@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabaseAdmin } from '../lib/supabase'
+import { supabase as supabaseAdmin } from '../lib/supabase'
 import AdminLayout from './AdminLayout'
 
 const empty = {

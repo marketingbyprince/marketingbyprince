@@ -37,7 +37,7 @@ function transformForSave(form) {
 }
 
 export default function ManagePlatforms() {
-  const crud = useCrud('platforms', {
+  const crud = useCrud('platform_options', {
     defaultForm: DEFAULT_FORM,
     orderBy:     'sort_order',
     orderAsc:    true,
