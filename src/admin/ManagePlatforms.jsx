@@ -5,10 +5,6 @@ import FieldGroup     from './components/FieldGroup'
 import RecordRow      from './components/RecordRow'
 import { useCrud }    from './hooks/useCrud'
 
-// ─── Schema ─────────────────────────────────────────────────────────────────
-// Table: platforms
-// Columns: id, name, icon, url, category, sort_order, is_active, created_at
-
 const DEFAULT_FORM = {
   name:       '',
   icon:       '',
@@ -37,7 +33,7 @@ function transformForSave(form) {
 }
 
 export default function ManagePlatforms() {
-  const crud = useCrud('platform_options', {
+  const crud = useCrud('platforms', {
     defaultForm: DEFAULT_FORM,
     orderBy:     'sort_order',
     orderAsc:    true,

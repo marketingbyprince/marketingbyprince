@@ -12,7 +12,7 @@ const emptyAddon = { name: '', description: '', price: '', icon: '🧩' }
 export default function ManageGigs() {
   const [gigs,        setGigs]        = useState([])
   const [loading,     setLoading]     = useState(true)
-  const [editing,     setEditing]     = useState(null)   // null | 'add' | gig_id string
+  const [editing,     setEditing]     = useState(null)
   const [form,        setForm]        = useState(emptyGig)
   const [packages,    setPackages]    = useState(TIERS.map(emptyPkg))
   const [addons,      setAddons]      = useState([])
@@ -29,7 +29,6 @@ export default function ManageGigs() {
 
   useEffect(() => { fetchGigs() }, [])
 
-  // ── Open add ──────────────────────────────────────────────────────
   const openAdd = () => {
     setForm(emptyGig)
     setPackages(TIERS.map(emptyPkg))
@@ -38,7 +37,6 @@ export default function ManageGigs() {
     setEditing('add')
   }
 
-  // ── Open edit ─────────────────────────────────────────────────────
   const openEdit = async id => {
     const [{ data: gig }, { data: pkgs }, { data: ads }] = await Promise.all([
       supabaseAdmin.from('gigs').select('*').eq('id', id).single(),
@@ -63,7 +61,6 @@ export default function ManageGigs() {
     setEditing(id)
   }
 
-  // ── Save gig + packages ───────────────────────────────────────────
   const saveGig = async e => {
     e.preventDefault()
     setSaving(true)
@@ -102,7 +99,6 @@ export default function ManageGigs() {
     setSaving(false)
   }
 
-  // ── Add-on CRUD ───────────────────────────────────────────────────
   const addAddon = async e => {
     e.preventDefault()
     if (!addonDraft.name || editing === 'add') return
@@ -127,7 +123,6 @@ export default function ManageGigs() {
     setAddons(prev => prev.filter(a => a.id !== id))
   }
 
-  // ── Delete gig ────────────────────────────────────────────────────
   const delGig = async id => {
     if (!confirm('Delete this gig and all its packages / add-ons?')) return
     await supabaseAdmin.from('gig_addons').delete().eq('gig_id', id)
@@ -139,81 +134,45 @@ export default function ManageGigs() {
   const updatePkg = (tier, field, value) =>
     setPackages(prev => prev.map(p => p.tier === tier ? { ...p, [field]: value } : p))
 
-  // ══════════════════════════════════════════════════════════════════
-  //  Edit / Add view
-  // ══════════════════════════════════════════════════════════════════
   if (editing !== null) {
     const isAdd = editing === 'add'
     return (
       <AdminLayout>
         <div className="p-6 sm:p-8 max-w-5xl">
-
-          <button
-            onClick={() => setEditing(null)}
-            className="text-gray-500 hover:text-white text-sm mb-6 transition-colors font-semibold"
-          >
+          <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white text-sm mb-6 transition-colors font-semibold">
             ← Back to Gigs
           </button>
           <h1 className="text-2xl font-extrabold text-white tracking-tight mb-8">
             {isAdd ? 'New Gig' : 'Edit Gig'}
           </h1>
-
           <form onSubmit={saveGig} className="space-y-8">
-
-            {/* ── Gig Info ── */}
             <div className="admin-card rounded-xl p-6 space-y-4">
               <SectionLabel>Gig Info</SectionLabel>
               <div>
                 <label className="admin-label">Title *</label>
-                <input
-                  type="text" required value={form.title}
-                  onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                  placeholder="e.g. Paid Ads Management"
-                  className="admin-input"
-                />
+                <input type="text" required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Paid Ads Management" className="admin-input" />
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="admin-label">Category</label>
-                  <input
-                    type="text" value={form.category}
-                    onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-                    placeholder="e.g. Paid Marketing"
-                    className="admin-input"
-                  />
+                  <input type="text" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} placeholder="e.g. Paid Marketing" className="admin-input" />
                 </div>
                 <div>
                   <label className="admin-label">Cover Image URL</label>
-                  <input
-                    type="text" value={form.cover_image_url || ''}
-                    onChange={e => setForm(p => ({ ...p, cover_image_url: e.target.value }))}
-                    placeholder="https://..."
-                    className="admin-input"
-                  />
+                  <input type="text" value={form.cover_image_url || ''} onChange={e => setForm(p => ({ ...p, cover_image_url: e.target.value }))} placeholder="https://..." className="admin-input" />
                 </div>
               </div>
               <div>
                 <label className="admin-label">Short Description</label>
-                <textarea
-                  rows={2} value={form.short_description || ''}
-                  onChange={e => setForm(p => ({ ...p, short_description: e.target.value }))}
-                  className="admin-input resize-none"
-                />
+                <textarea rows={2} value={form.short_description || ''} onChange={e => setForm(p => ({ ...p, short_description: e.target.value }))} className="admin-input resize-none" />
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox" checked={form.is_active}
-                  onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))}
-                />
+                <input type="checkbox" checked={form.is_active} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
                 <span className="text-sm text-gray-300 font-medium">Active (visible on website)</span>
               </label>
             </div>
-
-            {/* ── Packages ── */}
             <div>
-              <SectionLabel hint="Price = per platform per month. User selects platforms → price multiplies.">
-                Packages
-              </SectionLabel>
+              <SectionLabel hint="Price = per platform per month. User selects platforms → price multiplies.">Packages</SectionLabel>
               <div className="grid sm:grid-cols-3 gap-4">
                 {TIERS.map(tier => {
                   const pkg = packages.find(p => p.tier === tier) || emptyPkg(tier)
@@ -222,171 +181,92 @@ export default function ManageGigs() {
                       <div className="flex items-center justify-between">
                         <h3 className="text-white font-bold">{TIER_LABELS[tier]}</h3>
                         <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-400 select-none">
-                          <input
-                            type="checkbox" checked={pkg.is_featured}
-                            onChange={e => updatePkg(tier, 'is_featured', e.target.checked)}
-                          />
+                          <input type="checkbox" checked={pkg.is_featured} onChange={e => updatePkg(tier, 'is_featured', e.target.checked)} />
                           Most Popular
                         </label>
                       </div>
-
                       <div>
                         <label className="admin-label">Package Name</label>
-                        <input
-                          type="text" value={pkg.name}
-                          onChange={e => updatePkg(tier, 'name', e.target.value)}
-                          placeholder={tier === 'starter' ? 'Basic' : tier === 'standard' ? 'Growth' : 'Full-Service'}
-                          className="admin-input text-sm"
-                        />
+                        <input type="text" value={pkg.name} onChange={e => updatePkg(tier, 'name', e.target.value)} placeholder={tier === 'starter' ? 'Basic' : tier === 'standard' ? 'Growth' : 'Full-Service'} className="admin-input text-sm" />
                       </div>
-
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="admin-label">Price / Platform ($)</label>
-                          <input
-                            type="number" value={pkg.price} min="0"
-                            onChange={e => updatePkg(tier, 'price', e.target.value)}
-                            placeholder="150"
-                            className="admin-input text-sm"
-                          />
+                          <input type="number" value={pkg.price} min="0" onChange={e => updatePkg(tier, 'price', e.target.value)} placeholder="150" className="admin-input text-sm" />
                         </div>
                         <div>
                           <label className="admin-label">Setup (days)</label>
-                          <input
-                            type="number" value={pkg.delivery_days} min="1"
-                            onChange={e => updatePkg(tier, 'delivery_days', e.target.value)}
-                            placeholder="3"
-                            className="admin-input text-sm"
-                          />
+                          <input type="number" value={pkg.delivery_days} min="1" onChange={e => updatePkg(tier, 'delivery_days', e.target.value)} placeholder="3" className="admin-input text-sm" />
                         </div>
                       </div>
-
                       <div>
                         <label className="admin-label">Features (one per line)</label>
-                        <textarea
-                          rows={7} value={pkg.features}
-                          onChange={e => updatePkg(tier, 'features', e.target.value)}
-                          placeholder={`1 Campaign\n3 Ad Groups\nBasic Research\nConversion Tracking\nMonthly Report`}
-                          className="admin-input resize-none text-xs font-mono"
-                        />
+                        <textarea rows={7} value={pkg.features} onChange={e => updatePkg(tier, 'features', e.target.value)} placeholder={`1 Campaign\n3 Ad Groups\nBasic Research\nConversion Tracking\nMonthly Report`} className="admin-input resize-none text-xs font-mono" />
                       </div>
                     </div>
                   )
                 })}
               </div>
             </div>
-
-            <button
-              type="submit" disabled={saving}
-              className="btn-admin btn-md disabled:opacity-60"
-            >
+            <button type="submit" disabled={saving} className="btn-admin btn-md disabled:opacity-60">
               {saving ? 'Saving…' : isAdd ? 'Create Gig' : 'Save Changes'}
             </button>
           </form>
-
-          {/* ── Add-ons (only after gig exists) ── */}
           <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--admin-border)' }}>
-            <SectionLabel hint="Users can optionally select these when inquiring.">
-              Add-Ons {!isAdd && `(${addons.length})`}
-            </SectionLabel>
-
+            <SectionLabel hint="Users can optionally select these when inquiring.">Add-Ons {!isAdd && `(${addons.length})`}</SectionLabel>
             {isAdd ? (
-              <p className="text-gray-500 text-sm bg-white/5 rounded-xl px-5 py-4">
-                💡 Save the gig first, then add your add-on services here.
-              </p>
+              <p className="text-gray-500 text-sm bg-white/5 rounded-xl px-5 py-4">💡 Save the gig first, then add your add-on services here.</p>
             ) : (
               <>
-                {/* Existing add-ons */}
                 {addons.length > 0 && (
                   <div className="space-y-2 mb-6">
                     {addons.map(a => (
-                      <div
-                        key={a.id}
-                        className="admin-card rounded-xl px-5 py-3.5 flex items-center gap-4"
-                      >
+                      <div key={a.id} className="admin-card rounded-xl px-5 py-3.5 flex items-center gap-4">
                         <span className="text-xl shrink-0">{a.icon || '🧩'}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm font-semibold">{a.name}</p>
-                          {a.description && (
-                            <p className="text-gray-500 text-xs truncate">{a.description}</p>
-                          )}
+                          {a.description && <p className="text-gray-500 text-xs truncate">{a.description}</p>}
                         </div>
                         <span className="text-sm font-bold shrink-0" style={{ color: 'var(--accent)' }}>
                           {a.price > 0 ? `$${Number(a.price).toLocaleString()}` : 'Free'}
                         </span>
-                        <button
-                          onClick={() => deleteAddon(a.id)}
-                          className="text-gray-500 hover:text-red-400 text-xs px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors shrink-0"
-                        >
-                          Remove
-                        </button>
+                        <button onClick={() => deleteAddon(a.id)} className="text-gray-500 hover:text-red-400 text-xs px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors shrink-0">Remove</button>
                       </div>
                     ))}
                   </div>
                 )}
-
-                {/* New add-on form */}
                 <form onSubmit={addAddon} className="admin-card rounded-xl p-5">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-4">
-                    Add New Add-On
-                  </p>
+                  <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-4">Add New Add-On</p>
                   <div className="grid sm:grid-cols-4 gap-3 mb-3">
                     <div className="sm:col-span-2">
                       <label className="admin-label">Name *</label>
-                      <input
-                        type="text" required value={addonDraft.name}
-                        onChange={e => setAddonDraft(p => ({ ...p, name: e.target.value }))}
-                        placeholder="e.g. Extra Campaign Setup"
-                        className="admin-input"
-                      />
+                      <input type="text" required value={addonDraft.name} onChange={e => setAddonDraft(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Extra Campaign Setup" className="admin-input" />
                     </div>
                     <div>
                       <label className="admin-label">Price ($)</label>
-                      <input
-                        type="number" value={addonDraft.price} min="0"
-                        onChange={e => setAddonDraft(p => ({ ...p, price: e.target.value }))}
-                        placeholder="50"
-                        className="admin-input"
-                      />
+                      <input type="number" value={addonDraft.price} min="0" onChange={e => setAddonDraft(p => ({ ...p, price: e.target.value }))} placeholder="50" className="admin-input" />
                     </div>
                     <div>
                       <label className="admin-label">Icon</label>
-                      <input
-                        type="text" value={addonDraft.icon}
-                        onChange={e => setAddonDraft(p => ({ ...p, icon: e.target.value }))}
-                        placeholder="🧩"
-                        className="admin-input"
-                      />
+                      <input type="text" value={addonDraft.icon} onChange={e => setAddonDraft(p => ({ ...p, icon: e.target.value }))} placeholder="🧩" className="admin-input" />
                     </div>
                   </div>
                   <div className="mb-4">
                     <label className="admin-label">Description</label>
-                    <input
-                      type="text" value={addonDraft.description}
-                      onChange={e => setAddonDraft(p => ({ ...p, description: e.target.value }))}
-                      placeholder="Short description of what this includes"
-                      className="admin-input"
-                    />
+                    <input type="text" value={addonDraft.description} onChange={e => setAddonDraft(p => ({ ...p, description: e.target.value }))} placeholder="Short description of what this includes" className="admin-input" />
                   </div>
-                  <button
-                    type="submit" disabled={savingAddon || !addonDraft.name}
-                    className="btn-admin btn-sm disabled:opacity-60"
-                  >
+                  <button type="submit" disabled={savingAddon || !addonDraft.name} className="btn-admin btn-sm disabled:opacity-60">
                     {savingAddon ? 'Adding…' : '+ Add Add-On'}
                   </button>
                 </form>
               </>
             )}
           </div>
-
         </div>
       </AdminLayout>
     )
   }
 
-  // ══════════════════════════════════════════════════════════════════
-  //  List view
-  // ══════════════════════════════════════════════════════════════════
   return (
     <AdminLayout>
       <div className="p-6 sm:p-8">
@@ -397,7 +277,6 @@ export default function ManageGigs() {
           </div>
           <button onClick={openAdd} className="btn-admin btn-sm">+ New Gig</button>
         </div>
-
         {loading ? (
           <div className="flex justify-center py-20"><div className="spinner" /></div>
         ) : gigs.length === 0 ? (
@@ -408,32 +287,17 @@ export default function ManageGigs() {
         ) : (
           <div className="space-y-2">
             {gigs.map(g => (
-              <div
-                key={g.id}
-                className="flex items-center justify-between admin-card rounded-xl px-5 py-4 gap-4"
-              >
+              <div key={g.id} className="flex items-center justify-between admin-card rounded-xl px-5 py-4 gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-semibold truncate">{g.title}</p>
                   <p className="text-gray-500 text-xs">{g.category || 'No category'}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-xs px-2.5 py-1 rounded-full ${
-                    g.is_active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-gray-500'
-                  }`}>
+                  <span className={`text-xs px-2.5 py-1 rounded-full ${g.is_active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-gray-500'}`}>
                     {g.is_active ? 'Active' : 'Inactive'}
                   </span>
-                  <button
-                    onClick={() => openEdit(g.id)}
-                    className="text-gray-400 hover:text-white text-xs px-3 py-1 rounded-lg hover:bg-white/5 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => delGig(g.id)}
-                    className="text-gray-500 hover:text-red-400 text-xs px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors"
-                  >
-                    Del
-                  </button>
+                  <button onClick={() => openEdit(g.id)} className="text-gray-400 hover:text-white text-xs px-3 py-1 rounded-lg hover:bg-white/5 transition-colors">Edit</button>
+                  <button onClick={() => delGig(g.id)} className="text-gray-500 hover:text-red-400 text-xs px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors">Del</button>
                 </div>
               </div>
             ))}
