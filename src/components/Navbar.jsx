@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/about', label: 'About' },
-  { to: '/services', label: 'Services' },
-  { to: '/gigs', label: 'Gigs' },
-  { to: '/portfolio', label: 'Portfolio' },
-  { to: '/blog', label: 'Blog' },
+  { to: '/',               label: 'Home' },
+  { to: '/about',          label: 'About' },
+  { to: '/services',       label: 'Services' },
+  { to: '/gigs',           label: 'Gigs' },
+  { to: '/portfolio',      label: 'Portfolio' },
+  { to: '/blog',           label: 'Blog' },
   { to: '/certifications', label: 'Certs' },
 ]
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled,  setScrolled]  = useState(false)
+  const [menuOpen,  setMenuOpen]  = useState(false)
   const location = useLocation()
 
   useEffect(() => {
@@ -26,26 +26,34 @@ export default function Navbar() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-[#111827] border-b border-gray-800 shadow-2xl' : 'bg-transparent'
+      scrolled
+        ? 'bg-white border-b border-gray-200 shadow-card'
+        : 'bg-white/80 backdrop-blur-md'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="section-wrap">
         <div className="flex items-center justify-between h-16">
+
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-xs">PP</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                 style={{ backgroundColor: 'var(--accent)' }}>
+              <span className="text-white font-extrabold text-xs">PP</span>
             </div>
-            <span className="text-white font-semibold text-base hidden sm:block">Prince Pandey</span>
+            <span className="text-deep font-extrabold text-base hidden sm:block tracking-tight">
+              Prince Pandey
+            </span>
           </Link>
 
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                   location.pathname === to
-                    ? 'text-blue-400'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-deep'
                 }`}
               >
                 {label}
@@ -53,15 +61,16 @@ export default function Navbar() {
             ))}
             <Link
               to="/contact"
-              className="ml-3 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+              className="ml-3 btn-primary btn-md"
             >
               Let's Talk
             </Link>
           </div>
 
+          {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(o => !o)}
-            className="md:hidden text-gray-400 hover:text-white p-2 rounded-md"
+            className="md:hidden text-gray-500 hover:text-deep p-2 rounded-lg transition-colors"
             aria-label="Toggle menu"
           >
             {menuOpen ? (
@@ -77,16 +86,17 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden bg-[#111827] border-t border-gray-800 px-4 py-3 space-y-1">
+        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3 space-y-1">
           {navLinks.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
-              className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`block px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === to
-                  ? 'text-blue-400 bg-blue-500/10'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  ? 'text-accent bg-accent-muted'
+                  : 'text-gray-500 hover:text-deep hover:bg-gray-50'
               }`}
             >
               {label}
@@ -94,7 +104,7 @@ export default function Navbar() {
           ))}
           <Link
             to="/contact"
-            className="block w-full text-center px-4 py-2 mt-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+            className="block w-full text-center btn-primary btn-md mt-2"
           >
             Let's Talk
           </Link>

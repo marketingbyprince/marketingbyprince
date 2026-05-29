@@ -1,0 +1,49 @@
+/* Section Headline (accent bar variant — not in index.css @layer components) */
+.section-headline {
+  font-size: var(--size-section-head);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.section-headline::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 20px;
+  background-color: var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+/* Deliverables ordered list with leading-zero counters */
+.deliverables-ordered-list {
+  list-style: none;
+  counter-reset: deliverables-counter;
+  padding-left: 0;
+}
+
+.deliverables-ordered-list li {
+  counter-increment: deliverables-counter;
+  position: relative;
+  padding-left: 42px;
+  margin-bottom: var(--space-md);
+}
+
+.deliverables-ordered-list li::before {
+  content: counter(deliverables-counter, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  background-color: var(--color-text);
+  color: var(--color-white);
+  font-size: 10px;
+  font-weight: 800;
+  width: 26px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}

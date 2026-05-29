@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 export default function StatCounter({ value, prefix = '', suffix = '', label }) {
-  const [count, setCount] = useState(0)
+  const [count,     setCount]     = useState(0)
   const [triggered, setTriggered] = useState(false)
   const ref = useRef(null)
 
@@ -16,11 +16,11 @@ export default function StatCounter({ value, prefix = '', suffix = '', label }) 
 
   useEffect(() => {
     if (!triggered) return
-    const duration = 1800
-    const steps = 60
+    const duration  = 1800
+    const steps     = 60
     const increment = value / steps
     let current = 0
-    let step = 0
+    let step    = 0
     const timer = setInterval(() => {
       step++
       current = Math.min(increment * step, value)
@@ -32,10 +32,12 @@ export default function StatCounter({ value, prefix = '', suffix = '', label }) 
 
   return (
     <div ref={ref} className="text-center">
-      <div className="text-3xl sm:text-4xl font-bold text-white mb-1">
-        {prefix}{count}{suffix}
+      <div className="font-black text-deep mb-1" style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}>
+        <span style={{ color: 'var(--accent)' }}>{prefix}</span>
+        {count}
+        <span style={{ color: 'var(--accent)' }}>{suffix}</span>
       </div>
-      <div className="text-gray-400 text-sm font-medium">{label}</div>
+      <div className="text-body-sm text-gray-500 font-semibold">{label}</div>
     </div>
   )
 }

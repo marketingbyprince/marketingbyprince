@@ -13,74 +13,88 @@ export default function BlogPost() {
   }, [slug])
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-soft">
+      <div className="spinner" />
     </div>
   )
 
   if (!article) return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-soft">
       <div className="text-center">
-        <p className="text-gray-400 mb-4">Article not found.</p>
-        <Link to="/blog" className="text-blue-400 hover:underline">← Back to Blog</Link>
+        <p className="text-body text-gray-500 mb-4">Article not found.</p>
+        <Link to="/blog" className="text-body-sm font-bold" style={{ color: 'var(--accent)' }}>
+          &larr; Back to Blog
+        </Link>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen pt-24 pb-24">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+    <div className="min-h-screen pt-24 pb-24 bg-soft">
+      <div className="section-tight">
 
-        <Link to="/blog" className="text-gray-500 hover:text-white text-sm flex items-center gap-1 mb-8 transition-colors">
-          ← Back to Blog
+        <Link to="/blog"
+              className="text-body-sm font-semibold text-gray-400 hover:text-accent flex items-center gap-1 mb-8 transition-colors">
+          &larr; Back to Blog
         </Link>
 
         {article.cover_image_url && (
-          <img src={article.cover_image_url} alt={article.title} className="w-full h-72 object-cover rounded-2xl mb-8" />
+          <img src={article.cover_image_url} alt={article.title}
+               className="w-full h-72 object-cover rounded-2xl mb-8 shadow-card" />
         )}
 
         <div className="flex flex-wrap items-center gap-3 mb-6">
           {article.category && (
-            <span className="text-xs font-medium text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full">{article.category}</span>
+            <span className="badge-accent">{article.category}</span>
           )}
           {article.read_time_minutes && (
-            <span className="text-xs text-gray-500">{article.read_time_minutes} min read</span>
+            <span className="text-xs text-gray-400 font-medium">{article.read_time_minutes} min read</span>
           )}
           {article.published_at && (
-            <span className="text-xs text-gray-600">
-              {new Date(article.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+            <span className="text-xs text-gray-400 font-medium">
+              {new Date(article.published_at).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'long', year: 'numeric',
+              })}
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-6 leading-tight">{article.title}</h1>
+        <h1 className="heading-display text-deep mb-6 leading-tight">{article.title}</h1>
 
         {article.excerpt && (
-          <p className="text-lg text-gray-400 leading-relaxed mb-8 pb-8 border-b border-gray-800">{article.excerpt}</p>
+          <p className="text-body text-gray-500 leading-relaxed mb-8 pb-8 border-b border-gray-200">
+            {article.excerpt}
+          </p>
         )}
 
-        {/* Content — rendered as plain text / pre-formatted markdown */}
-        <div className="prose-custom text-gray-300 leading-relaxed whitespace-pre-line text-[15px]">
+        <div className="text-body text-gray-600 leading-relaxed whitespace-pre-line">
           {article.content}
         </div>
 
-        <div className="mt-14 pt-8 border-t border-gray-800">
+        {/* Author */}
+        <div className="mt-14 pt-8 border-t border-gray-200">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-xl">👨‍💼</div>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
+                 style={{ backgroundColor: 'var(--accent-muted)' }}>
+              👨‍💼
+            </div>
             <div>
-              <p className="text-white font-semibold text-sm">Prince Pandey</p>
-              <p className="text-gray-400 text-xs">Performance Marketer & Key Account Manager</p>
+              <p className="text-deep font-bold text-sm">Prince Pandey</p>
+              <p className="text-body-sm text-gray-500">Performance Marketer &amp; Key Account Manager</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 text-center">
-          <p className="text-white font-semibold mb-1">Found this useful?</p>
-          <p className="text-gray-400 text-sm mb-4">Let's work together on your marketing strategy.</p>
-          <Link to="/contact" className="inline-block px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-semibold transition-colors">
-            Get in Touch
-          </Link>
+        {/* CTA */}
+        <div className="mt-8 rounded-2xl p-6 text-center"
+             style={{ backgroundColor: 'var(--accent-muted)', border: '1px solid var(--accent-border)' }}>
+          <p className="heading-section mb-1">Found this useful?</p>
+          <p className="text-body text-gray-500 mb-5">
+            Let&rsquo;s work together on your marketing strategy.
+          </p>
+          <Link to="/contact" className="btn-primary btn-md">Get in Touch</Link>
         </div>
+
       </div>
     </div>
   )

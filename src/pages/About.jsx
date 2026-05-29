@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import SectionHeader from '../components/ui/SectionHeader'
 
 const experience = [
   {
@@ -67,92 +68,97 @@ export default function About() {
   }, [])
 
   return (
-    <div className="min-h-screen pt-24 pb-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-24 pb-20 bg-soft">
+      <div className="section-narrow">
 
-        {/* ── Bio ── */}
+        {/* ── Bio ─────────────────────────────────────────────────── */}
         <div className="grid md:grid-cols-3 gap-12 mb-20">
           <div className="md:col-span-1 flex flex-col items-center md:items-start gap-5">
-            <div className="w-36 h-36 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 flex items-center justify-center text-5xl">
+            <div className="w-36 h-36 rounded-2xl border-2 flex items-center justify-center text-5xl"
+                 style={{
+                   background: 'var(--accent-muted)',
+                   borderColor: 'var(--accent-border)',
+                 }}>
               👨‍💼
             </div>
             {resumeUrl ? (
-              <a
-                href={resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full text-center px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-semibold transition-colors"
-              >
+              <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
+                 className="w-full text-center btn-primary btn-md">
                 Download Resume
               </a>
             ) : (
-              <Link to="/contact" className="w-full text-center px-4 py-2.5 border border-gray-700 hover:border-blue-500/60 text-gray-300 rounded-xl text-sm font-semibold transition-colors">
+              <Link to="/contact"
+                    className="w-full text-center btn-secondary btn-md">
                 Request Resume
               </Link>
             )}
           </div>
 
           <div className="md:col-span-2">
-            <span className="text-blue-400 text-sm font-semibold uppercase tracking-widest">About Me</span>
-            <h1 className="text-4xl font-bold text-white mt-2 mb-6">Prince Pandey</h1>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Results-driven Key Account Manager with 3+ years of experience managing 40+ client accounts across digital marketing and performance advertising. Proven track record of driving revenue growth, client retention, and upselling — consistently generating $3,000–$4,000/month in incremental revenue through strategic account expansion.
+            <span className="eyebrow mb-3">About Me</span>
+            <h1 className="heading-display text-deep mb-6">Prince Pandey</h1>
+            <p className="text-body text-gray-600 leading-relaxed mb-4">
+              Results-driven Key Account Manager with 3+ years of experience managing 40+ client
+              accounts across digital marketing and performance advertising. Proven track record of
+              driving revenue growth, client retention, and upselling — consistently generating
+              $3,000–$4,000/month in incremental revenue through strategic account expansion.
             </p>
-            <p className="text-gray-400 leading-relaxed">
-              Specialising in Google Ads, Meta, LinkedIn, and TikTok campaigns, I combine analytical rigour with creative strategy to deliver sustainable, scalable results for brands across SaaS, e-commerce, healthcare, automotive, and D2C verticals.
+            <p className="text-body text-gray-500 leading-relaxed">
+              Specialising in Google Ads, Meta, LinkedIn, and TikTok campaigns, I combine analytical
+              rigour with creative strategy to deliver sustainable, scalable results for brands across
+              SaaS, e-commerce, healthcare, automotive, and D2C verticals.
             </p>
 
-            <div className="flex flex-wrap gap-2 mt-8">
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
-                <span>📍</span> Panchkula, Haryana
-              </div>
-              <div className="flex items-center gap-2 text-gray-400 text-sm ml-4">
-                <span>✉</span> marketingbyprince@gmail.com
-              </div>
-              <div className="flex items-center gap-2 text-gray-400 text-sm ml-4">
-                <span>📞</span> +91 9465992412
-              </div>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 mt-8">
+              {[
+                { icon: '📍', text: 'Panchkula, Haryana' },
+                { icon: '✉',  text: 'marketingbyprince@gmail.com' },
+                { icon: '📞', text: '+91 9465992412' },
+              ].map(({ icon, text }) => (
+                <div key={text} className="flex items-center gap-2 text-body-sm text-gray-500 font-medium">
+                  <span>{icon}</span> {text}
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* ── Experience Timeline ── */}
+        {/* ── Experience Timeline ──────────────────────────────────── */}
         <div className="mb-20">
-          <span className="text-blue-400 text-sm font-semibold uppercase tracking-widest">Experience</span>
-          <h2 className="text-2xl font-bold text-white mt-2 mb-10">Work History</h2>
+          <SectionHeader eyebrow="Experience" title="Work History" />
 
           <div className="relative">
-            <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-800" />
-            <div className="space-y-10">
+            <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200" />
+            <div className="space-y-8">
               {experience.map((job, i) => (
                 <div key={i} className="relative pl-12">
                   <div className={`absolute left-0 top-1 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                    job.current ? 'bg-blue-500 border-blue-500' : 'bg-[#111827] border-gray-700'
-                  }`}>
-                    {job.current ? (
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    ) : (
-                      <span className="w-2 h-2 bg-gray-600 rounded-full" />
-                    )}
+                    job.current ? 'border-accent' : 'bg-white border-gray-200'
+                  }`}
+                  style={job.current ? { backgroundColor: 'var(--accent)' } : {}}>
+                    {job.current
+                      ? <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                      : <span className="w-2 h-2 bg-gray-300 rounded-full" />
+                    }
                   </div>
 
-                  <div className="bg-[#111827] border border-gray-800 rounded-xl p-6">
+                  <div className="card p-6">
                     <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
                       <div>
-                        <h3 className="text-white font-semibold">{job.role}</h3>
-                        <p className="text-blue-400 text-sm">{job.company}</p>
+                        <h3 className="heading-section">{job.role}</h3>
+                        <p className="text-body-sm font-semibold mt-0.5" style={{ color: 'var(--accent)' }}>
+                          {job.company}
+                        </p>
                       </div>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                        job.current ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-gray-800 text-gray-400'
-                      }`}>
+                      <span className={`badge ${job.current ? 'badge-green' : 'badge-gray'}`}>
                         {job.period}
                       </span>
                     </div>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-1.5 mt-2">
                       {job.bullets.map((b, j) => (
-                        <li key={j} className="text-gray-400 text-sm flex gap-2">
-                          <span className="text-blue-500 mt-1 shrink-0">›</span>
-                          <span>{b}</span>
+                        <li key={j} className="text-body text-gray-500 flex gap-2">
+                          <span className="shrink-0 mt-1 font-bold" style={{ color: 'var(--accent)' }}>›</span>
+                          {b}
                         </li>
                       ))}
                     </ul>
@@ -163,28 +169,30 @@ export default function About() {
           </div>
         </div>
 
-        {/* ── Skills ── */}
+        {/* ── Skills ──────────────────────────────────────────────── */}
         <div className="mb-20">
-          <span className="text-blue-400 text-sm font-semibold uppercase tracking-widest">Skills</span>
-          <h2 className="text-2xl font-bold text-white mt-2 mb-8">Tools & Expertise</h2>
+          <SectionHeader eyebrow="Skills" title="Tools & Expertise" />
           <div className="flex flex-wrap gap-2.5">
             {skills.map(s => (
-              <span key={s} className="px-3.5 py-1.5 bg-[#111827] border border-gray-800 rounded-full text-sm text-gray-300 hover:border-blue-500/50 hover:text-white transition-all">
+              <span key={s}
+                    className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-full text-body-sm font-semibold text-gray-600 hover:border-accent/40 hover:text-deep transition-all">
                 {s}
               </span>
             ))}
           </div>
         </div>
 
-        {/* ── Education ── */}
+        {/* ── Education ───────────────────────────────────────────── */}
         <div>
-          <span className="text-blue-400 text-sm font-semibold uppercase tracking-widest">Education</span>
-          <h2 className="text-2xl font-bold text-white mt-2 mb-6">Academic Background</h2>
-          <div className="bg-[#111827] border border-gray-800 rounded-xl p-6 inline-flex flex-col gap-1">
-            <h3 className="text-white font-semibold">B.Tech in Computer Science (Cyber Security)</h3>
-            <p className="text-blue-400 text-sm">GNA University · 2023</p>
+          <SectionHeader eyebrow="Education" title="Academic Background" />
+          <div className="card p-6 inline-flex flex-col gap-1">
+            <h3 className="heading-section">B.Tech in Computer Science (Cyber Security)</h3>
+            <p className="text-body-sm font-semibold mt-1" style={{ color: 'var(--accent)' }}>
+              GNA University &middot; 2023
+            </p>
           </div>
         </div>
+
       </div>
     </div>
   )

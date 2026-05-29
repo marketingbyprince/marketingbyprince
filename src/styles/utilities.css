@@ -1,0 +1,14 @@
+/* Project-specific single-purpose helpers that Tailwind doesn't cover.
+   Use Tailwind utility classes for everything else. */
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}

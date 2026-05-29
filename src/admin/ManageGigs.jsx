@@ -6,24 +6,28 @@ const emptyGig = { title: '', category: '', short_description: '', cover_image_u
 const emptyPkg = { tier: 'starter', price: '', delivery_days: '', milestones: [] }
 
 export default function ManageGigs() {
-  const [gigs, setGigs] = useState([])
+  const [gigs,    setGigs]    = useState([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState(emptyGig)
-  const [packages, setPackages] = useState([])
-  const [saving, setSaving] = useState(false)
+  const [form,    setForm]    = useState(emptyGig)
+  const [packages,setPackages]= useState([])
+  const [saving,  setSaving]  = useState(false)
 
-  const fetch = async () => {
+  const fetchData = async () => {
     const { data } = await supabaseAdmin.from('gigs').select('*').order('created_at', { ascending: false })
     setGigs(data || [])
     setLoading(false)
   }
 
-  useEffect(() => { fetch() }, [])
+  useEffect(() => { fetchData() }, [])
 
   const openAdd = () => {
     setForm(emptyGig)
-    setPackages([{ ...emptyPkg, tier: 'starter' }, { ...emptyPkg, tier: 'standard' }, { ...emptyPkg, tier: 'premium' }])
+    setPackages([
+      { ...emptyPkg, tier: 'starter' },
+      { ...emptyPkg, tier: 'standard' },
+      { ...emptyPkg, tier: 'premium' },
+    ])
     setEditing('add')
   }
 
@@ -60,12 +64,14 @@ export default function ManageGigs() {
           gig_id: gigId,
           price: p.price ? Number(p.price) : null,
           delivery_days: p.delivery_days ? Number(p.delivery_days) : null,
-          milestones: typeof p.milestones === 'string' ? p.milestones.split('\n').filter(Boolean) : p.milestones,
+          milestones: typeof p.milestones === 'string'
+            ? p.milestones.split('\n').filter(Boolean)
+            : p.milestones,
         }))
       if (pkgsToInsert.length) await supabaseAdmin.from('gig_packages').insert(pkgsToInsert)
     }
 
-    await fetch()
+    await fetchData()
     setEditing(null)
     setSaving(false)
   }
@@ -77,71 +83,89 @@ export default function ManageGigs() {
     setGigs(prev => prev.filter(g => g.id !== id))
   }
 
-  const updatePkg = (tier, field, value) => {
+  const updatePkg = (tier, field, value) =>
     setPackages(prev => prev.map(p => p.tier === tier ? { ...p, [field]: value } : p))
-  }
 
   if (editing) {
     return (
       <AdminLayout>
         <div className="p-6 sm:p-8 max-w-3xl">
-          <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white text-sm mb-6 transition-colors">← Back</button>
-          <h1 className="text-2xl font-bold text-white mb-8">{editing === 'add' ? 'New Gig' : 'Edit Gig'}</h1>
+          <button onClick={() => setEditing(null)}
+                  className="text-gray-500 hover:text-white text-sm mb-6 transition-colors font-semibold">
+            &larr; Back
+          </button>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight mb-8">
+            {editing === 'add' ? 'New Gig' : 'Edit Gig'}
+          </h1>
+
           <form onSubmit={save} className="space-y-5">
             {[
-              { name: 'title', label: 'Title *', required: true },
-              { name: 'category', label: 'Category' },
+              { name: 'title',           label: 'Title *',         required: true },
+              { name: 'category',        label: 'Category' },
               { name: 'cover_image_url', label: 'Cover Image URL' },
             ].map(f => (
               <div key={f.name}>
-                <label className="text-xs text-gray-400 mb-1 block">{f.label}</label>
-                <input type="text" required={f.required} value={form[f.name] || ''} onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))}
-                  className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500" />
+                <label className="admin-label">{f.label}</label>
+                <input type="text" required={f.required}
+                       value={form[f.name] || ''}
+                       onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))}
+                       className="admin-input" />
               </div>
             ))}
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Short Description</label>
-              <textarea rows={2} value={form.short_description || ''} onChange={e => setForm(p => ({ ...p, short_description: e.target.value }))}
-                className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500 resize-none" />
+              <label className="admin-label">Short Description</label>
+              <textarea rows={2} value={form.short_description || ''}
+                        onChange={e => setForm(p => ({ ...p, short_description: e.target.value }))}
+                        className="admin-input resize-none" />
             </div>
 
-            <h3 className="text-white font-semibold pt-2">Packages</h3>
+            <h3 className="text-white font-bold pt-2 uppercase text-xs tracking-widest text-gray-400">
+              Packages
+            </h3>
             {['starter', 'standard', 'premium'].map(tier => {
               const pkg = packages.find(p => p.tier === tier) || { ...emptyPkg, tier }
               return (
-                <div key={tier} className="bg-[#111827] border border-gray-800 rounded-xl p-5 space-y-3">
-                  <h4 className="text-white font-medium capitalize">{tier}</h4>
+                <div key={tier} className="admin-card rounded-xl p-5 space-y-3">
+                  <h4 className="text-white font-bold capitalize">{tier}</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Price (₹)</label>
-                      <input type="number" value={pkg.price || ''} onChange={e => updatePkg(tier, 'price', e.target.value)}
-                        className="w-full bg-[#0A0F1E] border border-gray-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                      <label className="admin-label">Price (₹)</label>
+                      <input type="number" value={pkg.price || ''}
+                             onChange={e => updatePkg(tier, 'price', e.target.value)}
+                             className="admin-input" />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Delivery (days)</label>
-                      <input type="number" value={pkg.delivery_days || ''} onChange={e => updatePkg(tier, 'delivery_days', e.target.value)}
-                        className="w-full bg-[#0A0F1E] border border-gray-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                      <label className="admin-label">Delivery (days)</label>
+                      <input type="number" value={pkg.delivery_days || ''}
+                             onChange={e => updatePkg(tier, 'delivery_days', e.target.value)}
+                             className="admin-input" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400 mb-1 block">Milestones (one per line)</label>
-                    <textarea rows={3} value={Array.isArray(pkg.milestones) ? pkg.milestones.join('\n') : pkg.milestones || ''}
-                      onChange={e => updatePkg(tier, 'milestones', e.target.value)}
-                      className="w-full bg-[#0A0F1E] border border-gray-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 resize-none" />
+                    <label className="admin-label">Milestones (one per line)</label>
+                    <textarea rows={3}
+                              value={Array.isArray(pkg.milestones) ? pkg.milestones.join('\n') : pkg.milestones || ''}
+                              onChange={e => updatePkg(tier, 'milestones', e.target.value)}
+                              className="admin-input resize-none" />
                   </div>
                 </div>
               )
             })}
 
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.is_active} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
-              <span className="text-sm text-gray-300">Active</span>
+              <input type="checkbox" checked={form.is_active}
+                     onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
+              <span className="text-sm text-gray-300 font-medium">Active</span>
             </label>
             <div className="flex gap-3">
-              <button type="submit" disabled={saving} className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium disabled:opacity-60">
+              <button type="submit" disabled={saving}
+                      className="btn-admin btn-md disabled:opacity-60">
                 {saving ? 'Saving…' : 'Save Gig'}
               </button>
-              <button type="button" onClick={() => setEditing(null)} className="px-6 py-2.5 border border-gray-700 text-gray-300 rounded-xl text-sm">Cancel</button>
+              <button type="button" onClick={() => setEditing(null)}
+                      className="btn btn-md border border-gray-700 text-gray-300">
+                Cancel
+              </button>
             </div>
           </form>
         </div>
@@ -153,23 +177,32 @@ export default function ManageGigs() {
     <AdminLayout>
       <div className="p-6 sm:p-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-white">Gigs</h1>
-          <button onClick={openAdd} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium transition-colors">+ New Gig</button>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Gigs</h1>
+          <button onClick={openAdd} className="btn-admin btn-sm">+ New Gig</button>
         </div>
         {loading ? (
-          <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+          <div className="flex justify-center py-20"><div className="spinner" /></div>
         ) : (
           <div className="space-y-2">
             {gigs.map(g => (
-              <div key={g.id} className="flex items-center justify-between bg-[#111827] border border-gray-800 rounded-xl px-5 py-4 gap-4">
+              <div key={g.id}
+                   className="flex items-center justify-between admin-card rounded-xl px-5 py-4 gap-4">
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{g.title}</p>
+                  <p className="text-white text-sm font-semibold truncate">{g.title}</p>
                   <p className="text-gray-500 text-xs">{g.category}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-xs px-2.5 py-1 rounded-full ${g.is_active ? 'bg-green-500/10 text-green-400' : 'bg-gray-800 text-gray-500'}`}>{g.is_active ? 'Active' : 'Inactive'}</span>
-                  <button onClick={() => openEdit(g.id)} className="text-gray-400 hover:text-white text-xs px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors">Edit</button>
-                  <button onClick={() => del(g.id)} className="text-gray-500 hover:text-red-400 text-xs px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors">Del</button>
+                  <span className={`text-xs px-2.5 py-1 rounded-full ${g.is_active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-gray-500'}`}>
+                    {g.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                  <button onClick={() => openEdit(g.id)}
+                          className="text-gray-400 hover:text-white text-xs px-3 py-1 rounded-lg hover:bg-white/5 transition-colors">
+                    Edit
+                  </button>
+                  <button onClick={() => del(g.id)}
+                          className="text-gray-500 hover:text-red-400 text-xs px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors">
+                    Del
+                  </button>
                 </div>
               </div>
             ))}

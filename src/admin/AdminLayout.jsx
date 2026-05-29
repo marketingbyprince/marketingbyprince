@@ -2,14 +2,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const navItems = [
-  { to: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-  { to: '/admin/leads', label: 'Leads', icon: '📬' },
-  { to: '/admin/services', label: 'Services', icon: '🎯' },
-  { to: '/admin/gigs', label: 'Gigs', icon: '📦' },
-  { to: '/admin/case-studies', label: 'Case Studies', icon: '📁' },
-  { to: '/admin/articles', label: 'Articles', icon: '✍️' },
+  { to: '/admin/dashboard',      label: 'Dashboard',     icon: '📊' },
+  { to: '/admin/leads',          label: 'Leads',          icon: '📬' },
+  { to: '/admin/services',       label: 'Services',       icon: '🎯' },
+  { to: '/admin/packages',       label: 'Packages',       icon: '📋' },
+  { to: '/admin/addons',         label: 'Add-ons',        icon: '🧩' },
+  { to: '/admin/platforms',      label: 'Platforms',      icon: '🌐' },
+  { to: '/admin/gigs',           label: 'Gigs',           icon: '📦' },
+  { to: '/admin/case-studies',   label: 'Case Studies',   icon: '📁' },
+  { to: '/admin/articles',       label: 'Articles',       icon: '✍️' },
   { to: '/admin/certifications', label: 'Certifications', icon: '🏆' },
-  { to: '/admin/settings', label: 'Settings', icon: '⚙️' },
+  { to: '/admin/settings',       label: 'Settings',       icon: '⚙️' },
 ]
 
 export default function AdminLayout({ children }) {
@@ -22,15 +25,19 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F1E] flex">
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--admin-bg)' }}>
+
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-56 bg-[#111827] border-r border-gray-800 shrink-0">
-        <div className="p-4 border-b border-gray-800">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-500 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">PP</span>
+      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r"
+             style={{ backgroundColor: 'var(--admin-surface)', borderColor: 'var(--admin-border)' }}>
+
+        <div className="p-4 border-b" style={{ borderColor: 'var(--admin-border)' }}>
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                 style={{ backgroundColor: 'var(--accent)' }}>
+              <span className="text-white font-extrabold text-xs">PP</span>
             </div>
-            <span className="text-white font-semibold text-sm">Admin Panel</span>
+            <span className="text-white font-bold text-sm tracking-tight">Admin Panel</span>
           </Link>
         </div>
 
@@ -39,10 +46,10 @@ export default function AdminLayout({ children }) {
             <Link
               key={to}
               to={to}
-              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                 location.pathname === to
-                  ? 'bg-blue-500/15 text-blue-400 font-medium'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  ? 'bg-accent/10 text-accent'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <span className="text-base">{icon}</span> {label}
@@ -50,10 +57,10 @@ export default function AdminLayout({ children }) {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-gray-800">
+        <div className="p-3 border-t" style={{ borderColor: 'var(--admin-border)' }}>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
           >
             <span>🚪</span> Log Out
           </button>
@@ -61,16 +68,21 @@ export default function AdminLayout({ children }) {
       </aside>
 
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#111827] border-b border-gray-800 px-4 py-3 flex items-center justify-between">
-        <Link to="/admin/dashboard" className="text-white font-semibold text-sm">Admin Panel</Link>
-        <button onClick={handleLogout} className="text-gray-400 text-xs hover:text-red-400 transition-colors">Log Out</button>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 border-b px-4 py-3 flex items-center justify-between"
+           style={{ backgroundColor: 'var(--admin-surface)', borderColor: 'var(--admin-border)' }}>
+        <Link to="/admin/dashboard" className="text-white font-bold text-sm">Admin Panel</Link>
+        <button onClick={handleLogout}
+                className="text-gray-400 text-xs hover:text-red-400 transition-colors font-semibold">
+          Log Out
+        </button>
       </div>
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto pt-0 md:pt-0">
+      {/* Main content */}
+      <main className="flex-1 overflow-auto">
         <div className="md:hidden h-14" />
         {children}
       </main>
+
     </div>
   )
 }
