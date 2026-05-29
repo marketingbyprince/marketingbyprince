@@ -27,7 +27,7 @@ export default function GigDetail() {
       supabase.from('gigs').select('*').eq('id', id).single(),
       supabase.from('gig_packages').select('*').eq('gig_id', id).eq('is_active', true),
       supabase.from('gig_addons').select('*').eq('gig_id', id).eq('is_active', true).order('sort_order'),
-      supabase.from('platform_options').select('*').eq('is_active', true).order('sort_order'),
+      supabase.from('platforms').select('*').eq('is_active', true).order('sort_order'),
     ]).then(([{ data: g }, { data: pkgs }, { data: ads }, { data: plats }]) => {
       setGig(g)
       setPackages((pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)))
