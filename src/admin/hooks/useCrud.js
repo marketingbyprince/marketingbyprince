@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabaseAdmin } from '../../lib/supabase'
+import { supabase as supabaseAdmin } from '../../lib/supabase'
 
 /**
  * Generic CRUD hook for admin manage pages.
