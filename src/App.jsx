@@ -33,6 +33,7 @@ import ManageCertifications from './admin/ManageCertifications'
 import ManageLeads         from './admin/ManageLeads'
 import SiteSettings        from './admin/SiteSettings'
 import MediaManager        from './admin/MediaManager'
+import ManageAbout         from './admin/ManageAbout'
 
 function PublicLayout() {
   return (
@@ -80,6 +81,7 @@ export default function App() {
         <Route path="/admin/leads" element={<ProtectedRoute><ManageLeads /></ProtectedRoute>} />
         <Route path="/admin/settings" element={<ProtectedRoute><SiteSettings /></ProtectedRoute>} />
         <Route path="/admin/media"    element={<ProtectedRoute><MediaManager   /></ProtectedRoute>} />
+        <Route path="/admin/about"    element={<ProtectedRoute><ManageAbout    /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )
