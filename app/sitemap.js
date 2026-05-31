@@ -1,5 +1,3 @@
-import { supabase } from '@/lib/supabase'
-
 export default async function sitemap() {
   const baseUrl = 'https://marketingbyprince.com'
 
@@ -14,29 +12,38 @@ export default async function sitemap() {
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
   ]
 
-  const { data: services } = await supabase.from('services').select('slug, updated_at')
-  const servicePages = (services || []).map(s => ({
-    url: `${baseUrl}/services/${s.slug}`,
-    lastModified: new Date(s.updated_at),
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }))
+  try {
+    const { supabase } = await import('@/lib/supabase')
 
-  const { data: posts } = await supabase.from('articles').select('slug, updated_at').eq('published', true)
-  const blogPages = (posts || []).map(p => ({
-    url: `${baseUrl}/blog/${p.slug}`,
-    lastModified: new Date(p.updated_at),
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
+    const [{ data: services }, { data: posts }, { data: gigs }] = await Promise.all([
+      supabase.from('services').select('slug, updated_at'),
+      supabase.from('articles').select('slug, updated_at').eq('published', true),
+      supabase.from('gigs').select('slug, updated_at').eq('is_active', true),
+    ])
 
-  const { data: gigs } = await supabase.from('gigs').select('slug, updated_at').eq('is_active', true)
-  const gigPages = (gigs || []).map(g => ({
-    url: `${baseUrl}/gigs/${g.slug}`,
-    lastModified: new Date(g.updated_at),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  }))
+    const servicePages = (services || []).map(s => ({
+      url: `${baseUrl}/services/${s.slug}`,
+      lastModified: new Date(s.updated_at),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    }))
 
-  return [...staticPages, ...servicePages, ...blogPages, ...gigPages]
+    const blogPages = (posts || []).map(p => ({
+      url: `${baseUrl}/blog/${p.slug}`,
+      lastModified: new Date(p.updated_at),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }))
+
+    const gigPages = (gigs || []).map(g => ({
+      url: `${baseUrl}/gigs/${g.slug}`,
+      lastModified: new Date(g.updated_at),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }))
+
+    return [...staticPages, ...servicePages, ...blogPages, ...gigPages]
+  } catch {
+    return staticPages
+  }
 }
