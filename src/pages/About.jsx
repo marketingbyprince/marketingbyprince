@@ -74,12 +74,16 @@ export default function About() {
         {/* ── Bio ─────────────────────────────────────────────────── */}
         <div className="grid md:grid-cols-3 gap-12 mb-20">
           <div className="md:col-span-1 flex flex-col items-center md:items-start gap-5">
-            <div className="w-36 h-36 rounded-2xl border-2 flex items-center justify-center text-5xl"
+            <div className="w-36 h-36 rounded-2xl border-2 overflow-hidden"
                  style={{
-                   background: 'var(--accent-muted)',
                    borderColor: 'var(--accent-border)',
                  }}>
-              👨‍💼
+              <img
+                src="https://ywoynxlxddsxkrxmsvla.supabase.co/storage/v1/object/public/website-assets/Prince-Pandey/Prince%20Pandey%20Professional%20corporate%20headshot%20in%20office.png"
+                alt="Prince Pandey — Professional corporate headshot"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
             {resumeUrl ? (
               <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
