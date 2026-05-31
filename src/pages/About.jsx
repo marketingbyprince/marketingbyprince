@@ -74,12 +74,16 @@ export default function About() {
         {/* ── Bio ─────────────────────────────────────────────────── */}
         <div className="grid md:grid-cols-3 gap-12 mb-20">
           <div className="md:col-span-1 flex flex-col items-center md:items-start gap-5">
-            <div className="w-36 h-36 rounded-2xl border-2 flex items-center justify-center text-5xl"
+            <div className="w-36 h-36 rounded-2xl border-2 overflow-hidden"
                  style={{
-                   background: 'var(--accent-muted)',
                    borderColor: 'var(--accent-border)',
                  }}>
-              👨‍💼
+              <img
+                src="https://ywoynxlxddsxkrxmsvla.supabase.co/storage/v1/object/public/website-assets/Prince-Pandey/Prince%20Pandey%20Professional%20corporate%20headshot%20in%20office.png"
+                alt="Prince Pandey — Professional corporate headshot"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
             {resumeUrl ? (
               <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
@@ -123,7 +127,7 @@ export default function About() {
           </div>
         </div>
 
-        {/* ── Experience Timeline ──────────────────────────────────── */}
+        {/* ── Experience Timeline ──────────────────────────────────────── */}
         <div className="mb-20">
           <SectionHeader eyebrow="Experience" title="Work History" />
 
@@ -169,7 +173,7 @@ export default function About() {
           </div>
         </div>
 
-        {/* ── Skills ──────────────────────────────────────────────── */}
+        {/* ── Skills ─────────────────────────────────────────────── */}
         <div className="mb-20">
           <SectionHeader eyebrow="Skills" title="Tools & Expertise" />
           <div className="flex flex-wrap gap-2.5">
@@ -182,7 +186,7 @@ export default function About() {
           </div>
         </div>
 
-        {/* ── Education ───────────────────────────────────────────── */}
+        {/* ── Education ────────────────────────────────────────────── */}
         <div>
           <SectionHeader eyebrow="Education" title="Academic Background" />
           <div className="card p-6 inline-flex flex-col gap-1">
