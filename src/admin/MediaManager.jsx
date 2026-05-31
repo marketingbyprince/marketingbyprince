@@ -47,6 +47,8 @@ export default function MediaManager() {
   const [toast,       setToast]       = useState(null)
   const [newFolder,   setNewFolder]   = useState('')
   const [showFolderInput, setShowFolderInput] = useState(false)
+  const [renamingFolder, setRenamingFolder] = useState(null) // folder name being renamed
+  const [renameValue,    setRenameValue]    = useState('')
   const fileInputRef = useRef()
 
   // ── Load folders ──────────────────────────────────────────────────
@@ -100,13 +102,36 @@ export default function MediaManager() {
 
   // ── Create folder ─────────────────────────────────────────────────
   const createFolder = async () => {
-    const name = newFolder.trim().replace(/\s+/g, '-').toLowerCase()
+    const name = newFolder.trim().replace(/\s+/g, '-')
     if (!name) return
     await supabase.storage.from(BUCKET).upload(`${name}/.keep`, new Blob(['']))
     setNewFolder('')
     setShowFolderInput(false)
     await loadFolders()
     setActiveFolder(name)
+  }
+
+  // ── Rename folder ─────────────────────────────────────────────────
+  const renameFolder = async () => {
+    const newName = renameValue.trim().replace(/\s+/g, '-')
+    if (!newName || newName === renamingFolder) { setRenamingFolder(null); return }
+
+    // List all files in old folder
+    const { data: files } = await supabase.storage.from(BUCKET).list(renamingFolder, { limit: 500 })
+    const moveOps = (files || []).map(f =>
+      supabase.storage.from(BUCKET).move(`${renamingFolder}/${f.name}`, `${newName}/${f.name}`)
+    )
+    await Promise.all(moveOps)
+
+    // Update image_metadata folder references
+    await supabase.from('image_metadata')
+      .update({ folder: newName })
+      .eq('folder', renamingFolder)
+
+    setRenamingFolder(null)
+    await loadFolders()
+    if (activeFolder === renamingFolder) setActiveFolder(newName)
+    setToast('Folder renamed')
   }
 
   // ── Copy URL ──────────────────────────────────────────────────────
@@ -202,18 +227,41 @@ export default function MediaManager() {
         {/* ── Folder tabs ────────────────────────────────────────── */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           {folders.map(f => (
-            <button
-              key={f}
-              onClick={() => setActiveFolder(f)}
-              className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all border ${
-                activeFolder === f
-                  ? 'text-white border-transparent'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
-              }`}
-              style={activeFolder === f ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' } : {}}
-            >
-              {f}
-            </button>
+            renamingFolder === f ? (
+              <div key={f} className="flex items-center gap-1">
+                <input
+                  autoFocus
+                  type="text"
+                  value={renameValue}
+                  onChange={e => setRenameValue(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') renameFolder(); if (e.key === 'Escape') setRenamingFolder(null) }}
+                  className="admin-input py-1 text-sm w-32"
+                />
+                <button onClick={renameFolder} className="btn-admin btn-sm">Save</button>
+                <button onClick={() => setRenamingFolder(null)} className="text-gray-500 hover:text-white text-sm">✕</button>
+              </div>
+            ) : (
+              <div key={f} className="group/tab relative flex items-center">
+                <button
+                  onClick={() => setActiveFolder(f)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all border pr-7 ${
+                    activeFolder === f
+                      ? 'text-white border-transparent'
+                      : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+                  }`}
+                  style={activeFolder === f ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' } : {}}
+                >
+                  {f}
+                </button>
+                <button
+                  onClick={() => { setRenamingFolder(f); setRenameValue(f) }}
+                  className="absolute right-2 opacity-0 group-hover/tab:opacity-100 transition-opacity text-xs text-gray-400 hover:text-white"
+                  title="Rename folder"
+                >
+                  ✏️
+                </button>
+              </div>
+            )
           ))}
 
           {showFolderInput ? (
