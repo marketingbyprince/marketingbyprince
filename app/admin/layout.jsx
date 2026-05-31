@@ -17,6 +17,7 @@ const navItems = [
   { to: '/admin/articles',       label: 'Articles',       icon: '✍️' },
   { to: '/admin/certifications', label: 'Certifications', icon: '🏆' },
   { to: '/admin/media',          label: 'Media',          icon: '🖼️' },
+  { to: '/admin/seo',            label: 'SEO Center',     icon: '🔍' },
   { to: '/admin/settings',       label: 'Settings',       icon: '⚙️' },
 ]
 
@@ -68,11 +69,11 @@ export default function AdminLayout({ children }) {
               key={to}
               href={to}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mb-0.5 ${
-                pathname === to
+                pathname === to || (to !== '/admin/dashboard' && pathname.startsWith(to))
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
-              style={pathname === to ? { backgroundColor: 'var(--accent)' } : {}}
+              style={pathname === to || (to !== '/admin/dashboard' && pathname.startsWith(to)) ? { backgroundColor: 'var(--accent)' } : {}}
             >
               <span className="text-base">{icon}</span>
               {label}
