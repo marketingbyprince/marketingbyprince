@@ -43,11 +43,13 @@ export async function generateResume() {
     { data: experience },
     { data: skillsData },
     { data: educationData },
+    { data: caseStudies },
   ] = await Promise.all([
     supabase.from('about_content').select('*').single(),
     supabase.from('work_experience').select('*').order('sort_order'),
     supabase.from('skills').select('*').order('category').order('sort_order'),
     supabase.from('education').select('*').order('sort_order'),
+    supabase.from('case_studies').select('*').eq('is_visible_on_resume', true).order('sort_order'),
   ])
 
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
@@ -127,6 +129,55 @@ export async function generateResume() {
       }
       y += 4
     })
+  }
+
+  // ── Case Studies & Portfolio ───────────────────────────────────────
+  if (caseStudies?.length) {
+    y = checkPage(doc, y)
+    y = addSection(doc, 'Case Studies & Portfolio', y)
+
+    caseStudies.forEach(cs => {
+      y = checkPage(doc, y, 20)
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.setTextColor(30, 30, 30)
+      const clientLabel = cs.industry ? `${cs.client_name}  ·  ${cs.industry}` : cs.client_name
+      doc.text(clientLabel, 20, y)
+      y += 5
+
+      if (cs.results) {
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(9)
+        doc.setTextColor(80, 80, 80)
+        const resultLines = doc.splitTextToSize(cs.results, 165)
+        resultLines.forEach(line => { y = checkPage(doc, y); doc.text(line, 23, y); y += 4.5 })
+      }
+
+      const metricsStr = typeof cs.key_metrics === 'string'
+        ? cs.key_metrics
+        : cs.key_metrics && typeof cs.key_metrics === 'object'
+          ? Object.values(cs.key_metrics).join(' · ')
+          : ''
+      if (metricsStr) {
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(9)
+        doc.setTextColor(...ACCENT)
+        const mLines = doc.splitTextToSize(`Metrics: ${metricsStr}`, 165)
+        mLines.forEach(line => { y = checkPage(doc, y); doc.text(line, 23, y); y += 4.5 })
+      }
+
+      if (cs.portfolio_url) {
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8.5)
+        doc.setTextColor(100, 130, 220)
+        doc.text(cs.portfolio_url, 23, y)
+        y += 4.5
+      }
+
+      y += 3
+    })
+    y += 2
   }
 
   // ── Skills ────────────────────────────────────────────────────────
