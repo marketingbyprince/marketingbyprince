@@ -1,0 +1,194 @@
+.edu {
+  padding: 80px 60px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.eduInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: block;
+  margin-bottom: 40px;
+}
+
+.eduGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.eduCard {
+  background: var(--bg);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardTag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.degree {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.inst {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.certGrid {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.certCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 28px 40px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.certCard:last-child {
+  border-bottom: none;
+}
+
+.certCard:hover {
+  background: var(--bg2);
+}
+
+.certIcon {
+  color: var(--accent);
+  font-size: 12px;
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+
+.certName {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+/* Footer */
+.footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+
+.footerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 60px 40px;
+  border-bottom: 1px solid var(--border);
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footerLeft {}
+
+.footerName {
+  font-family: var(--font-display);
+  font-size: 48px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.footerTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+
+.footerRight {
+  text-align: right;
+}
+
+.footerCta {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.footerEmail {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s;
+  display: block;
+}
+
+.footerEmail:hover {
+  opacity: 0.7;
+}
+
+.footerBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 60px;
+}
+
+.footerCopy {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.footerLinks {
+  display: flex;
+  gap: 24px;
+}
+
+.footerLinks a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .edu { padding: 60px 24px; }
+  .eduGrid { grid-template-columns: 1fr; }
+  .eduCard, .certCard { padding: 24px; }
+  .footerContent { padding: 40px 24px 32px; flex-direction: column; align-items: flex-start; }
+  .footerRight { text-align: left; }
+  .footerBottom { padding: 16px 24px; }
+}

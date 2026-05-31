@@ -1,21 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       colors: {
-        /* ── Brand palette ── */
         accent:          '#FF6933',
         'accent-dark':   '#E8582A',
         'accent-muted':  '#FFF3EE',
-        deep:            '#111827',   // Deep Text
-        charcoal:        '#1F2937',   // Secondary Charcoal
-        soft:            '#F9FAFB',   // Soft Background
+        deep:            '#111827',
+        charcoal:        '#1F2937',
+        soft:            '#F9FAFB',
         'warn-canvas':   '#FFFBEB',
         'warn-border':   '#FCD34D',
       },
       fontFamily: {
-        sans: ['Raleway', 'system-ui', 'sans-serif'],
+        sans:    ['Raleway', 'system-ui', 'sans-serif'],
+        raleway: ['var(--font-raleway)', 'sans-serif'],
       },
       fontSize: {
         display:        ['2.375rem', { lineHeight: '1.1',  letterSpacing: '-0.02em' }],

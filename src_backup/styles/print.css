@@ -1,0 +1,19 @@
+.page {
+width: 210mm;
+min-height: 296mm;
+margin: 0 auto 30px auto;
+background-color: #FFFFFF;
+padding: 22mm 20mm 25mm 20mm;
+position: relative;
+overflow: hidden;
+box-sizing: border-box;
+}
+
+@media print {
+.page {
+margin: 0 !important;
+box-shadow: none !important;
+page-break-after: always !important;
+break-after: page !important;
+}
+}

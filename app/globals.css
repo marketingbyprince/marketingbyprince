@@ -1,0 +1,413 @@
+@import '../src_backup/styles/variables.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Raleway', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    line-height: 1.65;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  img, video { max-width: 100%; height: auto; }
+
+  ::-webkit-scrollbar             { width: 6px; }
+  ::-webkit-scrollbar-track       { background: #F3F4F6; }
+  ::-webkit-scrollbar-thumb       { background: #D1D5DB; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENTS — reusable class API for the entire project
+   ═══════════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* ── Typography ─────────────────────────────────────────────── */
+
+  .heading-display {
+    @apply font-extrabold uppercase tracking-tight leading-[1.1];
+    font-size: var(--size-display);
+    color: var(--color-text);
+  }
+
+  .heading-pkg {
+    @apply font-extrabold uppercase tracking-tight leading-snug;
+    font-size: var(--size-pkg-title);
+  }
+
+  .heading-section {
+    @apply font-extrabold leading-snug;
+    font-size: var(--size-section-head);
+    color: var(--color-text);
+  }
+
+  .text-price-val {
+    font-size: var(--size-price);
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .eyebrow {
+    @apply block font-bold uppercase;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .text-body     { font-size: var(--size-body);    line-height: 1.7; }
+  .text-body-sm  { font-size: var(--size-body-sm); line-height: 1.6; }
+
+
+  /* ── Cards (public / light) ─────────────────────────────────── */
+
+  .card {
+    @apply bg-white border border-gray-200 rounded-2xl transition-all duration-200;
+  }
+
+  .card-elevated {
+    @apply bg-white border border-gray-200 rounded-2xl;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-featured {
+    @apply bg-white rounded-2xl border-2;
+    border-color: var(--accent);
+    box-shadow: var(--shadow-accent);
+  }
+
+  .card-warn {
+    @apply rounded-2xl border;
+    background-color: var(--warn-canvas);
+    border-color: var(--warn-border);
+  }
+
+  .card-interactive {
+    @apply card hover:border-accent/30 hover:shadow-card-hover;
+  }
+
+  /* ── Cards (admin / dark) ───────────────────────────────────── */
+
+  .admin-card {
+    @apply border rounded-xl;
+    background-color: var(--admin-surface);
+    border-color: var(--admin-border);
+  }
+
+
+  /* ── Buttons ────────────────────────────────────────────────── */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold
+           transition-all duration-150 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-sm  { @apply px-3.5 py-2    text-xs; }
+  .btn-md  { @apply px-5   py-2.5  text-sm; }
+  .btn-lg  { @apply px-6   py-3    text-sm; }
+  .btn-xl  { @apply px-8   py-4    text-base; }
+
+  .btn-primary {
+    @apply btn btn-md bg-accent text-white
+           hover:bg-accent-dark hover:shadow-accent hover:-translate-y-px
+           active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply btn btn-md bg-white text-deep border border-gray-200
+           hover:border-accent/40 hover:shadow-card-hover hover:-translate-y-px
+           active:translate-y-0;
+  }
+
+  .btn-ghost {
+    @apply btn btn-md text-gray-500
+           hover:text-deep hover:bg-gray-100;
+  }
+
+  .btn-outline {
+    @apply btn btn-md border-2 border-accent text-accent
+           hover:bg-accent hover:text-white hover:shadow-accent;
+  }
+
+  .btn-danger {
+    @apply btn btn-md bg-red-500 text-white
+           hover:bg-red-600;
+  }
+
+  .btn-admin {
+    @apply btn btn-md bg-accent text-white
+           hover:bg-accent-dark hover:shadow-accent;
+  }
+
+
+  /* ── Form controls ──────────────────────────────────────────── */
+
+  .input-field {
+    @apply w-full bg-white border border-gray-200 rounded-xl px-4 py-3
+           text-sm text-deep placeholder-gray-400 transition-colors
+           focus:outline-none focus:border-accent;
+  }
+
+  .input-field:focus {
+    box-shadow: 0 0 0 3px var(--accent-ring);
+  }
+
+  .input-label {
+    @apply block font-semibold text-gray-600 mb-1.5;
+    font-size: var(--size-body-sm);
+  }
+
+  .admin-input {
+    @apply w-full border rounded-xl px-4 py-3 text-sm text-white
+           placeholder-gray-600 transition-colors focus:outline-none;
+    background-color: var(--admin-bg);
+    border-color: var(--admin-border);
+  }
+
+  .admin-input:focus { border-color: var(--accent); }
+
+  .admin-label {
+    @apply block font-medium uppercase tracking-wide mb-1.5 text-gray-400;
+    font-size: 11px;
+  }
+
+  select.input-field  { @apply appearance-none; }
+  textarea.input-field { @apply resize-none; }
+  select.admin-input  { @apply appearance-none; }
+  textarea.admin-input { @apply resize-none; }
+
+
+  /* ── Badges / pills ─────────────────────────────────────────── */
+
+  .badge {
+    @apply inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .badge-accent {
+    @apply badge;
+    background-color: rgba(255,105,51,0.1);
+    color: var(--accent);
+  }
+
+  .badge-gray    { @apply badge bg-gray-100 text-gray-600; }
+
+  .badge-warn {
+    @apply badge border;
+    background-color: var(--warn-canvas);
+    border-color: var(--warn-border);
+    color: var(--warn-text);
+  }
+
+  .badge-green   { @apply badge bg-green-50  text-green-700; }
+  .badge-red     { @apply badge bg-red-50    text-red-700;   }
+  .badge-purple  { @apply badge bg-purple-50 text-purple-700; }
+
+  .badge-admin-new  { @apply badge bg-accent/10 text-accent; }
+  .badge-admin-read { @apply text-xs text-gray-500; }
+
+
+  /* ── Filter pills ───────────────────────────────────────────── */
+
+  .filter-pill {
+    @apply px-4 py-2 rounded-full text-sm font-semibold border cursor-pointer transition-all;
+  }
+
+  .filter-pill-on  {
+    @apply filter-pill bg-accent text-white border-accent;
+  }
+
+  .filter-pill-off {
+    @apply filter-pill bg-white border-gray-200 text-gray-500
+           hover:border-accent/40 hover:text-deep;
+  }
+
+
+  /* ── Spinners ───────────────────────────────────────────────── */
+
+  .spinner {
+    @apply rounded-full animate-spin;
+    width: 32px; height: 32px;
+    border: 2px solid var(--accent);
+    border-top-color: transparent;
+  }
+
+  .spinner-sm {
+    @apply rounded-full animate-spin;
+    width: 20px; height: 20px;
+    border: 2px solid var(--accent);
+    border-top-color: transparent;
+  }
+
+
+  /* ── Section containers ─────────────────────────────────────── */
+
+  .section-wrap   { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .section-narrow { @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .section-tight  { @apply max-w-3xl  mx-auto px-4 sm:px-6; }
+
+  /* ── Table (admin) ──────────────────────────────────────────── */
+
+  .admin-table {
+    @apply w-full;
+  }
+
+  .admin-table thead {
+    @apply border-b;
+    border-color: var(--admin-border);
+  }
+
+  .admin-table thead th {
+    @apply px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500;
+  }
+
+  .admin-table tbody tr {
+    @apply border-b cursor-pointer transition-colors;
+    border-color: var(--admin-border);
+  }
+
+  .admin-table tbody tr:last-child { border-bottom: none; }
+
+  .admin-table tbody tr:hover {
+    background-color: rgba(255,255,255,0.04);
+  }
+
+  .admin-table tbody td {
+    @apply px-5 py-3.5;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES — single-purpose helpers
+   ═══════════════════════════════════════════════════════════════ */
+@layer utilities {
+
+  .text-gradient {
+    background: linear-gradient(135deg, #FF8C66, #FF6933);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .glass-dark {
+    background: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .dot-accent {
+    @apply w-2 h-2 rounded-full bg-accent;
+  }
+
+  .divider      { @apply border-t border-gray-100; }
+  .divider-dark { @apply border-t border-gray-800; }
+
+  .pulse-dot {
+    @apply w-2 h-2 rounded-full bg-accent animate-pulse;
+  }
+}
+
+/* ── Extra component styles ──────────────────────────────────── */
+.section-headline {
+  font-size: var(--size-section-head);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.section-headline::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 20px;
+  background-color: var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+.deliverables-ordered-list {
+  list-style: none;
+  counter-reset: deliverables-counter;
+  padding-left: 0;
+}
+
+.deliverables-ordered-list li {
+  counter-increment: deliverables-counter;
+  position: relative;
+  padding-left: 42px;
+  margin-bottom: var(--space-md);
+}
+
+.deliverables-ordered-list li::before {
+  content: counter(deliverables-counter, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  background-color: var(--color-text);
+  color: var(--color-white);
+  font-size: 10px;
+  font-weight: 800;
+  width: 26px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+.page {
+  width: 210mm;
+  min-height: 296mm;
+  margin: 0 auto 30px auto;
+  background-color: #FFFFFF;
+  padding: 22mm 20mm 25mm 20mm;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media print {
+  .page {
+    margin: 0 !important;
+    box-shadow: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+}
