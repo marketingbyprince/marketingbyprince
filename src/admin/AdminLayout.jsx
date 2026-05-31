@@ -12,6 +12,7 @@ const navItems = [
   { to: '/admin/case-studies',   label: 'Case Studies',   icon: '📁' },
   { to: '/admin/articles',       label: 'Articles',       icon: '✍️' },
   { to: '/admin/certifications', label: 'Certifications', icon: '🏆' },
+  { to: '/admin/media',           label: 'Media',          icon: '🖼️' },
   { to: '/admin/settings',       label: 'Settings',       icon: '⚙️' },
 ]
 
