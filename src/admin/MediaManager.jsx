@@ -47,6 +47,8 @@ export default function MediaManager() {
   const [toast,       setToast]       = useState(null)
   const [newFolder,   setNewFolder]   = useState('')
   const [showFolderInput, setShowFolderInput] = useState(false)
+  const [renamingFolder, setRenamingFolder] = useState(null)
+  const [renameValue,    setRenameValue]    = useState('')
   const fileInputRef = useRef()
 
   // ── Load folders ──────────────────────────────────────────────────
@@ -100,13 +102,34 @@ export default function MediaManager() {
 
   // ── Create folder ─────────────────────────────────────────────────
   const createFolder = async () => {
-    const name = newFolder.trim().replace(/\s+/g, '-').toLowerCase()
+    const name = newFolder.trim().replace(/\s+/g, '-')
     if (!name) return
     await supabase.storage.from(BUCKET).upload(`${name}/.keep`, new Blob(['']))
     setNewFolder('')
     setShowFolderInput(false)
     await loadFolders()
     setActiveFolder(name)
+  }
+
+  // ── Rename folder ─────────────────────────────────────────────────
+  const renameFolder = async () => {
+    const newName = renameValue.trim().replace(/\s+/g, '-')
+    if (!newName || newName === renamingFolder) { setRenamingFolder(null); return }
+
+    const { data: files } = await supabase.storage.from(BUCKET).list(renamingFolder, { limit: 500 })
+    const moveOps = (files || []).map(f =>
+      supabase.storage.from(BUCKET).move(`${renamingFolder}/${f.name}`, `${newName}/${f.name}`)
+    )
+    await Promise.all(moveOps)
+
+    await supabase.from('image_metadata')
+      .update({ folder: newName })
+      .eq('folder', renamingFolder)
+
+    setRenamingFolder(null)
+    await loadFolders()
+    if (activeFolder === renamingFolder) setActiveFolder(newName)
+    setToast('Folder renamed')
   }
 
   // ── Copy URL ──────────────────────────────────────────────────────
@@ -148,7 +171,6 @@ export default function MediaManager() {
       await supabase.from('image_metadata').insert([payload])
     }
 
-    // Move file if folder changed
     if (drawerMeta.folder !== activeFolder) {
       const newPath = `${drawerMeta.folder}/${drawer.name}`
       await supabase.storage.from(BUCKET).move(drawer.path, newPath)
@@ -202,18 +224,41 @@ export default function MediaManager() {
         {/* ── Folder tabs ────────────────────────────────────────── */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           {folders.map(f => (
-            <button
-              key={f}
-              onClick={() => setActiveFolder(f)}
-              className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all border ${
-                activeFolder === f
-                  ? 'text-white border-transparent'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
-              }`}
-              style={activeFolder === f ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' } : {}}
-            >
-              {f}
-            </button>
+            renamingFolder === f ? (
+              <div key={f} className="flex items-center gap-1">
+                <input
+                  autoFocus
+                  type="text"
+                  value={renameValue}
+                  onChange={e => setRenameValue(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') renameFolder(); if (e.key === 'Escape') setRenamingFolder(null) }}
+                  className="admin-input py-1 text-sm w-32"
+                />
+                <button onClick={renameFolder} className="btn-admin btn-sm">Save</button>
+                <button onClick={() => setRenamingFolder(null)} className="text-gray-500 hover:text-white text-sm">✕</button>
+              </div>
+            ) : (
+              <div key={f} className="group/tab relative flex items-center">
+                <button
+                  onClick={() => setActiveFolder(f)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all border pr-7 ${
+                    activeFolder === f
+                      ? 'text-white border-transparent'
+                      : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+                  }`}
+                  style={activeFolder === f ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' } : {}}
+                >
+                  {f}
+                </button>
+                <button
+                  onClick={() => { setRenamingFolder(f); setRenameValue(f) }}
+                  className="absolute right-2 opacity-0 group-hover/tab:opacity-100 transition-opacity text-xs text-gray-400 hover:text-white"
+                  title="Rename folder"
+                >
+                  ✏️
+                </button>
+              </div>
+            )
           ))}
 
           {showFolderInput ? (
@@ -224,7 +269,7 @@ export default function MediaManager() {
                 value={newFolder}
                 onChange={e => setNewFolder(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') createFolder(); if (e.key === 'Escape') setShowFolderInput(false) }}
-                placeholder="folder-name"
+                placeholder="Folder Name"
                 className="admin-input py-1 text-sm w-36"
               />
               <button onClick={createFolder} className="btn-admin btn-sm">Create</button>
@@ -255,11 +300,7 @@ export default function MediaManager() {
               const meta = metadata[img.path]
               const hasMeta = !!(meta?.alt_text && meta?.slug && meta?.title_tag)
               return (
-                <div
-                  key={img.path}
-                  className="admin-card rounded-xl overflow-hidden group relative"
-                >
-                  {/* Thumbnail */}
+                <div key={img.path} className="admin-card rounded-xl overflow-hidden group relative">
                   <div className="aspect-square bg-black/20 relative overflow-hidden">
                     {isImage(img.name) ? (
                       <img
@@ -273,41 +314,17 @@ export default function MediaManager() {
                         {/\.pdf/i.test(img.name) ? '📄' : /\.svg/i.test(img.name) ? '✦' : '📁'}
                       </div>
                     )}
-
-                    {/* SEO dot */}
                     <span
                       className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full border-2 border-black/30"
                       style={{ backgroundColor: hasMeta ? '#22c55e' : '#6b7280' }}
                       title={hasMeta ? 'SEO complete' : 'SEO incomplete'}
                     />
-
-                    {/* Hover overlay */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => copyUrl(img.path)}
-                        title="Copy URL"
-                        className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm transition-colors"
-                      >
-                        🔗
-                      </button>
-                      <button
-                        onClick={() => openDrawer(img)}
-                        title="Edit metadata"
-                        className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm transition-colors"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(img)}
-                        title="Delete"
-                        className="w-8 h-8 rounded-lg bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center text-red-400 text-sm transition-colors"
-                      >
-                        🗑️
-                      </button>
+                      <button onClick={() => copyUrl(img.path)} title="Copy URL" className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm transition-colors">🔗</button>
+                      <button onClick={() => openDrawer(img)} title="Edit metadata" className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm transition-colors">✏️</button>
+                      <button onClick={() => setDeleteTarget(img)} title="Delete" className="w-8 h-8 rounded-lg bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center text-red-400 text-sm transition-colors">🗑️</button>
                     </div>
                   </div>
-
-                  {/* Filename */}
                   <div className="px-2.5 py-2">
                     <p className="text-xs text-gray-400 truncate font-medium">{img.name}</p>
                   </div>
@@ -321,125 +338,57 @@ export default function MediaManager() {
       {/* ── Edit Drawer ─────────────────────────────────────────────── */}
       {drawer && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setDrawer(null)}
-          />
-          {/* Drawer */}
-          <div
-            className="fixed top-0 right-0 h-full w-full max-w-sm z-50 flex flex-col overflow-hidden"
-            style={{ backgroundColor: 'var(--admin-surface)', borderLeft: '1px solid var(--admin-border)' }}
-          >
-            {/* Drawer header */}
+          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setDrawer(null)} />
+          <div className="fixed top-0 right-0 h-full w-full max-w-sm z-50 flex flex-col overflow-hidden"
+               style={{ backgroundColor: 'var(--admin-surface)', borderLeft: '1px solid var(--admin-border)' }}>
             <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="text-white font-extrabold text-sm truncate pr-4">{drawer.name}</h3>
               <button onClick={() => setDrawer(null)} className="text-gray-500 hover:text-white text-xl leading-none shrink-0">✕</button>
             </div>
-
-            {/* Drawer body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
-
-              {/* Preview */}
               {isImage(drawer.name) && (
                 <div className="rounded-xl overflow-hidden aspect-video bg-black/20">
                   <img src={getPublicUrl(drawer.path)} alt={drawer.name} className="w-full h-full object-contain" />
                 </div>
               )}
-
-              {/* Public URL */}
               <div>
                 <label className="admin-label">Public URL</label>
                 <div className="flex gap-2">
-                  <input
-                    readOnly
-                    value={getPublicUrl(drawer.path)}
-                    className="admin-input text-xs flex-1 cursor-text"
-                  />
-                  <button
-                    onClick={() => copyUrl(drawer.path)}
-                    className="btn-admin btn-sm shrink-0"
-                  >
-                    Copy
-                  </button>
+                  <input readOnly value={getPublicUrl(drawer.path)} className="admin-input text-xs flex-1 cursor-text" />
+                  <button onClick={() => copyUrl(drawer.path)} className="btn-admin btn-sm shrink-0">Copy</button>
                 </div>
               </div>
-
-              {/* SEO score */}
               <SeoScore meta={drawerMeta} />
-
-              {/* Metadata fields */}
               <div className="space-y-4">
                 <div>
                   <label className="admin-label">Slug <span className="text-gray-600 font-normal normal-case">(SEO URL)</span></label>
-                  <input
-                    type="text"
-                    value={drawerMeta.slug}
-                    onChange={e => setDrawerMeta(p => ({ ...p, slug: e.target.value }))}
-                    placeholder="my-image-name"
-                    className="admin-input"
-                  />
+                  <input type="text" value={drawerMeta.slug} onChange={e => setDrawerMeta(p => ({ ...p, slug: e.target.value }))} placeholder="my-image-name" className="admin-input" />
                 </div>
                 <div>
                   <label className="admin-label">Alt Text</label>
-                  <input
-                    type="text"
-                    value={drawerMeta.alt_text}
-                    onChange={e => setDrawerMeta(p => ({ ...p, alt_text: e.target.value }))}
-                    placeholder="Describe the image for screen readers"
-                    className="admin-input"
-                  />
+                  <input type="text" value={drawerMeta.alt_text} onChange={e => setDrawerMeta(p => ({ ...p, alt_text: e.target.value }))} placeholder="Describe the image for screen readers" className="admin-input" />
                 </div>
                 <div>
                   <label className="admin-label">Title Tag</label>
-                  <input
-                    type="text"
-                    value={drawerMeta.title_tag}
-                    onChange={e => setDrawerMeta(p => ({ ...p, title_tag: e.target.value }))}
-                    placeholder="Image title"
-                    className="admin-input"
-                  />
+                  <input type="text" value={drawerMeta.title_tag} onChange={e => setDrawerMeta(p => ({ ...p, title_tag: e.target.value }))} placeholder="Image title" className="admin-input" />
                 </div>
                 <div>
                   <label className="admin-label">Caption</label>
-                  <textarea
-                    rows={3}
-                    value={drawerMeta.caption}
-                    onChange={e => setDrawerMeta(p => ({ ...p, caption: e.target.value }))}
-                    placeholder="Optional caption text"
-                    className="admin-input resize-none"
-                  />
+                  <textarea rows={3} value={drawerMeta.caption} onChange={e => setDrawerMeta(p => ({ ...p, caption: e.target.value }))} placeholder="Optional caption text" className="admin-input resize-none" />
                 </div>
                 <div>
                   <label className="admin-label">Move to Folder</label>
-                  <select
-                    value={drawerMeta.folder}
-                    onChange={e => setDrawerMeta(p => ({ ...p, folder: e.target.value }))}
-                    className="admin-input"
-                  >
-                    {folders.map(f => (
-                      <option key={f} value={f}>{f}</option>
-                    ))}
+                  <select value={drawerMeta.folder} onChange={e => setDrawerMeta(p => ({ ...p, folder: e.target.value }))} className="admin-input">
+                    {folders.map(f => <option key={f} value={f}>{f}</option>)}
                   </select>
                 </div>
               </div>
             </div>
-
-            {/* Drawer footer */}
             <div className="p-5 border-t flex gap-3" style={{ borderColor: 'var(--admin-border)' }}>
-              <button
-                onClick={saveMeta}
-                disabled={savingMeta}
-                className="flex-1 btn-admin btn-md disabled:opacity-60"
-              >
+              <button onClick={saveMeta} disabled={savingMeta} className="flex-1 btn-admin btn-md disabled:opacity-60">
                 {savingMeta ? 'Saving…' : 'Save Metadata'}
               </button>
-              <button
-                onClick={() => setDeleteTarget(drawer)}
-                className="px-4 py-2 rounded-xl text-red-400 border border-red-500/30 hover:bg-red-500/10 transition-colors text-sm font-bold"
-              >
-                🗑️
-              </button>
+              <button onClick={() => setDeleteTarget(drawer)} className="px-4 py-2 rounded-xl text-red-400 border border-red-500/30 hover:bg-red-500/10 transition-colors text-sm font-bold">🗑️</button>
             </div>
           </div>
         </>
@@ -454,19 +403,10 @@ export default function MediaManager() {
               <span className="text-white font-semibold">{deleteTarget.name}</span> will be permanently deleted and cannot be recovered.
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={confirmDelete}
-                disabled={deleting}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-60"
-              >
+              <button onClick={confirmDelete} disabled={deleting} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-60">
                 {deleting ? 'Deleting…' : 'Yes, Delete'}
               </button>
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold border border-gray-700 text-gray-300 hover:border-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2.5 rounded-xl text-sm font-bold border border-gray-700 text-gray-300 hover:border-gray-600 transition-colors">Cancel</button>
             </div>
           </div>
         </div>
