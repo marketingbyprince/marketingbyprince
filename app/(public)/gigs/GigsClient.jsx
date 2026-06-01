@@ -3,40 +3,68 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import SectionHeader from '@/components/ui/SectionHeader'
-
 
 export default function GigsClient() {
   const [gigs,           setGigs]           = useState([])
   const [packages,       setPackages]       = useState([])
   const [activeCategory, setActiveCategory] = useState('All')
   const [loading,        setLoading]        = useState(true)
+  const [hero,           setHero]           = useState({
+    eyebrow:  'Freelance Gigs',
+    title:    'Packaged Services',
+    subtitle: 'Fixed-scope deliverables with transparent pricing. Pick a package and let\'s get started.',
+    intro:    '',
+  })
 
   useEffect(() => {
     Promise.all([
       supabase.from('gigs').select('*').eq('is_active', true).order('category'),
       supabase.from('gig_packages').select('*').eq('tier', 'starter'),
-    ]).then(([{ data: gigsData }, { data: pkgData }]) => {
+      supabase.from('site_settings')
+        .select('key, value')
+        .in('key', ['gigs_page_eyebrow', 'gigs_page_title', 'gigs_page_subtitle', 'gigs_page_intro']),
+    ]).then(([{ data: gigsData }, { data: pkgData }, { data: settings }]) => {
       setGigs(gigsData || [])
       setPackages(pkgData || [])
+      if (settings?.length) {
+        const s = Object.fromEntries(settings.map(r => [r.key, r.value]))
+        setHero(prev => ({
+          eyebrow:  s.gigs_page_eyebrow  || prev.eyebrow,
+          title:    s.gigs_page_title    || prev.title,
+          subtitle: s.gigs_page_subtitle || prev.subtitle,
+          intro:    s.gigs_page_intro    || '',
+        }))
+      }
       setLoading(false)
     })
   }, [])
 
-  const categories   = ['All', ...new Set(gigs.map(g => g.category).filter(Boolean))]
-  const filtered     = activeCategory === 'All' ? gigs : gigs.filter(g => g.category === activeCategory)
+  const categories    = ['All', ...new Set(gigs.map(g => g.category).filter(Boolean))]
+  const filtered      = activeCategory === 'All' ? gigs : gigs.filter(g => g.category === activeCategory)
   const getStarterPkg = gigId => packages.find(p => p.gig_id === gigId)
 
   return (
     <div className="min-h-screen pt-24 pb-24 bg-soft">
       <div className="section-wrap">
 
-        <SectionHeader
-          eyebrow="Freelance Gigs"
-          title="Packaged Services"
-          subtitle="Fixed-scope deliverables with transparent pricing. Pick a package and let's get started."
-        />
+        {/* Hero / Intro Section — editable from admin */}
+        <div className="mb-14 max-w-3xl">
+          {hero.eyebrow && (
+            <span className="badge-accent mb-4 inline-block">{hero.eyebrow}</span>
+          )}
+          <h1 className="heading-display text-deep mt-2 mb-4">{hero.title}</h1>
+          {hero.subtitle && (
+            <p className="text-body text-gray-500 leading-relaxed">{hero.subtitle}</p>
+          )}
+          {hero.intro && (
+            <p className="text-body text-gray-600 leading-relaxed mt-5 border-l-4 pl-4 whitespace-pre-line"
+              style={{ borderColor: 'var(--accent)' }}>
+              {hero.intro}
+            </p>
+          )}
+        </div>
 
+        {/* Category filters */}
         <div className="flex flex-wrap gap-2 mb-10">
           {categories.map(cat => (
             <button
