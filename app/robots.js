@@ -1,13 +1,14 @@
 export default function robots() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.com'
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/admin/login'],
+        disallow: ['/admin/'],
       },
     ],
-    sitemap: 'https://marketingbyprince.com/sitemap.xml',
-    host: 'https://marketingbyprince.com',
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   }
 }

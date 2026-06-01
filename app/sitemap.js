@@ -1,48 +1,73 @@
 export default async function sitemap() {
-  const baseUrl = 'https://marketingbyprince.com'
+  // Must match your verified domain in Google Search Console exactly
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.com'
+
+  const now = new Date()
 
   const staticPages = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
-    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${baseUrl}/gigs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/portfolio`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/certifications`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: baseUrl,                          lastModified: now, changeFrequency: 'weekly',  priority: 1.0 },
+    { url: `${baseUrl}/about`,               lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${baseUrl}/services`,            lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
+    { url: `${baseUrl}/blog`,                lastModified: now, changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${baseUrl}/gigs`,                lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${baseUrl}/portfolio`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/case-studies`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/certifications`,      lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/contact`,             lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   try {
     const { supabase } = await import('@/lib/supabase')
 
-    const [{ data: services }, { data: posts }, { data: gigs }] = await Promise.all([
-      supabase.from('services').select('slug, updated_at'),
-      supabase.from('articles').select('slug, updated_at').eq('published', true),
-      supabase.from('gigs').select('slug, updated_at').eq('is_active', true),
+    const [
+      { data: services },
+      { data: posts },
+      { data: gigs },
+      { data: cases },
+    ] = await Promise.all([
+      // services has a slug column
+      supabase.from('services').select('slug, updated_at').eq('is_active', true).not('slug', 'is', null),
+      // articles: column is is_published (not published)
+      supabase.from('articles').select('slug, updated_at').eq('is_published', true).not('slug', 'is', null),
+      // gigs: no slug column — use id-based URL
+      supabase.from('gigs').select('id, updated_at').eq('is_active', true),
+      // case studies: use id-based URL
+      supabase.from('case_studies').select('id, updated_at').eq('is_published', true),
     ])
 
-    const servicePages = (services || []).map(s => ({
-      url: `${baseUrl}/services/${s.slug}`,
-      lastModified: new Date(s.updated_at),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    }))
+    const servicePages = (services || [])
+      .filter(s => s.slug)
+      .map(s => ({
+        url: `${baseUrl}/services/${s.slug}`,
+        lastModified: s.updated_at ? new Date(s.updated_at) : now,
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      }))
 
-    const blogPages = (posts || []).map(p => ({
-      url: `${baseUrl}/blog/${p.slug}`,
-      lastModified: new Date(p.updated_at),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    }))
+    const blogPages = (posts || [])
+      .filter(p => p.slug)
+      .map(p => ({
+        url: `${baseUrl}/blog/${p.slug}`,
+        lastModified: p.updated_at ? new Date(p.updated_at) : now,
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      }))
 
     const gigPages = (gigs || []).map(g => ({
-      url: `${baseUrl}/gigs/${g.slug}`,
-      lastModified: new Date(g.updated_at),
+      url: `${baseUrl}/gigs/${g.id}`,
+      lastModified: g.updated_at ? new Date(g.updated_at) : now,
       changeFrequency: 'monthly',
       priority: 0.7,
     }))
 
-    return [...staticPages, ...servicePages, ...blogPages, ...gigPages]
+    const casePages = (cases || []).map(c => ({
+      url: `${baseUrl}/case-studies/${c.id}`,
+      lastModified: c.updated_at ? new Date(c.updated_at) : now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }))
+
+    return [...staticPages, ...servicePages, ...blogPages, ...gigPages, ...casePages]
   } catch {
     return staticPages
   }
