@@ -6,7 +6,8 @@
       "mcp__c7354915-7387-4869-8727-d124445ecbe9__list_tables",
       "mcp__c7354915-7387-4869-8727-d124445ecbe9__apply_migration",
       "mcp__c7354915-7387-4869-8727-d124445ecbe9__list_projects",
-      "mcp__c7354915-7387-4869-8727-d124445ecbe9__execute_sql"
+      "mcp__c7354915-7387-4869-8727-d124445ecbe9__execute_sql",
+      "mcp__3c30bfa2-86ff-42df-9c73-7e21c35ea450__get_runtime_logs"
     ]
   }
 }
