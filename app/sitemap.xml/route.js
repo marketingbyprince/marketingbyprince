@@ -98,8 +98,8 @@ function buildHtmlIndex(baseUrl) {
 
 export async function GET(request) {
   const baseUrl = BASE_URL()
-  const accept = request.headers.get('accept') || ''
-  const isBot = !accept.includes('text/html')
+  const { isBrowserRequest } = await import('@/lib/sitemap-helpers')
+  const isBot = !isBrowserRequest(request)
 
   if (isBot) {
     return new NextResponse(buildXmlIndex(baseUrl), {
