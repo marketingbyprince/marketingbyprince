@@ -16,11 +16,26 @@ const SINGLETON_SECTIONS = [
   { type: null,           label: 'Global Settings', icon: '⚙️', href: '/admin/seo/global' },
 ]
 
-const COLLECTION_META = {
-  gig:        { label: 'Gig',         baseHref: '/admin/seo/gigs' },
-  blog_post:  { label: 'Blog Post',   baseHref: '/admin/seo/blogs' },
-  case_study: { label: 'Case Study',  baseHref: '/admin/seo/case-studies' },
-  service:    { label: 'Service',     baseHref: '/admin/seo/services' },
+// Which singleton rows have expandable sub-records
+const EXPANDABLE = {
+  gigs:         { label: 'Gigs',         key: 'gigs' },
+  services:     { label: 'Services',     key: 'services' },
+  case_studies: { label: 'Case Studies', key: 'caseStudies' },
+  blogs:        { label: 'Blogs',        key: 'blogs' },
+}
+
+const PAGE_LABELS = {
+  homepage: 'Homepage', services: 'Services', gigs: 'Gigs', portfolio: 'Portfolio',
+  case_studies: 'Case Studies', blogs: 'Blogs', about: 'About Us',
+}
+const PAGE_HREFS = {
+  homepage:     '/admin/seo/homepage',
+  services:     '/admin/seo/services',
+  gigs:         '/admin/seo/gigs',
+  portfolio:    '/admin/seo/portfolio',
+  case_studies: '/admin/seo/case-studies',
+  blogs:        '/admin/seo/blogs',
+  about:        '/admin/seo/about',
 }
 
 function Check({ ok }) {
@@ -37,65 +52,108 @@ function ScorePill({ score }) {
   )
 }
 
-function AuditTable({ title, rows, editHref }) {
-  if (!rows.length) return null
+function AuditRow({ p, depth = 0 }) {
   return (
-    <div className="mb-6">
-      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">{title}</h3>
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
-              {['Page / Item', 'SEO Score', 'Title', 'Desc', 'OG', 'Canonical', 'Schema', 'FAQ/AI', ''].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((p, i) => (
-              <tr key={i} className="border-b last:border-0 hover:bg-white/3 transition-colors"
-                  style={{ borderColor: 'var(--admin-border)' }}>
-                <td className="px-4 py-3">
-                  <p className="font-medium text-white">{p.label}</p>
-                  {p.sublabel && <p className="text-xs text-gray-500">{p.sublabel}</p>}
-                </td>
-                <td className="px-4 py-3"><ScorePill score={p.seo_score || 0} /></td>
-                <td className="px-4 py-3"><Check ok={Boolean(p.meta_title)} /></td>
-                <td className="px-4 py-3"><Check ok={Boolean(p.meta_description)} /></td>
-                <td className="px-4 py-3"><Check ok={Boolean(p.og_image)} /></td>
-                <td className="px-4 py-3"><Check ok={Boolean(p.canonical_url)} /></td>
-                <td className="px-4 py-3"><Check ok={Array.isArray(p.schemas) && p.schemas.length > 0} /></td>
-                <td className="px-4 py-3"><Check ok={Array.isArray(p.ai_faq) && p.ai_faq.length > 0} /></td>
-                <td className="px-4 py-3">
-                  <Link href={p.editHref}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
-                        style={{ backgroundColor: 'var(--accent)' }}>
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <tr className="border-b last:border-0 hover:bg-white/3 transition-colors"
+        style={{ borderColor: 'var(--admin-border)' }}>
+      <td className="px-4 py-3" style={{ paddingLeft: depth > 0 ? '2.5rem' : undefined }}>
+        {depth > 0 && <span className="text-gray-600 mr-2">└</span>}
+        <p className="font-medium text-white inline">{p.label}</p>
+        {p.sublabel && <p className="text-xs text-gray-500 mt-0.5">{p.sublabel}</p>}
+      </td>
+      <td className="px-4 py-3"><ScorePill score={p.seo_score || 0} /></td>
+      <td className="px-4 py-3"><Check ok={Boolean(p.meta_title)} /></td>
+      <td className="px-4 py-3"><Check ok={Boolean(p.meta_description)} /></td>
+      <td className="px-4 py-3"><Check ok={Boolean(p.og_image)} /></td>
+      <td className="px-4 py-3"><Check ok={Boolean(p.canonical_url)} /></td>
+      <td className="px-4 py-3"><Check ok={Array.isArray(p.schemas) && p.schemas.length > 0} /></td>
+      <td className="px-4 py-3"><Check ok={Array.isArray(p.ai_faq) && p.ai_faq.length > 0} /></td>
+      <td className="px-4 py-3">
+        <Link href={p.editHref}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
+              style={{ backgroundColor: 'var(--accent)' }}>
+          Edit
+        </Link>
+      </td>
+    </tr>
   )
 }
 
-const PAGE_LABELS = {
-  homepage: 'Homepage', services: 'Services', gigs: 'Gigs', portfolio: 'Portfolio',
-  case_studies: 'Case Studies', blogs: 'Blogs', about: 'About Us',
-}
-const PAGE_HREFS = {
-  homepage: '/admin/seo/homepage', services: '/admin/seo/services', gigs: '/admin/seo/gigs',
-  portfolio: '/admin/seo/portfolio', case_studies: '/admin/seo/case-studies',
-  blogs: '/admin/seo/blogs', about: '/admin/seo/about',
+function ExpandableRow({ p, subRows, expanded, onToggle }) {
+  const hasChildren = subRows && subRows.length > 0
+  return (
+    <>
+      <tr className="border-b transition-colors cursor-pointer"
+          style={{ borderColor: 'var(--admin-border)', backgroundColor: expanded ? 'rgba(255,105,51,0.05)' : undefined }}
+          onClick={hasChildren ? onToggle : undefined}>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            {hasChildren && (
+              <span className="text-gray-400 text-xs font-bold transition-transform"
+                    style={{ display: 'inline-block', transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                ▶
+              </span>
+            )}
+            <div>
+              <p className="font-medium text-white">{p.label}</p>
+              {hasChildren && (
+                <p className="text-xs text-gray-500 mt-0.5">{subRows.length} item{subRows.length !== 1 ? 's' : ''} — click to {expanded ? 'collapse' : 'expand'}</p>
+              )}
+            </div>
+          </div>
+        </td>
+        <td className="px-4 py-3"><ScorePill score={p.seo_score || 0} /></td>
+        <td className="px-4 py-3"><Check ok={Boolean(p.meta_title)} /></td>
+        <td className="px-4 py-3"><Check ok={Boolean(p.meta_description)} /></td>
+        <td className="px-4 py-3"><Check ok={Boolean(p.og_image)} /></td>
+        <td className="px-4 py-3"><Check ok={Boolean(p.canonical_url)} /></td>
+        <td className="px-4 py-3"><Check ok={Array.isArray(p.schemas) && p.schemas.length > 0} /></td>
+        <td className="px-4 py-3"><Check ok={Array.isArray(p.ai_faq) && p.ai_faq.length > 0} /></td>
+        <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+          <Link href={p.editHref}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
+                style={{ backgroundColor: 'var(--accent)' }}>
+            Edit
+          </Link>
+        </td>
+      </tr>
+      {expanded && subRows.map((sub, i) => (
+        <tr key={i} className="border-b last:border-0 hover:bg-white/3 transition-colors"
+            style={{ borderColor: 'var(--admin-border)', backgroundColor: 'rgba(255,105,51,0.02)' }}>
+          <td className="py-2.5" style={{ paddingLeft: '2.5rem' }}>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600 text-xs">└</span>
+              <div>
+                <p className="font-medium text-white text-sm">{sub.label}</p>
+                {sub.sublabel && <p className="text-xs text-gray-500">{sub.sublabel}</p>}
+              </div>
+            </div>
+          </td>
+          <td className="px-4 py-2.5"><ScorePill score={sub.seo_score || 0} /></td>
+          <td className="px-4 py-2.5"><Check ok={Boolean(sub.meta_title)} /></td>
+          <td className="px-4 py-2.5"><Check ok={Boolean(sub.meta_description)} /></td>
+          <td className="px-4 py-2.5"><Check ok={Boolean(sub.og_image)} /></td>
+          <td className="px-4 py-2.5"><Check ok={Boolean(sub.canonical_url)} /></td>
+          <td className="px-4 py-2.5"><Check ok={Array.isArray(sub.schemas) && sub.schemas.length > 0} /></td>
+          <td className="px-4 py-2.5"><Check ok={Array.isArray(sub.ai_faq) && sub.ai_faq.length > 0} /></td>
+          <td className="px-4 py-2.5">
+            <Link href={sub.editHref}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
+                  style={{ backgroundColor: 'var(--accent)' }}>
+              Edit
+            </Link>
+          </td>
+        </tr>
+      ))}
+    </>
+  )
 }
 
 export default function SeoOverviewPage() {
   const [allSeo, setAllSeo] = useState([])
   const [records, setRecords] = useState({ gigs: [], articles: [], caseStudies: [], services: [] })
   const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState({})
 
   useEffect(() => {
     Promise.all([
@@ -116,7 +174,9 @@ export default function SeoOverviewPage() {
     })
   }, [])
 
-  // Build lookup maps
+  const toggle = (type) => setExpanded(prev => ({ ...prev, [type]: !prev[type] }))
+
+  // Build lookup map
   const seoByKey = {}
   allSeo.forEach(s => {
     const key = s.content_id ? `${s.content_type}::${s.content_id}` : `singleton::${s.content_type}`
@@ -138,29 +198,37 @@ export default function SeoOverviewPage() {
     faq:       allSeo.filter(p => !p.ai_faq || !p.ai_faq.length).length,
   }
 
-  // Build rows for each group
-  const singletonRows = singletons
-    .filter(p => PAGE_LABELS[p.content_type])
-    .map(p => ({ ...p, label: PAGE_LABELS[p.content_type], editHref: PAGE_HREFS[p.content_type] }))
+  // Sub-rows per expandable type
+  const subRowsMap = {
+    gigs: records.gigs.map(g => {
+      const seo = seoByKey[`gig::${g.id}`] || {}
+      return { ...seo, label: g.title, sublabel: g.category, editHref: `/admin/seo/gigs/${g.id}` }
+    }),
+    blogs: records.articles.map(a => {
+      const seo = seoByKey[`blog_post::${a.slug}`] || {}
+      return { ...seo, label: a.title, sublabel: `/${a.slug}`, editHref: `/admin/seo/blogs/${a.slug}` }
+    }),
+    caseStudies: records.caseStudies.map(c => {
+      const seo = seoByKey[`case_study::${c.id}`] || {}
+      return { ...seo, label: c.title, sublabel: c.client_name, editHref: `/admin/seo/case-studies/${c.id}` }
+    }),
+    services: records.services.map(s => {
+      const seo = seoByKey[`service::${s.id}`] || {}
+      return { ...seo, label: s.title, sublabel: s.pillar, editHref: `/admin/seo/services/${s.id}` }
+    }),
+  }
 
-  const gigRows = records.gigs.map(g => {
-    const seo = seoByKey[`gig::${g.id}`] || {}
-    return { ...seo, label: g.title, sublabel: g.category, editHref: `/admin/seo/gigs/${g.id}` }
-  })
-
-  const blogRows = records.articles.map(a => {
-    const seo = seoByKey[`blog_post::${a.slug}`] || {}
-    return { ...seo, label: a.title, sublabel: `/${a.slug}`, editHref: `/admin/seo/blogs/${a.slug}` }
-  })
-
-  const caseRows = records.caseStudies.map(c => {
-    const seo = seoByKey[`case_study::${c.id}`] || {}
-    return { ...seo, label: c.title, sublabel: c.client_name, editHref: `/admin/seo/case-studies/${c.id}` }
-  })
-
-  const serviceRows = records.services.map(s => {
-    const seo = seoByKey[`service::${s.id}`] || {}
-    return { ...seo, label: s.title, sublabel: s.pillar, editHref: `/admin/seo/services/${s.id}` }
+  // Build main rows — expandable ones get toggle behaviour
+  const mainRows = SINGLETON_SECTIONS.filter(s => s.type).map(({ type, label }) => {
+    const seo = singletons.find(p => p.content_type === type) || {}
+    const exp = EXPANDABLE[type]
+    return {
+      ...seo,
+      type,
+      label: PAGE_LABELS[type] || label,
+      editHref: PAGE_HREFS[type],
+      expandKey: exp?.key || null,
+    }
   })
 
   return (
@@ -224,18 +292,39 @@ export default function SeoOverviewPage() {
         </div>
       </div>
 
-      {/* SEO Audit Overview — all pages + all records */}
+      {/* SEO Audit Overview — unified expandable table */}
       <div>
         <h2 className="text-white font-bold text-lg mb-4">SEO Audit Overview</h2>
         {loading ? (
           <p className="text-gray-400 text-sm">Loading…</p>
         ) : (
-          <div>
-            <AuditTable title="Singleton Pages" rows={singletonRows} />
-            <AuditTable title={`Gigs (${gigRows.length})`} rows={gigRows} />
-            <AuditTable title={`Blog Posts (${blogRows.length})`} rows={blogRows} />
-            <AuditTable title={`Case Studies (${caseRows.length})`} rows={caseRows} />
-            <AuditTable title={`Services (${serviceRows.length})`} rows={serviceRows} />
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+                  {['Page / Item', 'SEO Score', 'Title', 'Desc', 'OG', 'Canonical', 'Schema', 'FAQ/AI', ''].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {mainRows.map((row) => {
+                  const subRows = row.expandKey ? subRowsMap[row.expandKey] : []
+                  if (subRows.length > 0) {
+                    return (
+                      <ExpandableRow
+                        key={row.type}
+                        p={row}
+                        subRows={subRows}
+                        expanded={!!expanded[row.type]}
+                        onToggle={() => toggle(row.type)}
+                      />
+                    )
+                  }
+                  return <AuditRow key={row.type} p={row} />
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
