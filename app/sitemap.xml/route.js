@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isBrowserRequest } from '@/lib/sitemap-helpers'
 
 const BASE_URL = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
 
@@ -98,7 +99,6 @@ function buildHtmlIndex(baseUrl) {
 
 export async function GET(request) {
   const baseUrl = BASE_URL()
-  const { isBrowserRequest } = await import('@/lib/sitemap-helpers')
   const isBot = !isBrowserRequest(request)
 
   if (isBot) {

@@ -1,9 +1,8 @@
-import { xmlResponse, htmlResponse, buildUrlset, buildHtmlUrlset } from '@/lib/sitemap-helpers'
+import { xmlResponse, htmlResponse, buildUrlset, buildHtmlUrlset, isBrowserRequest } from '@/lib/sitemap-helpers'
 
 export async function GET(request) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
   const today = new Date().toISOString().slice(0, 10)
-  const { isBrowserRequest } = await import('@/lib/sitemap-helpers')
   const isBrowser = isBrowserRequest(request)
 
   const pages = [
