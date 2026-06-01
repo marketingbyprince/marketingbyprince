@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { scoreColor, scoreLabel } from '@/lib/seo-scoring'
+import SeoScoreCard from '@/components/admin/seo/SeoScoreCard'
 
 function ScoreBadge({ score }) {
   return (
@@ -16,23 +17,28 @@ function ScoreBadge({ score }) {
 export default function CaseStudiesSeoListPage() {
   const [cases, setCases] = useState([])
   const [seoMap, setSeoMap] = useState({})
+  const [pageSeo, setPageSeo] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       supabase.from('case_studies').select('id, title, client_name, industry, is_published').order('created_at', { ascending: false }),
       supabase.from('seo_page_meta').select('content_id, seo_score, meta_title, meta_description, og_image, schemas').eq('content_type', 'case_study'),
-    ]).then(([{ data: casesData }, { data: seoData }]) => {
+      supabase.from('seo_page_meta').select('seo_score, meta_title, meta_description, og_image, schemas').eq('content_type', 'case_studies').is('content_id', null).single(),
+    ]).then(([{ data: casesData }, { data: seoData }, { data: pageData }]) => {
       setCases(casesData || [])
       const map = {}
       ;(seoData || []).forEach(s => { map[s.content_id] = s })
       setSeoMap(map)
+      setPageSeo(pageData)
       setLoading(false)
     })
   }, [])
 
+  const Check = ({ ok }) => <span className={ok ? 'text-green-500' : 'text-red-400'}>{ok ? '✓' : '✗'}</span>
+
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
       <div>
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
           <Link href="/admin/seo" className="hover:text-white">SEO Center</Link>
@@ -40,53 +46,77 @@ export default function CaseStudiesSeoListPage() {
           <span className="text-white">Case Studies</span>
         </div>
         <h1 className="text-2xl font-extrabold text-white">Case Studies SEO</h1>
-        <p className="text-sm text-gray-400 mt-1">Manage SEO for each individual case study</p>
       </div>
-      {loading ? (
-        <div className="text-gray-400 text-sm py-10 text-center">Loading…</div>
-      ) : cases.length === 0 ? (
-        <div className="text-gray-500 text-sm py-10 text-center">No case studies found.</div>
-      ) : (
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
-                {['Case Study', 'Industry', 'SEO Score', 'Title', 'Desc', 'OG', 'Schema', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {cases.map(c => {
-                const seo = seoMap[c.id] || {}
-                const Check = ({ ok }) => <span className={ok ? 'text-green-500' : 'text-red-400'}>{ok ? '✓' : '✗'}</span>
-                return (
-                  <tr key={c.id} className="border-b last:border-0 hover:bg-white/3 transition-colors"
-                      style={{ borderColor: 'var(--admin-border)' }}>
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-white">{c.title}</p>
-                      <p className="text-xs text-gray-500">{c.client_name}</p>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400">{c.industry || '—'}</td>
-                    <td className="px-4 py-3"><ScoreBadge score={seo.seo_score} /></td>
-                    <td className="px-4 py-3"><Check ok={Boolean(seo.meta_title)} /></td>
-                    <td className="px-4 py-3"><Check ok={Boolean(seo.meta_description)} /></td>
-                    <td className="px-4 py-3"><Check ok={Boolean(seo.og_image)} /></td>
-                    <td className="px-4 py-3"><Check ok={Array.isArray(seo.schemas) && seo.schemas.length > 0} /></td>
-                    <td className="px-4 py-3">
-                      <Link href={`/admin/seo/case-studies/${c.id}`}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white"
-                            style={{ backgroundColor: 'var(--accent)' }}>
-                        Edit SEO
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+
+      <div className="rounded-2xl border p-5 flex items-center justify-between gap-6"
+           style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+        <div className="flex items-center gap-5">
+          <SeoScoreCard label="Page Score" score={pageSeo?.seo_score || 0} />
+          <div>
+            <p className="text-white font-bold">Case Studies Listing Page</p>
+            <p className="text-xs text-gray-400 mt-0.5">SEO for the main <code className="text-orange-400">/case-studies</code> page</p>
+            <div className="flex gap-3 mt-2 text-xs">
+              <span>Title <Check ok={Boolean(pageSeo?.meta_title)} /></span>
+              <span>Desc <Check ok={Boolean(pageSeo?.meta_description)} /></span>
+              <span>OG <Check ok={Boolean(pageSeo?.og_image)} /></span>
+              <span>Schema <Check ok={Array.isArray(pageSeo?.schemas) && pageSeo.schemas.length > 0} /></span>
+            </div>
+          </div>
         </div>
-      )}
+        <Link href="/admin/seo/case-studies/page-seo"
+              className="shrink-0 text-sm font-bold px-4 py-2 rounded-xl text-white"
+              style={{ backgroundColor: 'var(--accent)' }}>
+          Edit Page SEO
+        </Link>
+      </div>
+
+      <div>
+        <h2 className="text-white font-bold text-sm uppercase tracking-widest mb-3">Individual Case Studies</h2>
+        {loading ? (
+          <div className="text-gray-400 text-sm py-10 text-center">Loading…</div>
+        ) : cases.length === 0 ? (
+          <div className="text-gray-500 text-sm py-10 text-center">No case studies found.</div>
+        ) : (
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+                  {['Case Study', 'Industry', 'SEO Score', 'Title', 'Desc', 'OG', 'Schema', ''].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {cases.map(c => {
+                  const seo = seoMap[c.id] || {}
+                  return (
+                    <tr key={c.id} className="border-b last:border-0 hover:bg-white/3 transition-colors"
+                        style={{ borderColor: 'var(--admin-border)' }}>
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-white">{c.title}</p>
+                        <p className="text-xs text-gray-500">{c.client_name}</p>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400">{c.industry || '—'}</td>
+                      <td className="px-4 py-3"><ScoreBadge score={seo.seo_score} /></td>
+                      <td className="px-4 py-3"><Check ok={Boolean(seo.meta_title)} /></td>
+                      <td className="px-4 py-3"><Check ok={Boolean(seo.meta_description)} /></td>
+                      <td className="px-4 py-3"><Check ok={Boolean(seo.og_image)} /></td>
+                      <td className="px-4 py-3"><Check ok={Array.isArray(seo.schemas) && seo.schemas.length > 0} /></td>
+                      <td className="px-4 py-3">
+                        <Link href={`/admin/seo/case-studies/${c.id}`}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white"
+                              style={{ backgroundColor: 'var(--accent)' }}>
+                          Edit SEO
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
