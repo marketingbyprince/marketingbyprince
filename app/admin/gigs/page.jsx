@@ -1,24 +1,33 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
 
 const TIERS = ['starter', 'standard', 'premium']
 const TIER_LABELS = { starter: 'Starter', standard: 'Standard', premium: 'Premium' }
 
-const emptyGig = { title: '', category: '', short_description: '', cover_image_url: '', is_active: true }
+const emptyGig = {
+  title: '', category: '', short_description: '', cover_image_url: '',
+  is_active: true, intro_paragraph: '', explore_more_content: '',
+  allowed_platform_ids: [],
+}
 const emptyPkg = tier => ({ tier, name: '', price: '', delivery_days: '', features: '', is_featured: false })
-const emptyAddon = { name: '', description: '', price: '', icon: '🧩' }
+const emptyAddon = { name: '', description: '', price: '', icon: '🧩', max_quantity: 1 }
+const emptyPlatform = { name: '', icon: '🌐', category: '' }
 
 export default function ManageGigs() {
-  const [gigs,        setGigs]        = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [editing,     setEditing]     = useState(null)
-  const [form,        setForm]        = useState(emptyGig)
-  const [packages,    setPackages]    = useState(TIERS.map(emptyPkg))
-  const [addons,      setAddons]      = useState([])
-  const [addonDraft,  setAddonDraft]  = useState(emptyAddon)
-  const [saving,      setSaving]      = useState(false)
-  const [savingAddon, setSavingAddon] = useState(false)
+  const [gigs,            setGigs]            = useState([])
+  const [loading,         setLoading]         = useState(true)
+  const [editing,         setEditing]         = useState(null)
+  const [form,            setForm]            = useState(emptyGig)
+  const [packages,        setPackages]        = useState(TIERS.map(emptyPkg))
+  const [addons,          setAddons]          = useState([])
+  const [addonDraft,      setAddonDraft]      = useState(emptyAddon)
+  const [saving,          setSaving]          = useState(false)
+  const [savingAddon,     setSavingAddon]     = useState(false)
+  const [allPlatforms,    setAllPlatforms]    = useState([])
+  const [showAddPlatform, setShowAddPlatform] = useState(false)
+  const [newPlatform,     setNewPlatform]     = useState(emptyPlatform)
+  const [savingPlatform,  setSavingPlatform]  = useState(false)
 
   const fetchGigs = async () => {
     const { data } = await supabaseAdmin
@@ -27,13 +36,19 @@ export default function ManageGigs() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchGigs() }, [])
+  const fetchPlatforms = useCallback(async () => {
+    const { data } = await supabaseAdmin.from('platforms').select('*').order('sort_order')
+    setAllPlatforms(data || [])
+  }, [])
+
+  useEffect(() => { fetchGigs(); fetchPlatforms() }, [fetchPlatforms])
 
   const openAdd = () => {
     setForm(emptyGig)
     setPackages(TIERS.map(emptyPkg))
     setAddons([])
     setAddonDraft(emptyAddon)
+    setShowAddPlatform(false)
     setEditing('add')
   }
 
@@ -43,7 +58,11 @@ export default function ManageGigs() {
       supabaseAdmin.from('gig_packages').select('*').eq('gig_id', id),
       supabaseAdmin.from('gig_addons').select('*').eq('gig_id', id).order('sort_order'),
     ])
-    setForm(gig || emptyGig)
+    setForm({
+      ...emptyGig,
+      ...gig,
+      allowed_platform_ids: gig?.allowed_platform_ids || [],
+    })
     const byTier = {}
     ;(pkgs || []).forEach(p => { byTier[p.tier] = p })
     setPackages(TIERS.map(tier => {
@@ -58,7 +77,18 @@ export default function ManageGigs() {
     }))
     setAddons(ads || [])
     setAddonDraft(emptyAddon)
+    setShowAddPlatform(false)
     setEditing(id)
+  }
+
+  const togglePlatform = id => {
+    setForm(prev => {
+      const ids = prev.allowed_platform_ids || []
+      return {
+        ...prev,
+        allowed_platform_ids: ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id],
+      }
+    })
   }
 
   const saveGig = async e => {
@@ -104,13 +134,14 @@ export default function ManageGigs() {
     if (!addonDraft.name || editing === 'add') return
     setSavingAddon(true)
     const { data } = await supabaseAdmin.from('gig_addons').insert([{
-      gig_id:      editing,
-      name:        addonDraft.name,
-      description: addonDraft.description || null,
-      price:       addonDraft.price !== '' ? Number(addonDraft.price) : 0,
-      icon:        addonDraft.icon || '🧩',
-      sort_order:  addons.length,
-      is_active:   true,
+      gig_id:       editing,
+      name:         addonDraft.name,
+      description:  addonDraft.description || null,
+      price:        addonDraft.price !== '' ? Number(addonDraft.price) : 0,
+      icon:         addonDraft.icon || '🧩',
+      max_quantity: addonDraft.max_quantity ? Number(addonDraft.max_quantity) : 1,
+      sort_order:   addons.length,
+      is_active:    true,
     }]).select().single()
     if (data) setAddons(prev => [...prev, data])
     setAddonDraft(emptyAddon)
@@ -121,6 +152,29 @@ export default function ManageGigs() {
     if (!confirm('Remove this add-on?')) return
     await supabaseAdmin.from('gig_addons').delete().eq('id', id)
     setAddons(prev => prev.filter(a => a.id !== id))
+  }
+
+  const addPlatformInline = async e => {
+    e.preventDefault()
+    if (!newPlatform.name) return
+    setSavingPlatform(true)
+    const { data } = await supabaseAdmin.from('platforms').insert([{
+      name:       newPlatform.name,
+      icon:       newPlatform.icon || '🌐',
+      category:   newPlatform.category || null,
+      sort_order: allPlatforms.length,
+      is_active:  true,
+    }]).select().single()
+    if (data) {
+      setAllPlatforms(prev => [...prev, data])
+      setForm(prev => ({
+        ...prev,
+        allowed_platform_ids: [...(prev.allowed_platform_ids || []), data.id],
+      }))
+    }
+    setNewPlatform(emptyPlatform)
+    setShowAddPlatform(false)
+    setSavingPlatform(false)
   }
 
   const delGig = async id => {
@@ -136,6 +190,8 @@ export default function ManageGigs() {
 
   if (editing !== null) {
     const isAdd = editing === 'add'
+    const allowedIds = form.allowed_platform_ids || []
+
     return (
       <div className="p-6 sm:p-8 max-w-5xl">
         <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white text-sm mb-6 transition-colors font-semibold">
@@ -145,6 +201,7 @@ export default function ManageGigs() {
           {isAdd ? 'New Gig' : 'Edit Gig'}
         </h1>
         <form onSubmit={saveGig} className="space-y-8">
+          {/* Gig Info */}
           <div className="admin-card rounded-xl p-6 space-y-4">
             <SectionLabel>Gig Info</SectionLabel>
             <div>
@@ -165,11 +222,71 @@ export default function ManageGigs() {
               <label className="admin-label">Short Description</label>
               <textarea rows={2} value={form.short_description || ''} onChange={e => setForm(p => ({ ...p, short_description: e.target.value }))} className="admin-input resize-none" />
             </div>
+            <div>
+              <label className="admin-label">Intro Paragraph <span className="text-gray-600 font-normal">(shown above packages — embed keywords here)</span></label>
+              <textarea rows={3} value={form.intro_paragraph || ''} onChange={e => setForm(p => ({ ...p, intro_paragraph: e.target.value }))} placeholder="Write a keyword-rich intro shown at the top of the gig page before the packages..." className="admin-input resize-none" />
+            </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.is_active} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
               <span className="text-sm text-gray-300 font-medium">Active (visible on website)</span>
             </label>
           </div>
+
+          {/* Platform Selection */}
+          <div className="admin-card rounded-xl p-6">
+            <SectionLabel hint="Only selected platforms will show on this gig's page.">Platforms for this Gig</SectionLabel>
+            {allPlatforms.length === 0 ? (
+              <p className="text-gray-500 text-sm mb-4">No platforms yet. Add one below.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {allPlatforms.map(p => {
+                  const checked = allowedIds.includes(p.id)
+                  return (
+                    <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${checked ? 'border-accent text-white' : 'border-white/10 text-gray-400 hover:border-white/30'}`}
+                      style={checked ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' } : {}}>
+                      <span>{p.icon || '🌐'}</span>
+                      <span>{p.name}</span>
+                      {checked && <span className="ml-0.5">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+            {!showAddPlatform ? (
+              <button type="button" onClick={() => setShowAddPlatform(true)} className="text-xs text-gray-400 hover:text-white transition-colors font-semibold flex items-center gap-1">
+                + Platform not in list? Add it here
+              </button>
+            ) : (
+              <form onSubmit={addPlatformInline} className="bg-white/5 rounded-xl p-4 space-y-3 mt-2">
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">New Platform</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="admin-label">Platform Name *</label>
+                    <input type="text" required value={newPlatform.name} onChange={e => setNewPlatform(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Google Ads" className="admin-input" />
+                  </div>
+                  <div>
+                    <label className="admin-label">Icon (emoji)</label>
+                    <input type="text" value={newPlatform.icon} onChange={e => setNewPlatform(p => ({ ...p, icon: e.target.value }))} placeholder="🌐" className="admin-input" />
+                  </div>
+                </div>
+                <div>
+                  <label className="admin-label">Category (optional)</label>
+                  <input type="text" value={newPlatform.category} onChange={e => setNewPlatform(p => ({ ...p, category: e.target.value }))} placeholder="e.g. Search, Social" className="admin-input" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={savingPlatform || !newPlatform.name} className="btn-admin btn-sm disabled:opacity-60">
+                    {savingPlatform ? 'Adding…' : '+ Add & Select'}
+                  </button>
+                  <button type="button" onClick={() => { setShowAddPlatform(false); setNewPlatform(emptyPlatform) }} className="text-xs text-gray-500 hover:text-white px-3 py-1 rounded-lg transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Packages */}
           <div>
             <SectionLabel hint="Price = per platform per month. User selects platforms → price multiplies.">Packages</SectionLabel>
             <div className="grid sm:grid-cols-3 gap-4">
@@ -207,12 +324,15 @@ export default function ManageGigs() {
               })}
             </div>
           </div>
+
           <button type="submit" disabled={saving} className="btn-admin btn-md disabled:opacity-60">
             {saving ? 'Saving…' : isAdd ? 'Create Gig' : 'Save Changes'}
           </button>
         </form>
+
+        {/* Add-Ons */}
         <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--admin-border)' }}>
-          <SectionLabel hint="Users can optionally select these when inquiring.">Add-Ons {!isAdd && `(${addons.length})`}</SectionLabel>
+          <SectionLabel hint="Users can optionally select these with a quantity multiplier when inquiring.">Add-Ons {!isAdd && `(${addons.length})`}</SectionLabel>
           {isAdd ? (
             <p className="text-gray-500 text-sm bg-white/5 rounded-xl px-5 py-4">💡 Save the gig first, then add your add-on services here.</p>
           ) : (
@@ -226,6 +346,7 @@ export default function ManageGigs() {
                         <p className="text-white text-sm font-semibold">{a.name}</p>
                         {a.description && <p className="text-gray-500 text-xs truncate">{a.description}</p>}
                       </div>
+                      <span className="text-xs text-gray-500 shrink-0">Max qty: {a.max_quantity || 1}</span>
                       <span className="text-sm font-bold shrink-0" style={{ color: 'var(--accent)' }}>
                         {a.price > 0 ? `$${Number(a.price).toLocaleString()}` : 'Free'}
                       </span>
@@ -250,16 +371,38 @@ export default function ManageGigs() {
                     <input type="text" value={addonDraft.icon} onChange={e => setAddonDraft(p => ({ ...p, icon: e.target.value }))} placeholder="🧩" className="admin-input" />
                   </div>
                 </div>
-                <div className="mb-4">
-                  <label className="admin-label">Description</label>
-                  <input type="text" value={addonDraft.description} onChange={e => setAddonDraft(p => ({ ...p, description: e.target.value }))} placeholder="Short description of what this includes" className="admin-input" />
+                <div className="grid sm:grid-cols-4 gap-3 mb-4">
+                  <div className="sm:col-span-3">
+                    <label className="admin-label">Description</label>
+                    <input type="text" value={addonDraft.description} onChange={e => setAddonDraft(p => ({ ...p, description: e.target.value }))} placeholder="Short description of what this includes" className="admin-input" />
+                  </div>
+                  <div>
+                    <label className="admin-label">Max Quantity</label>
+                    <input type="number" value={addonDraft.max_quantity} min="1" max="30" onChange={e => setAddonDraft(p => ({ ...p, max_quantity: e.target.value }))} placeholder="1" className="admin-input" />
+                  </div>
                 </div>
+                <p className="text-xs text-gray-600 mb-4">Max Quantity &gt; 1 lets users pick e.g. "3 extra days delivery" — price × qty.</p>
                 <button type="submit" disabled={savingAddon || !addonDraft.name} className="btn-admin btn-sm disabled:opacity-60">
                   {savingAddon ? 'Adding…' : '+ Add Add-On'}
                 </button>
               </form>
             </>
           )}
+        </div>
+
+        {/* Explore More Content */}
+        <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--admin-border)' }}>
+          <SectionLabel hint="Shown below the inquiry form. Users click 'Explore More' to scroll here. Supports plain text.">Explore More Section</SectionLabel>
+          <div className="admin-card rounded-xl p-5">
+            <textarea
+              rows={8}
+              value={form.explore_more_content || ''}
+              onChange={e => setForm(p => ({ ...p, explore_more_content: e.target.value }))}
+              placeholder="Add detailed information about this service — FAQs, process explanation, case studies, why choose us, etc."
+              className="admin-input resize-y w-full"
+            />
+            <p className="text-xs text-gray-600 mt-2">Save the gig (button above) to persist changes here too.</p>
+          </div>
         </div>
       </div>
     )

@@ -1,29 +1,31 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 const TIER_ORDER = ['starter', 'standard', 'premium']
 
-
 export default function GigDetailClient({ params }) {
   const id = params.slug
 
-  const [gig, setGig] = useState(null)
-  const [packages, setPackages] = useState([])
-  const [addons, setAddons] = useState([])
-  const [platforms, setPlatforms] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selPkgId, setSelPkgId] = useState(null)
-  const [selAddonIds, setSelAddonIds] = useState(() => new Set())
-  const [selPlatformIds, setSelPlatformIds] = useState(() => new Set())
-  const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', message: '' })
-  const [status, setStatus] = useState('idle')
+  const [gig,             setGig]             = useState(null)
+  const [packages,        setPackages]        = useState([])
+  const [addons,          setAddons]          = useState([])
+  const [platforms,       setPlatforms]       = useState([])
+  const [loading,         setLoading]         = useState(true)
+  const [selPkgId,        setSelPkgId]        = useState(null)
+  // Map of addonId -> quantity (0 means not selected)
+  const [addonQty,        setAddonQty]        = useState({})
+  const [selPlatformIds,  setSelPlatformIds]  = useState(() => new Set())
+  const [form,            setForm]            = useState({ name: '', email: '', phone: '', company: '', message: '' })
+  const [status,          setStatus]          = useState('idle')
+
+  const packagesRef    = useRef(null)
+  const exploreMoreRef = useRef(null)
 
   useEffect(() => {
     async function load() {
-      // Try by slug first, fall back to id
       let { data: g } = await supabase.from('gigs').select('*').eq('slug', id).single()
       if (!g) {
         const { data: byId } = await supabase.from('gigs').select('*').eq('id', id).single()
@@ -40,22 +42,37 @@ export default function GigDetailClient({ params }) {
       setGig(g)
       setPackages((pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)))
       setAddons(ads || [])
-      setPlatforms(plats || [])
+
+      // Filter platforms to only ones allowed for this gig (if set)
+      const allowedIds = g.allowed_platform_ids
+      const filteredPlats = (allowedIds && allowedIds.length > 0)
+        ? (plats || []).filter(p => allowedIds.includes(p.id))
+        : (plats || [])
+      setPlatforms(filteredPlats)
       setLoading(false)
     }
     load()
   }, [id])
 
-  const selPkgObj = useMemo(() => packages.find(p => p.id === selPkgId) ?? null, [packages, selPkgId])
-  const selAddonObjs = useMemo(() => addons.filter(a => selAddonIds.has(a.id)), [addons, selAddonIds])
+  const selPkgObj       = useMemo(() => packages.find(p => p.id === selPkgId) ?? null, [packages, selPkgId])
   const selPlatformObjs = useMemo(() => platforms.filter(p => selPlatformIds.has(p.id)), [platforms, selPlatformIds])
-  const basePrice = selPkgObj ? (selPkgObj.price || 0) * (selPlatformIds.size || 1) : 0
-  const addonTotal = selAddonObjs.reduce((s, a) => s + (a.price || 0), 0)
-  const grandTotal = basePrice + addonTotal
-  const hasSelection = !!(selPkgObj || selAddonObjs.length || selPlatformObjs.length)
 
-  const toggleAddon = useCallback(addonId =>
-    setSelAddonIds(prev => { const s = new Set(prev); s.has(addonId) ? s.delete(addonId) : s.add(addonId); return s }), [])
+  // Addons with quantities > 0
+  const selAddonEntries = useMemo(() =>
+    addons.flatMap(a => {
+      const qty = addonQty[a.id] || 0
+      return qty > 0 ? [{ addon: a, qty }] : []
+    }), [addons, addonQty])
+
+  const basePrice  = selPkgObj ? (selPkgObj.price || 0) * (selPlatformIds.size || 1) : 0
+  const addonTotal = selAddonEntries.reduce((s, { addon, qty }) => s + (addon.price || 0) * qty, 0)
+  const grandTotal = basePrice + addonTotal
+  const hasSelection = !!(selPkgObj || selAddonEntries.length || selPlatformObjs.length)
+
+  const setAddonQuantity = useCallback((addonId, qty) => {
+    setAddonQty(prev => ({ ...prev, [addonId]: Math.max(0, qty) }))
+  }, [])
+
   const togglePlatform = useCallback(platId =>
     setSelPlatformIds(prev => { const s = new Set(prev); s.has(platId) ? s.delete(platId) : s.add(platId); return s }), [])
 
@@ -67,35 +84,106 @@ export default function GigDetailClient({ params }) {
       name: form.name, email: form.email,
       phone: form.phone || null, company: form.company || null, message: form.message || null,
       source_page: `/gigs/${id}`, selected_gig_id: gig.id, selected_gig_package_id: selPkgId || null,
-      selected_addons: selAddonObjs.length ? selAddonObjs.map(a => ({ id: a.id, name: a.name, price: a.price })) : null,
+      selected_addons: selAddonEntries.length
+        ? selAddonEntries.map(({ addon, qty }) => ({ id: addon.id, name: addon.name, price: addon.price, qty }))
+        : null,
       selected_platforms: selPlatformObjs.length ? selPlatformObjs.map(p => ({ id: p.id, name: p.name })) : null,
       estimated_price: grandTotal > 0 ? grandTotal : null, is_read: false,
     }])
     setStatus(error ? 'error' : 'success')
   }
 
+  const scrollToPackages   = () => packagesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const scrollToExplore    = () => exploreMoreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-soft"><div className="spinner" /></div>
-  if (!gig) return <div className="min-h-screen flex items-center justify-center bg-soft"><div className="text-center"><p className="text-body text-gray-500 mb-4">Gig not found.</p><Link href="/gigs" className="btn-primary btn-md">← Back to Gigs</Link></div></div>
+  if (!gig)    return (
+    <div className="min-h-screen flex items-center justify-center bg-soft">
+      <div className="text-center">
+        <p className="text-body text-gray-500 mb-4">Gig not found.</p>
+        <Link href="/gigs" className="btn-primary btn-md">← Back to Gigs</Link>
+      </div>
+    </div>
+  )
+
+  const stepBase = platforms.length > 0 ? 1 : 0
 
   return (
     <div className="min-h-screen pt-24 pb-24 bg-soft">
       <div className="section-narrow">
         <Link href="/gigs" className="text-body-sm font-semibold text-gray-400 hover:text-accent flex items-center gap-1 mb-8 transition-colors">← Back to Gigs</Link>
-        <div className="mb-14">
+
+        {/* Header */}
+        <div className="mb-10">
           <span className="badge-accent mb-4 inline-block">{gig.category}</span>
           <h1 className="heading-display text-deep mt-2 mb-4">{gig.title}</h1>
           {gig.short_description && <p className="text-body text-gray-500 max-w-2xl leading-relaxed">{gig.short_description}</p>}
-          {platforms.length > 0 && (
-            <p className="text-body-sm text-gray-400 mt-4 font-medium inline-flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-accent" />
-              Price is <strong>per platform / month</strong> — select platforms below to calculate your total
+
+          {/* Intro paragraph — keyword-rich content editable from admin */}
+          {gig.intro_paragraph && (
+            <p className="text-body text-gray-600 max-w-2xl leading-relaxed mt-4 border-l-4 pl-4" style={{ borderColor: 'var(--accent)' }}>
+              {gig.intro_paragraph}
             </p>
           )}
+
+          <div className="flex flex-wrap gap-3 mt-6">
+            {platforms.length > 0 && (
+              <p className="text-body-sm text-gray-400 font-medium inline-flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-accent" />
+                Price is <strong>per platform / month</strong> — select platforms below to calculate your total
+              </p>
+            )}
+          </div>
+
+          {/* CTA buttons */}
+          <div className="flex flex-wrap gap-3 mt-6">
+            <button onClick={scrollToPackages} className="btn-primary btn-md">
+              View Packages
+            </button>
+            {gig.explore_more_content && (
+              <button onClick={scrollToExplore}
+                className="btn-md border-2 font-bold rounded-xl px-5 py-2.5 transition-all hover:opacity-80"
+                style={{ borderColor: 'var(--accent)', color: 'var(--accent)', background: 'transparent' }}>
+                Explore More ↓
+              </button>
+            )}
+          </div>
         </div>
 
-        {packages.length > 0 && (
+        {/* Step 1 — Platforms */}
+        {platforms.length > 0 && (
           <section className="mb-14">
-            <StepHeading step="1" title="Choose Your Package" />
+            <StepHeading step="1" title="Select Advertising Platforms" sub="Your package price multiplies by the number of platforms you choose" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              {platforms.map(p => {
+                const isSel = selPlatformIds.has(p.id)
+                return (
+                  <button key={p.id} onClick={() => togglePlatform(p.id)}
+                    className={`p-4 rounded-xl border-2 text-center transition-all ${isSel ? 'border-accent shadow-sm' : 'bg-white border-gray-200 hover:border-accent/40'}`}
+                    style={isSel ? { backgroundColor: 'var(--accent-muted)' } : {}}>
+                    <div className="text-2xl mb-1.5 leading-none">{p.icon || '🌐'}</div>
+                    <div className={`text-xs font-bold leading-tight ${isSel ? 'text-deep' : 'text-gray-600'}`}>{p.name}</div>
+                  </button>
+                )
+              })}
+            </div>
+            {selPlatformIds.size > 0 && selPkgObj && (
+              <div className="card p-4 border-l-4" style={{ borderLeftColor: 'var(--accent)' }}>
+                <p className="text-body-sm text-gray-600">
+                  <span className="font-extrabold text-deep">{selPlatformIds.size} platform{selPlatformIds.size > 1 ? 's' : ''}</span>
+                  {' '}×{' '}<span className="font-bold">${Number(selPkgObj.price || 0).toLocaleString()}</span>{' '}={' '}
+                  <span className="font-extrabold text-lg" style={{ color: 'var(--accent)' }}>${basePrice.toLocaleString()}/mo base</span>
+                </p>
+                <p className="text-xs text-gray-400 mt-1 font-medium">Platforms: {selPlatformObjs.map(p => p.name).join(', ')}</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Step 2 — Packages */}
+        {packages.length > 0 && (
+          <section className="mb-14" ref={packagesRef}>
+            <StepHeading step={String(stepBase + 1)} title="Choose Your Package" />
             <div className="grid sm:grid-cols-3 gap-5">
               {packages.map(pkg => {
                 const isSelected = selPkgId === pkg.id
@@ -128,43 +216,18 @@ export default function GigDetailClient({ params }) {
           </section>
         )}
 
-        {platforms.length > 0 && (
-          <section className="mb-14">
-            <StepHeading step="2" title="Select Advertising Platforms" sub="Your package price multiplies by the number of platforms you choose" />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-              {platforms.map(p => {
-                const isSel = selPlatformIds.has(p.id)
-                return (
-                  <button key={p.id} onClick={() => togglePlatform(p.id)}
-                    className={`p-4 rounded-xl border-2 text-center transition-all ${isSel ? 'border-accent shadow-sm' : 'bg-white border-gray-200 hover:border-accent/40'}`}
-                    style={isSel ? { backgroundColor: 'var(--accent-muted)' } : {}}>
-                    <div className="text-2xl mb-1.5 leading-none">{p.icon || '🌐'}</div>
-                    <div className={`text-xs font-bold leading-tight ${isSel ? 'text-deep' : 'text-gray-600'}`}>{p.name}</div>
-                  </button>
-                )
-              })}
-            </div>
-            {selPlatformIds.size > 0 && selPkgObj && (
-              <div className="card p-4 border-l-4" style={{ borderLeftColor: 'var(--accent)' }}>
-                <p className="text-body-sm text-gray-600">
-                  <span className="font-extrabold text-deep">{selPlatformIds.size} platform{selPlatformIds.size > 1 ? 's' : ''}</span>
-                  {' '}×{' '}<span className="font-bold">${Number(selPkgObj.price || 0).toLocaleString()}</span>{' '}={' '}
-                  <span className="font-extrabold text-lg" style={{ color: 'var(--accent)' }}>${basePrice.toLocaleString()}/mo base</span>
-                </p>
-                <p className="text-xs text-gray-400 mt-1 font-medium">Platforms: {selPlatformObjs.map(p => p.name).join(', ')}</p>
-              </div>
-            )}
-          </section>
-        )}
-
+        {/* Step 3 — Add-Ons with quantity */}
         {addons.length > 0 && (
           <section className="mb-14">
-            <StepHeading step={platforms.length > 0 ? '3' : '2'} title="Add-Ons" sub="Optional extras — click to include in your inquiry" />
+            <StepHeading step={String(stepBase + 2)} title="Add-Ons" sub="Optional extras — select and adjust quantity as needed" />
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {addons.map(addon => {
-                const isSel = selAddonIds.has(addon.id)
+                const qty      = addonQty[addon.id] || 0
+                const isSel    = qty > 0
+                const maxQty   = addon.max_quantity || 1
+                const unitPrice = addon.price || 0
                 return (
-                  <button key={addon.id} onClick={() => toggleAddon(addon.id)}
+                  <div key={addon.id}
                     className={`card text-left p-5 transition-all ${isSel ? 'border-accent' : 'hover:border-accent/30'}`}
                     style={isSel ? { backgroundColor: 'var(--accent-muted)' } : {}}>
                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -172,19 +235,49 @@ export default function GigDetailClient({ params }) {
                         <span className="text-xl shrink-0">{addon.icon || '🧩'}</span>
                         <span className="font-bold text-sm text-deep leading-snug">{addon.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {addon.price > 0 && <span className="text-xs font-extrabold" style={{ color: 'var(--accent)' }}>+${Number(addon.price).toLocaleString()}</span>}
-                        <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center text-[10px] font-bold transition-all" style={isSel ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)', color: '#fff' } : { borderColor: '#D1D5DB', color: 'transparent' }}>✓</span>
-                      </div>
+                      {unitPrice > 0 && (
+                        <span className="text-xs font-extrabold shrink-0" style={{ color: 'var(--accent)' }}>
+                          +${(unitPrice * (qty || 1)).toLocaleString()}{qty > 1 ? ` (${qty}×$${unitPrice})` : '/ea'}
+                        </span>
+                      )}
                     </div>
-                    {addon.description && <p className="text-body-sm text-gray-500 leading-relaxed mt-1.5">{addon.description}</p>}
-                  </button>
+                    {addon.description && <p className="text-body-sm text-gray-500 leading-relaxed mt-1 mb-3">{addon.description}</p>}
+
+                    {/* Quantity control */}
+                    {maxQty > 1 ? (
+                      <div className="flex items-center gap-2 mt-2">
+                        <button type="button" onClick={() => setAddonQuantity(addon.id, qty - 1)}
+                          className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-sm font-bold transition-all"
+                          style={isSel ? { borderColor: 'var(--accent)', color: 'var(--accent)' } : { borderColor: '#D1D5DB', color: '#9CA3AF' }}>
+                          −
+                        </button>
+                        <span className={`text-sm font-bold w-5 text-center ${isSel ? 'text-deep' : 'text-gray-400'}`}>{qty}</span>
+                        <button type="button" onClick={() => setAddonQuantity(addon.id, qty + 1)}
+                          disabled={qty >= maxQty}
+                          className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-sm font-bold transition-all disabled:opacity-30"
+                          style={qty < maxQty ? { borderColor: 'var(--accent)', color: 'var(--accent)' } : {}}>
+                          +
+                        </button>
+                        <span className="text-xs text-gray-400 ml-1">/ max {maxQty}</span>
+                      </div>
+                    ) : (
+                      /* Single-quantity: simple toggle */
+                      <button type="button" onClick={() => setAddonQuantity(addon.id, isSel ? 0 : 1)}
+                        className="flex items-center gap-2 mt-2 text-xs font-semibold transition-all"
+                        style={isSel ? { color: 'var(--accent)' } : { color: '#9CA3AF' }}>
+                        <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center text-[10px] font-bold transition-all"
+                          style={isSel ? { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)', color: '#fff' } : { borderColor: '#D1D5DB', color: 'transparent' }}>✓</span>
+                        {isSel ? 'Added' : 'Add'}
+                      </button>
+                    )}
+                  </div>
                 )
               })}
             </div>
           </section>
         )}
 
+        {/* Inquiry form */}
         <section className="mb-14">
           <div className="card p-8" style={{ boxShadow: 'var(--shadow-lg)' }}>
             {hasSelection && (
@@ -192,7 +285,11 @@ export default function GigDetailClient({ params }) {
                 <h3 className="heading-section mb-5">Your Quote Summary</h3>
                 <div className="space-y-2.5">
                   {selPkgObj && <SummaryRow label={`${selPkgObj.name || selPkgObj.tier} × ${selPlatformIds.size || 1} platform${(selPlatformIds.size || 1) > 1 ? 's' : ''}`} value={`$${basePrice.toLocaleString()}/mo`} />}
-                  {selAddonObjs.map(a => <SummaryRow key={a.id} label={a.name} value={a.price > 0 ? `+$${Number(a.price).toLocaleString()}` : 'Included'} />)}
+                  {selAddonEntries.map(({ addon, qty }) => (
+                    <SummaryRow key={addon.id}
+                      label={qty > 1 ? `${addon.name} × ${qty}` : addon.name}
+                      value={addon.price > 0 ? `+$${(addon.price * qty).toLocaleString()}` : 'Included'} />
+                  ))}
                   {selPlatformObjs.length > 0 && <p className="text-xs text-gray-400 pt-1">Platforms: {selPlatformObjs.map(p => p.name).join(' · ')}</p>}
                 </div>
                 {grandTotal > 0 && (
@@ -231,6 +328,19 @@ export default function GigDetailClient({ params }) {
           </div>
         </section>
 
+        {/* Explore More section */}
+        {gig.explore_more_content && (
+          <section ref={exploreMoreRef} className="mb-14 scroll-mt-28">
+            <div className="card p-8">
+              <h2 className="heading-section mb-6" style={{ color: 'var(--accent)' }}>Explore More About This Service</h2>
+              <div className="text-body text-gray-600 leading-relaxed whitespace-pre-line">
+                {gig.explore_more_content}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Custom solution CTA */}
         <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: 'var(--accent-muted)', border: '1px solid var(--accent-border)' }}>
           <h3 className="heading-section mb-2">Need a custom solution?</h3>
           <p className="text-body text-gray-500 mb-6">I can tailor any package to fit your exact needs and budget.</p>
