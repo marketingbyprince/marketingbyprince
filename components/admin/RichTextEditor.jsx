@@ -6,13 +6,10 @@ import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
-import TextStyle from '@tiptap/extension-text-style'
+import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import { useEffect, useCallback, useState } from 'react'
 
 // ── Toolbar button helper ────────────────────────────────────────────────────
@@ -113,8 +110,6 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write h
 
   if (!editor) return null
 
-  const can = editor.can().chain().focus()
-
   return (
     <div className="rte-wrap rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)', background: 'var(--admin-card)' }}>
 
@@ -122,8 +117,8 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write h
       <div className="rte-toolbar flex flex-wrap items-center gap-0.5 p-2 border-b" style={{ borderColor: 'var(--admin-border)', background: 'var(--admin-bg)' }}>
 
         {/* History */}
-        <Btn onClick={() => editor.chain().focus().undo().run()} disabled={!can.undo().run()} title="Undo">↩</Btn>
-        <Btn onClick={() => editor.chain().focus().redo().run()} disabled={!can.redo().run()} title="Redo">↪</Btn>
+        <Btn onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo">↩</Btn>
+        <Btn onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo">↪</Btn>
 
         <Divider />
 
