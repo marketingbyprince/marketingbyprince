@@ -411,3 +411,139 @@
     break-after: page !important;
   }
 }
+
+/* ── Rich Text Editor (TipTap) ──────────────────────────────────────────── */
+.rte-body {
+  outline: none;
+  padding: 16px 18px;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  caret-color: var(--accent);
+}
+
+.rte-body p.is-empty::before {
+  content: attr(data-placeholder);
+  color: #6b7280;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Headings */
+.rte-body h1 { font-size: 1.6rem; font-weight: 800; color: #f9fafb; margin: 1.2em 0 0.4em; }
+.rte-body h2 { font-size: 1.25rem; font-weight: 700; color: #f3f4f6; margin: 1em 0 0.35em; }
+.rte-body h3 { font-size: 1.05rem; font-weight: 700; color: #e5e7eb; margin: 0.8em 0 0.3em; }
+
+/* Inline */
+.rte-body strong { font-weight: 700; color: #f9fafb; }
+.rte-body em     { font-style: italic; }
+.rte-body u      { text-decoration: underline; }
+.rte-body s      { text-decoration: line-through; color: #9ca3af; }
+.rte-body code   { background: rgba(255,255,255,0.08); border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 0.82em; color: #a5f3fc; }
+.rte-body mark   { background: rgba(250,204,21,0.25); color: #fde68a; border-radius: 3px; padding: 0 3px; }
+.rte-link        { color: var(--accent); text-decoration: underline; }
+
+/* Blocks */
+.rte-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 6px 0 6px 16px;
+  margin: 12px 0;
+  color: #9ca3af;
+  font-style: italic;
+}
+.rte-body pre {
+  background: rgba(0,0,0,0.35);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.82em;
+  color: #a5f3fc;
+  margin: 10px 0;
+}
+.rte-body hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0; }
+
+/* Lists */
+.rte-body ul, .rte-body ol { padding-left: 1.5em; margin: 8px 0; }
+.rte-body ul li { list-style: disc; margin: 3px 0; }
+.rte-body ol li { list-style: decimal; margin: 3px 0; }
+
+/* Images */
+.rte-body img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+.rte-body img.ProseMirror-selectednode { outline: 2px solid var(--accent); }
+
+/* Table */
+.rte-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0;
+  font-size: 0.85rem;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.rte-body table td,
+.rte-body table th {
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 8px 12px;
+  min-width: 80px;
+  vertical-align: top;
+}
+.rte-body table th {
+  background: rgba(255,255,255,0.07);
+  font-weight: 700;
+  color: #f3f4f6;
+}
+.rte-body table .selectedCell { background: rgba(var(--accent-rgb, 99,102,241), 0.15); }
+
+/* Public prose rendering (used in blog, case study, gig pages) */
+.prose-rte h1 { font-size: 1.8rem; font-weight: 800; color: #111827; margin: 1.4em 0 0.4em; }
+.prose-rte h2 { font-size: 1.35rem; font-weight: 700; color: #1f2937; margin: 1.1em 0 0.35em; }
+.prose-rte h3 { font-size: 1.1rem;  font-weight: 700; color: #374151; margin: 0.9em 0 0.3em; }
+.prose-rte p  { margin: 0.6em 0; line-height: 1.8; color: #4b5563; }
+.prose-rte strong { font-weight: 700; color: #111827; }
+.prose-rte em     { font-style: italic; }
+.prose-rte u      { text-decoration: underline; }
+.prose-rte s      { text-decoration: line-through; color: #9ca3af; }
+.prose-rte code   { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 0.82em; color: #6366f1; }
+.prose-rte mark   { background: #fef9c3; border-radius: 3px; padding: 0 3px; }
+.prose-rte a      { color: var(--accent); text-decoration: underline; }
+.prose-rte blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 6px 0 6px 16px;
+  margin: 14px 0;
+  color: #6b7280;
+  font-style: italic;
+}
+.prose-rte pre {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #a5f3fc;
+  margin: 12px 0;
+}
+.prose-rte hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+.prose-rte ul, .prose-rte ol { padding-left: 1.5em; margin: 8px 0; }
+.prose-rte ul li { list-style: disc; margin: 4px 0; color: #4b5563; }
+.prose-rte ol li { list-style: decimal; margin: 4px 0; color: #4b5563; }
+.prose-rte img  { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+.prose-rte table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0;
+  font-size: 0.875rem;
+}
+.prose-rte table td,
+.prose-rte table th {
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  vertical-align: top;
+}
+.prose-rte table th {
+  background: #f9fafb;
+  font-weight: 700;
+  color: #374151;
+}

@@ -70,9 +70,10 @@ export default function BlogPostClient({ params }) {
           </p>
         )}
 
-        <div className="text-body text-gray-600 leading-relaxed whitespace-pre-line">
-          {article.content}
-        </div>
+        <div
+          className="prose-rte"
+          dangerouslySetInnerHTML={{ __html: article.content || '' }}
+        />
 
         <div className="mt-14 pt-8 border-t border-gray-200">
           <div className="flex items-center gap-4">

@@ -121,9 +121,8 @@ export default function GigDetailClient({ params }) {
 
           {/* Intro paragraph — keyword-rich content editable from admin */}
           {gig.intro_paragraph && (
-            <p className="text-body text-gray-600 max-w-2xl leading-relaxed mt-4 border-l-4 pl-4" style={{ borderColor: 'var(--accent)' }}>
-              {gig.intro_paragraph}
-            </p>
+            <div className="prose-rte max-w-2xl mt-4 border-l-4 pl-4" style={{ borderColor: 'var(--accent)' }}
+              dangerouslySetInnerHTML={{ __html: gig.intro_paragraph }} />
           )}
 
           <div className="flex flex-wrap gap-3 mt-6">
@@ -333,9 +332,10 @@ export default function GigDetailClient({ params }) {
           <section ref={exploreMoreRef} className="mb-14 scroll-mt-28">
             <div className="card p-8">
               <h2 className="heading-section mb-6" style={{ color: 'var(--accent)' }}>Explore More About This Service</h2>
-              <div className="text-body text-gray-600 leading-relaxed whitespace-pre-line">
-                {gig.explore_more_content}
-              </div>
+              <div
+                className="prose-rte"
+                dangerouslySetInnerHTML={{ __html: gig.explore_more_content || '' }}
+              />
             </div>
           </section>
         )}

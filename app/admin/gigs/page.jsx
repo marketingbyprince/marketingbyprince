@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 
 const TIERS = ['starter', 'standard', 'premium']
 const TIER_LABELS = { starter: 'Starter', standard: 'Standard', premium: 'Premium' }
@@ -265,7 +266,12 @@ export default function ManageGigs() {
             </div>
             <div>
               <label className="admin-label">Intro Paragraph <span className="text-gray-600 font-normal">(shown above packages — embed keywords here)</span></label>
-              <textarea rows={3} value={form.intro_paragraph || ''} onChange={e => setForm(p => ({ ...p, intro_paragraph: e.target.value }))} placeholder="Write a keyword-rich intro shown at the top of the gig page before the packages..." className="admin-input resize-none" />
+              <RichTextEditor
+                value={form.intro_paragraph || ''}
+                onChange={val => setForm(p => ({ ...p, intro_paragraph: val }))}
+                placeholder="Write a keyword-rich intro shown at the top of the gig page before the packages…"
+                minHeight={140}
+              />
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.is_active} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
@@ -471,13 +477,12 @@ export default function ManageGigs() {
         {/* Explore More Content */}
         <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--admin-border)' }}>
           <SectionLabel hint="Shown below the inquiry form. Users click 'Explore More' to scroll here.">Explore More Section</SectionLabel>
-          <div className="admin-card rounded-xl p-5">
-            <textarea
-              rows={8}
+          <div>
+            <RichTextEditor
               value={form.explore_more_content || ''}
-              onChange={e => setForm(p => ({ ...p, explore_more_content: e.target.value }))}
+              onChange={val => setForm(p => ({ ...p, explore_more_content: val }))}
               placeholder="Add detailed information about this service — FAQs, process explanation, case studies, why choose us, etc."
-              className="admin-input resize-y w-full"
+              minHeight={320}
             />
             <p className="text-xs text-gray-600 mt-2">Save the gig (button above) to persist changes here too.</p>
           </div>
@@ -519,7 +524,12 @@ export default function ManageGigs() {
         </div>
         <div>
           <label className="admin-label">Intro Paragraph <span className="text-gray-600 font-normal">(keyword-rich, shown below subtitle with accent border)</span></label>
-          <textarea rows={3} value={hero.gigs_page_intro} onChange={e => setHero(p => ({ ...p, gigs_page_intro: e.target.value }))} placeholder="Optional longer intro paragraph — great for embedding keywords..." className="admin-input resize-none" />
+          <RichTextEditor
+            value={hero.gigs_page_intro}
+            onChange={val => setHero(p => ({ ...p, gigs_page_intro: val }))}
+            placeholder="Optional longer intro paragraph — great for embedding keywords…"
+            minHeight={120}
+          />
         </div>
         <button type="submit" disabled={savingHero} className="btn-admin btn-sm disabled:opacity-60">
           {savingHero ? 'Saving…' : 'Save Page Section'}

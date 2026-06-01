@@ -57,10 +57,8 @@ export default function GigsClient() {
             <p className="text-body text-gray-500 leading-relaxed">{hero.subtitle}</p>
           )}
           {hero.intro && (
-            <p className="text-body text-gray-600 leading-relaxed mt-5 border-l-4 pl-4 whitespace-pre-line"
-              style={{ borderColor: 'var(--accent)' }}>
-              {hero.intro}
-            </p>
+            <div className="prose-rte mt-5 border-l-4 pl-4" style={{ borderColor: 'var(--accent)' }}
+              dangerouslySetInnerHTML={{ __html: hero.intro }} />
           )}
         </div>
 

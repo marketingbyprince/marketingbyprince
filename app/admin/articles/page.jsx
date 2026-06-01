@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 
 const empty = {
   title: '', slug: '', excerpt: '', content: '', category: '',
@@ -119,11 +120,13 @@ export default function ManageArticles() {
                       className="admin-input resize-none" />
           </div>
           <div>
-            <label className="admin-label">Content (Markdown / plain text)</label>
-            <textarea rows={16} value={form.content}
-                      onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-                      placeholder="Write your article here..."
-                      className="admin-input resize-y font-mono text-xs" />
+            <label className="admin-label">Content</label>
+            <RichTextEditor
+              value={form.content}
+              onChange={val => setForm(p => ({ ...p, content: val }))}
+              placeholder="Write your article here…"
+              minHeight={400}
+            />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.is_published}

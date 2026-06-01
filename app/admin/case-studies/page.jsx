@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 
 const empty = {
   title: '', client_name: '', industry: '', challenge: '', strategy: '',
@@ -94,9 +95,12 @@ export default function ManageCaseStudies() {
           ].map(f => (
             <div key={f.name}>
               <label className="admin-label">{f.label}</label>
-              <textarea rows={4} value={form[f.name] || ''}
-                        onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))}
-                        className="admin-input resize-y" />
+              <RichTextEditor
+                value={form[f.name] || ''}
+                onChange={val => setForm(p => ({ ...p, [f.name]: val }))}
+                placeholder={`Write the ${f.label.toLowerCase()} section…`}
+                minHeight={180}
+              />
             </div>
           ))}
           <div>

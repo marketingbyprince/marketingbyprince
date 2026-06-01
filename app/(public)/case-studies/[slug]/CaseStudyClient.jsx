@@ -83,9 +83,10 @@ export default function CaseStudyClient({ params }) {
                 <h2 className="heading-section">{section.label}</h2>
               </div>
               <div className="card p-6">
-                <p className="text-body text-gray-600 leading-relaxed whitespace-pre-line">
-                  {cs[section.key]}
-                </p>
+                <div
+                  className="prose-rte"
+                  dangerouslySetInnerHTML={{ __html: cs[section.key] || '' }}
+                />
               </div>
             </div>
           ))}
