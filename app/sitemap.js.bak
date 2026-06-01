@@ -30,7 +30,7 @@ export default async function sitemap() {
       // articles: column is is_published (not published)
       supabase.from('articles').select('slug, updated_at').eq('is_published', true).not('slug', 'is', null),
       // gigs: no slug column — use id-based URL
-      supabase.from('gigs').select('id, updated_at').eq('is_active', true),
+      supabase.from('gigs').select('slug, updated_at').eq('is_active', true).not('slug', 'is', null),
       // case studies: use id-based URL
       supabase.from('case_studies').select('id, updated_at').eq('is_published', true),
     ])
@@ -53,8 +53,8 @@ export default async function sitemap() {
         priority: 0.7,
       }))
 
-    const gigPages = (gigs || []).map(g => ({
-      url: `${baseUrl}/gigs/${g.id}`,
+    const gigPages = (gigs || []).filter(g => g.slug).map(g => ({
+      url: `${baseUrl}/gigs/${g.slug}`,
       lastModified: g.updated_at ? new Date(g.updated_at) : now,
       changeFrequency: 'monthly',
       priority: 0.7,

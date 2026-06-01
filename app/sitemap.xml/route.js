@@ -29,7 +29,7 @@ export async function GET() {
     ] = await Promise.all([
       supabase.from('services').select('slug, updated_at').eq('is_active', true).not('slug', 'is', null),
       supabase.from('articles').select('slug, updated_at').eq('is_published', true).not('slug', 'is', null),
-      supabase.from('gigs').select('id, updated_at').eq('is_active', true),
+      supabase.from('gigs').select('slug, updated_at').eq('is_active', true).not('slug', 'is', null),
       supabase.from('case_studies').select('id, updated_at').eq('is_published', true),
     ])
 
@@ -43,8 +43,8 @@ export async function GET() {
       lastmod: p.updated_at ? p.updated_at.slice(0, 10) : now.slice(0, 10),
       freq: 'weekly', priority: '0.7',
     }))
-    ;(gigs || []).forEach(g => dynamicPages.push({
-      url: `${baseUrl}/gigs/${g.id}`,
+    ;(gigs || []).filter(g => g.slug).forEach(g => dynamicPages.push({
+      url: `${baseUrl}/gigs/${g.slug}`,
       lastmod: g.updated_at ? g.updated_at.slice(0, 10) : now.slice(0, 10),
       freq: 'monthly', priority: '0.7',
     }))
