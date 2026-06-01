@@ -22,18 +22,28 @@ export default function GigDetailClient({ params }) {
   const [status, setStatus] = useState('idle')
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('gigs').select('*').eq('slug', id).single(),
-      supabase.from('gig_packages').select('*').eq('gig_id', id).eq('is_active', true),
-      supabase.from('gig_addons').select('*').eq('gig_id', id).eq('is_active', true).order('sort_order'),
-      supabase.from('platforms').select('*').eq('is_active', true).order('sort_order'),
-    ]).then(([{ data: g }, { data: pkgs }, { data: ads }, { data: plats }]) => {
+    async function load() {
+      // Try by slug first, fall back to id
+      let { data: g } = await supabase.from('gigs').select('*').eq('slug', id).single()
+      if (!g) {
+        const { data: byId } = await supabase.from('gigs').select('*').eq('id', id).single()
+        g = byId
+      }
+      if (!g) { setLoading(false); return }
+
+      const gigId = g.id
+      const [{ data: pkgs }, { data: ads }, { data: plats }] = await Promise.all([
+        supabase.from('gig_packages').select('*').eq('gig_id', gigId).eq('is_active', true),
+        supabase.from('gig_addons').select('*').eq('gig_id', gigId).eq('is_active', true).order('sort_order'),
+        supabase.from('platforms').select('*').eq('is_active', true).order('sort_order'),
+      ])
       setGig(g)
       setPackages((pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)))
       setAddons(ads || [])
       setPlatforms(plats || [])
       setLoading(false)
-    })
+    }
+    load()
   }, [id])
 
   const selPkgObj = useMemo(() => packages.find(p => p.id === selPkgId) ?? null, [packages, selPkgId])
