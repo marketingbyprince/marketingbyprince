@@ -3,13 +3,45 @@ import { isBrowserRequest } from '@/lib/sitemap-helpers'
 
 const BASE_URL = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
 
-// Raw XML index for Google/bots
-function buildXmlIndex(baseUrl) {
+// Fetch which dynamic sitemaps have content so we only include non-empty ones
+async function getActiveSitemaps(baseUrl) {
   const today = new Date().toISOString().slice(0, 10)
-  const sitemaps = ['pages', 'gigs', 'services', 'blog', 'case-studies']
+
+  // pages sitemap is always present (static pages)
+  const active = [{ key: 'pages', lastmod: today }]
+
+  try {
+    const { supabase } = await import('@/lib/supabase')
+    const [
+      { count: gigCount },
+      { count: serviceCount },
+      { count: blogCount },
+      { count: caseCount },
+    ] = await Promise.all([
+      supabase.from('gigs').select('id', { count: 'exact', head: true }).eq('is_active', true).not('slug', 'is', null),
+      supabase.from('services').select('id', { count: 'exact', head: true }).eq('is_active', true).not('slug', 'is', null),
+      supabase.from('articles').select('id', { count: 'exact', head: true }).eq('is_published', true).not('slug', 'is', null),
+      supabase.from('case_studies').select('id', { count: 'exact', head: true }).eq('is_published', true),
+    ])
+
+    if (gigCount > 0)     active.push({ key: 'gigs',         lastmod: today })
+    if (serviceCount > 0) active.push({ key: 'services',     lastmod: today })
+    if (blogCount > 0)    active.push({ key: 'blog',         lastmod: today })
+    if (caseCount > 0)    active.push({ key: 'case-studies', lastmod: today })
+  } catch {
+    // On DB error fall back to including all sitemaps
+    ;['gigs', 'services', 'blog', 'case-studies'].forEach(key =>
+      active.push({ key, lastmod: today })
+    )
+  }
+
+  return active.map(s => ({ ...s, url: `${baseUrl}/${s.key}-sitemap.xml` }))
+}
+
+function buildXmlIndex(sitemaps) {
   const entries = sitemaps.map(s => `  <sitemap>
-    <loc>${baseUrl}/${s}-sitemap.xml</loc>
-    <lastmod>${today}</lastmod>
+    <loc>${s.url}</loc>
+    <lastmod>${s.lastmod}</lastmod>
   </sitemap>`).join('\n')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -18,24 +50,17 @@ ${entries}
 </sitemapindex>`
 }
 
-// Styled HTML index for browsers
-function buildHtmlIndex(baseUrl) {
-  const today = new Date().toISOString().slice(0, 10)
-  const sections = [
-    { key: 'pages',        icon: '📄', label: 'Pages' },
-    { key: 'gigs',         icon: '💼', label: 'Gigs' },
-    { key: 'services',     icon: '🛠️', label: 'Services' },
-    { key: 'blog',         icon: '✍️',  label: 'Blog' },
-    { key: 'case-studies', icon: '📊', label: 'Case Studies' },
-  ]
+function buildHtmlIndex(baseUrl, sitemaps) {
+  const ICONS = { pages: '📄', gigs: '💼', services: '🛠️', blog: '✍️', 'case-studies': '📊' }
+  const LABELS = { pages: 'Pages', gigs: 'Gigs', services: 'Services', blog: 'Blog', 'case-studies': 'Case Studies' }
 
-  const cards = sections.map(s => `
-    <a class="card" href="${baseUrl}/${s.key}-sitemap.xml">
-      <div class="card-icon">${s.icon}</div>
+  const cards = sitemaps.map(s => `
+    <a class="card" href="${s.url}">
+      <div class="card-icon">${ICONS[s.key] || '📄'}</div>
       <div class="card-body">
-        <div class="card-name">${s.label}</div>
-        <div class="card-url">${baseUrl}/${s.key}-sitemap.xml</div>
-        <div class="card-date">Updated: ${today}</div>
+        <div class="card-name">${LABELS[s.key] || s.key}</div>
+        <div class="card-url">${s.url}</div>
+        <div class="card-date">Updated: ${s.lastmod}</div>
       </div>
       <div class="card-arrow">→</div>
     </a>`).join('')
@@ -83,26 +108,27 @@ function buildHtmlIndex(baseUrl) {
   <div class="container">
     <div class="stats">
       <div class="stat">
-        <div class="stat-num">${sections.length}</div>
-        <div class="stat-label">Sitemaps</div>
+        <div class="stat-num">${sitemaps.length}</div>
+        <div class="stat-label">Active Sitemaps</div>
       </div>
     </div>
     <div class="hint">
-      📌 Submit <code>${baseUrl}/sitemap.xml</code> to Google Search Console. Click any sitemap below to view its URLs.
+      📌 Submit <code>${baseUrl}/sitemap.xml</code> to Google Search Console. Only sitemaps with published content are listed.
     </div>
     <div class="cards">${cards}</div>
   </div>
-  <footer>Auto-generated sitemap index · Submit /sitemap.xml to Google Search Console</footer>
+  <footer>Auto-generated sitemap index · Only non-empty sitemaps are included</footer>
 </body>
 </html>`
 }
 
 export async function GET(request) {
   const baseUrl = BASE_URL()
-  const isBot = !isBrowserRequest(request)
+  const isBrowser = isBrowserRequest(request)
+  const sitemaps = await getActiveSitemaps(baseUrl)
 
-  if (isBot) {
-    return new NextResponse(buildXmlIndex(baseUrl), {
+  if (!isBrowser) {
+    return new NextResponse(buildXmlIndex(sitemaps), {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
         'Cache-Control': 'public, max-age=3600',
@@ -110,7 +136,7 @@ export async function GET(request) {
     })
   }
 
-  return new NextResponse(buildHtmlIndex(baseUrl), {
+  return new NextResponse(buildHtmlIndex(baseUrl, sitemaps), {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=3600',

@@ -1,4 +1,4 @@
-import { xmlResponse, htmlResponse, buildUrlset, buildHtmlUrlset, isBrowserRequest } from '@/lib/sitemap-helpers'
+import { xmlResponse, htmlResponse, notFoundXmlResponse, buildUrlset, buildHtmlUrlset, isBrowserRequest } from '@/lib/sitemap-helpers'
 
 export async function GET(request) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
@@ -18,9 +18,11 @@ export async function GET(request) {
     }))
 
     if (isBrowser) return htmlResponse(buildHtmlUrlset(pages, '🛠️ Services Sitemap', `${baseUrl}/sitemap.xml`))
-    return xmlResponse(buildUrlset(pages))
+    const xml = buildUrlset(pages)
+    if (!xml) return notFoundXmlResponse()
+    return xmlResponse(xml)
   } catch {
     if (isBrowser) return htmlResponse(buildHtmlUrlset([], '🛠️ Services Sitemap', `${baseUrl}/sitemap.xml`))
-    return xmlResponse(buildUrlset([]))
+    return notFoundXmlResponse()
   }
 }
