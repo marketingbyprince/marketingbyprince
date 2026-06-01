@@ -1,6 +1,6 @@
 export default async function sitemap() {
   // Must match your verified domain in Google Search Console exactly
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
 
   const now = new Date()
 
