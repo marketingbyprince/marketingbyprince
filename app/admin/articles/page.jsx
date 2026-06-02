@@ -5,7 +5,7 @@ import RichTextEditor from '@/components/admin/RichTextEditor'
 
 const empty = {
   title: '', slug: '', excerpt: '', content: '', category: '',
-  read_time_minutes: '', cover_image_url: '', is_published: false,
+  read_time_minutes: '', cover_image_url: '', author: '', is_published: false,
 }
 
 const slugify = str => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -112,6 +112,12 @@ export default function ManageArticles() {
             <input type="url" value={form.cover_image_url}
                    onChange={e => setForm(p => ({ ...p, cover_image_url: e.target.value }))}
                    className="admin-input" />
+          </div>
+          <div>
+            <label className="admin-label">Author</label>
+            <input type="text" value={form.author || ''}
+                   onChange={e => setForm(p => ({ ...p, author: e.target.value }))}
+                   className="admin-input" placeholder="e.g. Prince Kumar" />
           </div>
           <div>
             <label className="admin-label">Excerpt</label>
