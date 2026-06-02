@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useCurrency } from '@/hooks/useCurrency'
+import CurrencySelector from '@/components/CurrencySelector'
 
 const TIER_ORDER = ['starter', 'standard', 'premium']
 
@@ -20,6 +22,7 @@ export default function GigDetailClient({ params }) {
   const [selPlatformIds,  setSelPlatformIds]  = useState(() => new Set())
   const [form,            setForm]            = useState({ name: '', email: '', phone: '', company: '', message: '' })
   const [status,          setStatus]          = useState('idle')
+  const { currency, setCurrency, format }     = useCurrency()
 
   const packagesRef    = useRef(null)
   const exploreMoreRef = useRef(null)
@@ -134,8 +137,8 @@ export default function GigDetailClient({ params }) {
             )}
           </div>
 
-          {/* CTA buttons */}
-          <div className="flex flex-wrap gap-3 mt-6">
+          {/* CTA buttons + currency */}
+          <div className="flex flex-wrap items-center gap-3 mt-6">
             <button onClick={scrollToPackages} className="btn-primary btn-md">
               View Packages
             </button>
@@ -146,6 +149,7 @@ export default function GigDetailClient({ params }) {
                 Explore More ↓
               </button>
             )}
+            <CurrencySelector currency={currency} onChange={setCurrency} className="ml-auto" />
           </div>
         </div>
 
@@ -170,8 +174,8 @@ export default function GigDetailClient({ params }) {
               <div className="card p-4 border-l-4" style={{ borderLeftColor: 'var(--accent)' }}>
                 <p className="text-body-sm text-gray-600">
                   <span className="font-extrabold text-deep">{selPlatformIds.size} platform{selPlatformIds.size > 1 ? 's' : ''}</span>
-                  {' '}×{' '}<span className="font-bold">${Number(selPkgObj.price || 0).toLocaleString()}</span>{' '}={' '}
-                  <span className="font-extrabold text-lg" style={{ color: 'var(--accent)' }}>${basePrice.toLocaleString()}/mo base</span>
+                  {' '}×{' '}<span className="font-bold">{format(selPkgObj.price || 0)}</span>{' '}={' '}
+                  <span className="font-extrabold text-lg" style={{ color: 'var(--accent)' }}>{format(basePrice)}/mo base</span>
                 </p>
                 <p className="text-xs text-gray-400 mt-1 font-medium">Platforms: {selPlatformObjs.map(p => p.name).join(', ')}</p>
               </div>
@@ -196,7 +200,7 @@ export default function GigDetailClient({ params }) {
                     <span className={`text-xs font-extrabold uppercase tracking-wider mb-2 ${isFeatured || isSelected ? 'text-accent' : 'text-gray-400'}`}>{pkg.tier}</span>
                     <h3 className="font-extrabold text-deep text-base leading-snug mb-4">{pkg.name || pkg.tier}</h3>
                     <div className="mb-5">
-                      <div className="text-price-val" style={isFeatured || isSelected ? { color: 'var(--accent)' } : {}}>${Number(pkg.price || 0).toLocaleString()}</div>
+                      <div className="text-price-val" style={isFeatured || isSelected ? { color: 'var(--accent)' } : {}}>{format(pkg.price || 0)}</div>
                       <p className="text-body-sm text-gray-400 font-medium mt-0.5">per platform / mo</p>
                       {pkg.delivery_days && <p className="text-body-sm text-gray-400 font-medium mt-1">⏱ {pkg.delivery_days}-day setup</p>}
                     </div>
@@ -236,7 +240,7 @@ export default function GigDetailClient({ params }) {
                       </div>
                       {unitPrice > 0 && (
                         <span className="text-xs font-extrabold shrink-0" style={{ color: 'var(--accent)' }}>
-                          +${(unitPrice * (qty || 1)).toLocaleString()}{qty > 1 ? ` (${qty}×$${unitPrice})` : '/ea'}
+                          +{format(unitPrice * (qty || 1))}{qty > 1 ? ` (${qty}×${format(unitPrice)})` : '/ea'}
                         </span>
                       )}
                     </div>
@@ -283,18 +287,18 @@ export default function GigDetailClient({ params }) {
               <div className="mb-8 pb-6 border-b border-gray-100">
                 <h3 className="heading-section mb-5">Your Quote Summary</h3>
                 <div className="space-y-2.5">
-                  {selPkgObj && <SummaryRow label={`${selPkgObj.name || selPkgObj.tier} × ${selPlatformIds.size || 1} platform${(selPlatformIds.size || 1) > 1 ? 's' : ''}`} value={`$${basePrice.toLocaleString()}/mo`} />}
+                  {selPkgObj && <SummaryRow label={`${selPkgObj.name || selPkgObj.tier} × ${selPlatformIds.size || 1} platform${(selPlatformIds.size || 1) > 1 ? 's' : ''}`} value={`${format(basePrice)}/mo`} />}
                   {selAddonEntries.map(({ addon, qty }) => (
                     <SummaryRow key={addon.id}
                       label={qty > 1 ? `${addon.name} × ${qty}` : addon.name}
-                      value={addon.price > 0 ? `+$${(addon.price * qty).toLocaleString()}` : 'Included'} />
+                      value={addon.price > 0 ? `+${format(addon.price * qty)}` : 'Included'} />
                   ))}
                   {selPlatformObjs.length > 0 && <p className="text-xs text-gray-400 pt-1">Platforms: {selPlatformObjs.map(p => p.name).join(' · ')}</p>}
                 </div>
                 {grandTotal > 0 && (
                   <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100">
                     <span className="text-sm font-bold text-gray-500">Estimated Monthly Investment</span>
-                    <span className="text-price-val" style={{ color: 'var(--accent)' }}>${grandTotal.toLocaleString()}</span>
+                    <span className="text-price-val" style={{ color: 'var(--accent)' }}>{format(grandTotal)}</span>
                   </div>
                 )}
               </div>

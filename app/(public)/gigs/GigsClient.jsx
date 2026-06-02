@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useCurrency } from '@/hooks/useCurrency'
+import CurrencySelector from '@/components/CurrencySelector'
 
 export default function GigsClient() {
   const [gigs,           setGigs]           = useState([])
   const [packages,       setPackages]       = useState([])
   const [activeCategory, setActiveCategory] = useState('All')
   const [loading,        setLoading]        = useState(true)
+  const { currency, setCurrency, format }   = useCurrency()
   const [hero,           setHero]           = useState({
     eyebrow:  'Freelance Gigs',
     title:    'Packaged Services',
@@ -62,17 +65,20 @@ export default function GigsClient() {
           )}
         </div>
 
-        {/* Category filters */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={activeCategory === cat ? 'filter-pill-on' : 'filter-pill-off'}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Category filters + Currency selector */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-10">
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={activeCategory === cat ? 'filter-pill-on' : 'filter-pill-off'}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <CurrencySelector currency={currency} onChange={setCurrency} />
         </div>
 
         {loading ? (
@@ -109,7 +115,7 @@ export default function GigsClient() {
                       {pkg && (
                         <span className="text-xs text-gray-400 font-medium">
                           from{' '}
-                          <span className="font-black text-deep">₹{pkg.price?.toLocaleString()}</span>
+                          <span className="font-black text-deep">{format(pkg.price)}</span>
                         </span>
                       )}
                     </div>

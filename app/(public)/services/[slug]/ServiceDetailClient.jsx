@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ServiceCard from '@/components/ServiceCard'
+import { useCurrency } from '@/hooks/useCurrency'
+import CurrencySelector from '@/components/CurrencySelector'
 
 const TIER_ORDER  = ['starter', 'standard', 'premium', 'custom']
 const TIER_LABEL  = { starter: 'Starter', standard: 'Standard', premium: 'Premium', custom: 'Custom / Enterprise' }
@@ -75,6 +77,7 @@ export default function ServiceDetailClient({ params }) {
 
   const addonTotal  = useMemo(() => selAddonObjs.reduce((s, a) => s + (a.price || 0), 0), [selAddonObjs])
   const grandTotal  = (selPkgObj?.price || 0) + addonTotal
+  const { currency, setCurrency, format } = useCurrency()
   const hasSelection = !!(selPkgObj || selAddonObjs.length || selPlatformObjs.length)
 
   const addonCategories = useMemo(
@@ -158,9 +161,10 @@ export default function ServiceDetailClient({ params }) {
                   {service.description}
                 </p>
               )}
-              <div className="flex flex-wrap gap-3 mt-6">
+              <div className="flex flex-wrap items-center gap-3 mt-6">
                 <Link href={inquiryUrl} className="btn-primary btn-md">Get a Quote</Link>
                 <Link href="/services" className="btn-ghost btn-md">← All Services</Link>
+                <CurrencySelector currency={currency} onChange={setCurrency} className="ml-auto" />
               </div>
             </div>
           </div>
@@ -221,7 +225,7 @@ export default function ServiceDetailClient({ params }) {
                         <>
                           <p className="text-price-val"
                              style={isFeatured || isSelected ? { color: 'var(--accent)' } : {}}>
-                            ₹{Number(pkg.price).toLocaleString('en-IN')}
+                            {format(pkg.price)}
                           </p>
                           {pkg.delivery_days && (
                             <p className="text-body-sm text-gray-400 font-medium mt-0.5">
@@ -308,7 +312,7 @@ export default function ServiceDetailClient({ params }) {
                       <div className="flex items-center gap-2 shrink-0">
                         {addon.price && (
                           <span className="text-xs font-extrabold" style={{ color: 'var(--accent)' }}>
-                            +₹{Number(addon.price).toLocaleString('en-IN')}
+                            +{format(addon.price)}
                           </span>
                         )}
                         <span
@@ -420,7 +424,7 @@ export default function ServiceDetailClient({ params }) {
                 {selPkgObj && (
                   <QuoteRow
                     label={`${TIER_LABEL[selPkgObj.tier] || 'Package'} — ${selPkgObj.name || ''}`}
-                    value={selPkgObj.price ? `₹${Number(selPkgObj.price).toLocaleString('en-IN')}` : 'Custom'}
+                    value={selPkgObj.price ? format(selPkgObj.price) : 'Custom'}
                     onRemove={() => setSelPkgId(null)}
                   />
                 )}
@@ -428,7 +432,7 @@ export default function ServiceDetailClient({ params }) {
                   <QuoteRow
                     key={a.id}
                     label={`Add-on: ${a.title}`}
-                    value={a.price ? `+₹${Number(a.price).toLocaleString('en-IN')}` : null}
+                    value={a.price ? `+${format(a.price)}` : null}
                     onRemove={() => toggleAddon(a.id)}
                   />
                 ))}
@@ -445,7 +449,7 @@ export default function ServiceDetailClient({ params }) {
                 <div className="flex items-center justify-between py-4 border-t border-b border-gray-100 mb-6">
                   <span className="text-sm font-bold text-gray-500">Estimated starting at</span>
                   <span className="text-price-val" style={{ color: 'var(--accent)' }}>
-                    ₹{grandTotal.toLocaleString('en-IN')}
+                    {format(grandTotal)}
                   </span>
                 </div>
               )}
