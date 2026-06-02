@@ -1,6 +1,6 @@
 'use client'
 
-import { CURRENCIES } from '@/hooks/useCurrency'
+import { CURRENCIES } from '@/context/CurrencyContext'
 
 export default function CurrencySelector({ currency, onChange, className = '' }) {
   return (
