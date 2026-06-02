@@ -1,4 +1,7 @@
+import { NextResponse } from 'next/server'
 import { xmlResponse, htmlResponse, buildUrlset, buildHtmlUrlset, isBrowserRequest } from '@/lib/sitemap-helpers'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
@@ -17,10 +20,10 @@ export async function GET(request) {
       freq: 'weekly', priority: '0.7',
     }))
 
+    if (pages.length === 0) return new NextResponse(null, { status: 404 })
     if (isBrowser) return htmlResponse(buildHtmlUrlset(pages, '✍️ Blog Sitemap', `${baseUrl}/sitemap.xml`))
     return xmlResponse(buildUrlset(pages))
   } catch {
-    if (isBrowser) return htmlResponse(buildHtmlUrlset([], '✍️ Blog Sitemap', `${baseUrl}/sitemap.xml`))
-    return xmlResponse(buildUrlset([]))
+    return new NextResponse(null, { status: 404 })
   }
 }

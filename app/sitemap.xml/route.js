@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { isBrowserRequest } from '@/lib/sitemap-helpers'
 
+export const dynamic = 'force-dynamic'
+
 const BASE_URL = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
 
 // Fetch which dynamic sitemaps have content so we only include non-empty ones
