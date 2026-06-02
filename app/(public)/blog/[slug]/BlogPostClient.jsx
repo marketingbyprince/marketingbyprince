@@ -41,11 +41,6 @@ export default function BlogPostClient({ params }) {
           &larr; Back to Blog
         </Link>
 
-        {article.cover_image_url && (
-          <img src={article.cover_image_url} alt={article.title}
-               className="w-full h-72 object-cover rounded-2xl mb-8 shadow-card" />
-        )}
-
         <div className="flex flex-wrap items-center gap-3 mb-6">
           {article.category && (
             <span className="badge-accent">{article.category}</span>
