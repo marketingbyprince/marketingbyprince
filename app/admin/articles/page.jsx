@@ -12,16 +12,21 @@ const slugify = str => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^
 
 export default function ManageArticles() {
   const [articles, setArticles] = useState([])
+  const [authors,  setAuthors]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [editing,  setEditing]  = useState(null)
   const [form,     setForm]     = useState(empty)
   const [saving,   setSaving]   = useState(false)
 
   const fetchData = async () => {
-    const { data } = await supabaseAdmin.from('articles')
-      .select('id, title, slug, category, is_published, published_at')
-      .order('created_at', { ascending: false })
-    setArticles(data || [])
+    const [{ data: arts }, { data: auths }] = await Promise.all([
+      supabaseAdmin.from('articles')
+        .select('id, title, slug, category, is_published, published_at')
+        .order('created_at', { ascending: false }),
+      supabaseAdmin.from('author_profile').select('id, name'),
+    ])
+    setArticles(arts || [])
+    setAuthors(auths || [])
     setLoading(false)
   }
 
@@ -115,9 +120,14 @@ export default function ManageArticles() {
           </div>
           <div>
             <label className="admin-label">Author</label>
-            <input type="text" value={form.author || ''}
-                   onChange={e => setForm(p => ({ ...p, author: e.target.value }))}
-                   className="admin-input" placeholder="e.g. Prince Kumar" />
+            <select value={form.author || ''}
+                    onChange={e => setForm(p => ({ ...p, author: e.target.value }))}
+                    className="admin-input">
+              <option value="">— Select Author —</option>
+              {authors.map(a => (
+                <option key={a.id} value={a.name}>{a.name}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="admin-label">Excerpt</label>
