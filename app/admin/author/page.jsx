@@ -1,20 +1,23 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
+
+const slugify = str => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
 const empty = {
   name: '', title: '', bio: '', avatar_url: '',
-  twitter_url: '', linkedin_url: '', website_url: '',
+  twitter_url: '', linkedin_url: '', website_url: '', slug: '',
 }
 
 export default function ManageAuthor() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.from('author_profile').select('*').eq('id', 1).single()
+    supabaseAdmin.from('author_profile').select('*').eq('id', 1).single()
       .then(({ data }) => {
         if (data) setForm(data)
         setLoading(false)
@@ -23,14 +26,24 @@ export default function ManageAuthor() {
 
   const set = key => e => setForm(p => ({ ...p, [key]: e.target.value }))
 
+  const handleNameChange = e => {
+    const name = e.target.value
+    setForm(p => ({ ...p, name, slug: p.slug || slugify(name) }))
+  }
+
   const save = async () => {
     setSaving(true)
     setSaved(false)
-    await supabase.from('author_profile')
+    setError('')
+    const { error: err } = await supabaseAdmin.from('author_profile')
       .upsert({ ...form, id: 1, updated_at: new Date().toISOString() })
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    if (err) {
+      setError(err.message)
+    } else {
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    }
   }
 
   if (loading) return (
@@ -42,7 +55,14 @@ export default function ManageAuthor() {
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-white tracking-tight">Author Profile</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Yeh info public <a href="/author" target="_blank" className="underline hover:text-white transition-colors">/author</a> page aur articles ke neeche dikhti hai.
+          Yeh info public{' '}
+          {form.slug && (
+            <a href={`/author/${form.slug}`} target="_blank"
+               className="underline hover:text-white transition-colors">
+              /author/{form.slug}
+            </a>
+          )}{' '}
+          page aur articles ke neeche dikhti hai.
         </p>
       </div>
 
@@ -60,6 +80,9 @@ export default function ManageAuthor() {
         <div>
           <p className="text-white font-bold text-sm">{form.name || 'Author Name'}</p>
           <p className="text-gray-500 text-xs mt-0.5">{form.title || 'Title / Designation'}</p>
+          {form.slug && (
+            <p className="text-xs mt-0.5" style={{ color: 'var(--accent)' }}>/author/{form.slug}</p>
+          )}
         </div>
       </div>
 
@@ -67,12 +90,20 @@ export default function ManageAuthor() {
         <div className="grid sm:grid-cols-2 gap-5">
           <div>
             <label className="admin-label">Name *</label>
-            <input type="text" value={form.name} onChange={set('name')} className="admin-input" placeholder="Prince Pandey" />
+            <input type="text" value={form.name} onChange={handleNameChange}
+                   className="admin-input" placeholder="Prince Pandey" />
           </div>
           <div>
-            <label className="admin-label">Title / Designation</label>
-            <input type="text" value={form.title} onChange={set('title')} className="admin-input" placeholder="Performance Marketer" />
+            <label className="admin-label">Slug (URL)</label>
+            <input type="text" value={form.slug || ''} onChange={set('slug')}
+                   className="admin-input font-mono" placeholder="prince-pandey" />
           </div>
+        </div>
+
+        <div>
+          <label className="admin-label">Title / Designation</label>
+          <input type="text" value={form.title} onChange={set('title')}
+                 className="admin-input" placeholder="Performance Marketer" />
         </div>
 
         <div>
@@ -115,10 +146,13 @@ export default function ManageAuthor() {
             {saving ? 'Saving…' : 'Save Profile'}
           </button>
           {saved && <span className="text-green-400 text-sm font-medium">✓ Saved!</span>}
-          <a href="/author" target="_blank"
-             className="text-sm text-gray-400 hover:text-white transition-colors underline">
-            Preview →
-          </a>
+          {error && <span className="text-red-400 text-sm">{error}</span>}
+          {form.slug && (
+            <a href={`/author/${form.slug}`} target="_blank"
+               className="text-sm text-gray-400 hover:text-white transition-colors underline">
+              Preview →
+            </a>
+          )}
         </div>
       </div>
     </div>

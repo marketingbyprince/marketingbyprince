@@ -6,11 +6,12 @@ import { supabase } from '@/lib/supabase'
 
 function AuthorCard({ author }) {
   if (!author) return null
+  const authorHref = author.slug ? `/author/${author.slug}` : '/author'
   return (
     <div className="mt-14 pt-8 border-t border-gray-200">
       <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Written by</p>
       <div className="flex items-start gap-4">
-        <Link href="/author" className="shrink-0">
+        <Link href={authorHref} className="shrink-0">
           {author.avatar_url ? (
             <img src={author.avatar_url} alt={author.name}
                  className="w-14 h-14 rounded-full object-cover hover:ring-2 transition-all"
@@ -23,7 +24,7 @@ function AuthorCard({ author }) {
           )}
         </Link>
         <div className="flex-1 min-w-0">
-          <Link href="/author" className="hover:underline">
+          <Link href={authorHref} className="hover:underline">
             <p className="text-deep font-bold text-sm">{author.name}</p>
           </Link>
           <p className="text-body-sm text-gray-500 mb-2">{author.title}</p>
@@ -45,7 +46,7 @@ function AuthorCard({ author }) {
                 Twitter / X ↗
               </a>
             )}
-            <Link href="/author"
+            <Link href={authorHref}
                   className="text-xs font-semibold hover:underline transition-colors text-gray-400">
               View all articles →
             </Link>
