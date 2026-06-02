@@ -15,6 +15,7 @@ export async function GET(request) {
     { url: `${baseUrl}/case-studies`,        freq: 'monthly', priority: '0.7', lastmod: today },
     { url: `${baseUrl}/certifications`,      freq: 'monthly', priority: '0.6', lastmod: today },
     { url: `${baseUrl}/contact`,             freq: 'monthly', priority: '0.7', lastmod: today },
+    { url: `${baseUrl}/author`,              freq: 'monthly', priority: '0.6', lastmod: today },
   ]
 
   if (isBrowser) return htmlResponse(buildHtmlUrlset(pages, '📄 Pages Sitemap', `${baseUrl}/sitemap.xml`))

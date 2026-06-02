@@ -4,15 +4,74 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+function AuthorCard({ author }) {
+  if (!author) return null
+  return (
+    <div className="mt-14 pt-8 border-t border-gray-200">
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Written by</p>
+      <div className="flex items-start gap-4">
+        <Link href="/author" className="shrink-0">
+          {author.avatar_url ? (
+            <img src={author.avatar_url} alt={author.name}
+                 className="w-14 h-14 rounded-full object-cover hover:ring-2 transition-all"
+                 style={{ '--tw-ring-color': 'var(--accent)' }} />
+          ) : (
+            <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+                 style={{ backgroundColor: 'var(--accent-muted)' }}>
+              👨‍💼
+            </div>
+          )}
+        </Link>
+        <div className="flex-1 min-w-0">
+          <Link href="/author" className="hover:underline">
+            <p className="text-deep font-bold text-sm">{author.name}</p>
+          </Link>
+          <p className="text-body-sm text-gray-500 mb-2">{author.title}</p>
+          {author.bio && (
+            <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-3">{author.bio}</p>
+          )}
+          <div className="flex items-center gap-3 flex-wrap">
+            {author.linkedin_url && (
+              <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer"
+                 className="text-xs font-semibold hover:underline transition-colors"
+                 style={{ color: 'var(--accent)' }}>
+                LinkedIn ↗
+              </a>
+            )}
+            {author.twitter_url && (
+              <a href={author.twitter_url} target="_blank" rel="noopener noreferrer"
+                 className="text-xs font-semibold hover:underline transition-colors"
+                 style={{ color: 'var(--accent)' }}>
+                Twitter / X ↗
+              </a>
+            )}
+            <Link href="/author"
+                  className="text-xs font-semibold hover:underline transition-colors text-gray-400">
+              View all articles →
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 export default function BlogPostClient({ params }) {
   const slug = params.slug
   const [article, setArticle] = useState(null)
+  const [author, setAuthor] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.from('articles').select('*').eq('slug', slug).eq('is_published', true).single()
-      .then(({ data }) => { setArticle(data); setLoading(false) })
+    Promise.all([
+      supabase.from('articles').select('*').eq('slug', slug).eq('is_published', true).single(),
+      supabase.from('author_profile').select('*').eq('id', 1).single(),
+    ]).then(([{ data: art }, { data: auth }]) => {
+      setArticle(art)
+      setAuthor(auth)
+      setLoading(false)
+    })
   }, [slug])
 
   if (loading) return (
@@ -70,18 +129,7 @@ export default function BlogPostClient({ params }) {
           dangerouslySetInnerHTML={{ __html: article.content || '' }}
         />
 
-        <div className="mt-14 pt-8 border-t border-gray-200">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
-                 style={{ backgroundColor: 'var(--accent-muted)' }}>
-              👨‍💼
-            </div>
-            <div>
-              <p className="text-deep font-bold text-sm">Prince Pandey</p>
-              <p className="text-body-sm text-gray-500">Performance Marketer &amp; Key Account Manager</p>
-            </div>
-          </div>
-        </div>
+        <AuthorCard author={author} />
 
         <div className="mt-8 rounded-2xl p-6 text-center"
              style={{ backgroundColor: 'var(--accent-muted)', border: '1px solid var(--accent-border)' }}>
