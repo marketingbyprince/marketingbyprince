@@ -37,13 +37,17 @@ export default function ManageAuthor() {
     setError('')
     const { error: err } = await supabaseAdmin.from('author_profile')
       .upsert({ ...form, id: 1, updated_at: new Date().toISOString() })
-    setSaving(false)
     if (err) {
       setError(err.message)
-    } else {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      setSaving(false)
+      return
     }
+    // re-fetch to confirm saved data
+    const { data } = await supabaseAdmin.from('author_profile').select('*').eq('id', 1).single()
+    if (data) setForm(data)
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
   }
 
   if (loading) return (
@@ -115,8 +119,14 @@ export default function ManageAuthor() {
 
         <div>
           <label className="admin-label">Avatar / Profile Photo URL</label>
-          <input type="url" value={form.avatar_url} onChange={set('avatar_url')}
+          <input type="text" value={form.avatar_url} onChange={set('avatar_url')}
                  className="admin-input" placeholder="https://..." />
+          {form.avatar_url && (
+            <img src={form.avatar_url} alt="preview"
+                 className="mt-2 w-16 h-16 rounded-full object-cover border-2"
+                 style={{ borderColor: 'var(--accent-border)' }}
+                 onError={e => e.target.style.display = 'none'} />
+          )}
         </div>
 
         <div className="border-t pt-5" style={{ borderColor: 'var(--admin-border)' }}>

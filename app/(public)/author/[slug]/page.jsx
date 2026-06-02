@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }) {
   const { data } = await supabase.from('author_profile').select('name, title').eq('slug', params.slug).single()
