@@ -5,7 +5,15 @@
    ═══════════════════════════════════════════════════════════════ */
 :root {
 
-  /* ── Brand colours ──────────────────────────────────────────── */
+  /* ── Brand identity tokens ──────────────────────────────────── */
+  --brand-orange:     #FF6933;
+  --deep-black:       #111827;
+  --rich-charcoal:    #1F2937;
+  --soft-surface:     #F9FAFB;
+  --warning-canvas:   #FFFBEB;
+  --warning-border:   #FCD34D;
+
+  /* ── Brand colours (aliases kept for backwards compat) ─────── */
   --accent:           #FF6933;
   --accent-dark:      #E8582A;
   --accent-muted:     #FFF3EE;

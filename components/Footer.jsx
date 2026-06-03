@@ -1,75 +1,127 @@
 import Link from 'next/link'
 
-const links = {
-  Pages: [
-    { to: '/',         label: 'Home' },
-    { to: '/about',    label: 'About' },
-    { to: '/services', label: 'Services' },
-    { to: '/gigs',     label: 'Gigs' },
-  ],
-  Work: [
-    { to: '/portfolio',      label: 'Portfolio' },
-    { to: '/blog',           label: 'Blog' },
-    { to: '/certifications', label: 'Certifications' },
-    { to: '/contact',        label: 'Contact' },
-  ],
-}
+const pageLinks = [
+  { to: '/',        label: 'Home' },
+  { to: '/about',   label: 'About' },
+  { to: '/services',label: 'Services' },
+  { to: '/#process',label: 'Process' },
+  { to: '/pricing', label: 'Pricing' },
+  { to: '/blog',    label: 'Insights' },
+  { to: '/contact', label: 'Contact' },
+]
+
+const workLinks = [
+  { to: '/portfolio',    label: 'Portfolio' },
+  { to: '/case-studies', label: 'Case Studies' },
+  { to: '/certifications', label: 'Certifications' },
+]
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 pt-14 pb-20 md:pb-8">
-      <div className="section-wrap">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                   style={{ backgroundColor: 'var(--accent)' }}>
-                <span className="text-white font-extrabold text-xs">PP</span>
-              </div>
-              <span className="text-deep font-extrabold tracking-tight">Prince Pandey</span>
-            </div>
-            <p className="text-body text-gray-500 max-w-xs leading-relaxed">
-              Performance Marketer &amp; Key Account Manager. Helping brands grow with data-driven strategies.
+    <footer style={{ backgroundColor: '#111827' }} className="pt-14 pb-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+
+          {/* Brand col */}
+          <div className="sm:col-span-2">
+            <Link href="/" className="block mb-4">
+              <span
+                className="text-white"
+                style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 800, fontSize: '18px' }}
+              >
+                Prince Pandey
+              </span>
+            </Link>
+            <p style={{ color: '#9CA3AF', fontSize: '13px', lineHeight: '1.7' }} className="max-w-xs mb-6">
+              Helping brands grow with data-driven performance marketing.
             </p>
-            <div className="flex gap-4 mt-6">
-              <a href="https://linkedin.com/in/marketingbyprince" target="_blank" rel="noopener noreferrer"
-                 className="text-body-sm text-gray-400 hover:text-accent transition-colors font-semibold">
+            <div className="flex gap-5">
+              <a
+                href="https://linkedin.com/in/marketingbyprince"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#9CA3AF', fontSize: '13px', fontWeight: 500 }}
+                className="hover:text-[#FF6933] transition-colors"
+              >
                 LinkedIn
               </a>
-              <a href="mailto:marketingbyprince@gmail.com"
-                 className="text-body-sm text-gray-400 hover:text-accent transition-colors font-semibold">
+              <a
+                href="mailto:marketingbyprince@gmail.com"
+                style={{ color: '#9CA3AF', fontSize: '13px', fontWeight: 500 }}
+                className="hover:text-[#FF6933] transition-colors"
+              >
                 Email
               </a>
-              <a href="tel:+919465992412"
-                 className="text-body-sm text-gray-400 hover:text-accent transition-colors font-semibold">
+              <a
+                href="tel:+919465992412"
+                style={{ color: '#9CA3AF', fontSize: '13px', fontWeight: 500 }}
+                className="hover:text-[#FF6933] transition-colors"
+              >
                 Phone
               </a>
             </div>
           </div>
 
-          {Object.entries(links).map(([group, items]) => (
-            <div key={group}>
-              <h4 className="text-deep font-bold text-sm mb-4 uppercase tracking-wide">{group}</h4>
-              <ul className="space-y-2.5">
-                {items.map(({ to, label }) => (
-                  <li key={to}>
-                    <Link href={to}
-                          className="text-body-sm text-gray-500 hover:text-accent transition-colors font-medium">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Pages */}
+          <div>
+            <h4
+              className="mb-4 uppercase tracking-wide"
+              style={{ color: '#F9FAFB', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em' }}
+            >
+              Pages
+            </h4>
+            <ul className="space-y-2.5">
+              {pageLinks.map(({ to, label }) => (
+                <li key={to}>
+                  <Link
+                    href={to}
+                    style={{ color: '#9CA3AF', fontSize: '13px', fontWeight: 500 }}
+                    className="hover:text-[#FF6933] transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Work */}
+          <div>
+            <h4
+              className="mb-4 uppercase tracking-wide"
+              style={{ color: '#F9FAFB', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em' }}
+            >
+              Work
+            </h4>
+            <ul className="space-y-2.5">
+              {workLinks.map(({ to, label }) => (
+                <li key={to}>
+                  <Link
+                    href={to}
+                    style={{ color: '#9CA3AF', fontSize: '13px', fontWeight: 500 }}
+                    className="hover:text-[#FF6933] transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div className="divider pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} Prince Pandey. All rights reserved.
+        <div
+          className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6"
+          style={{ borderTop: '1px solid #1F2937' }}
+        >
+          <p style={{ color: '#6B7280', fontSize: '12px' }}>
+            &copy;2026 Prince Pandey. All rights reserved.
           </p>
-          <Link href="/admin/login"
-                className="text-xs text-gray-300 hover:text-gray-400 transition-colors">
+          <Link
+            href="/admin/login"
+            style={{ color: '#374151', fontSize: '11px' }}
+            className="hover:text-gray-500 transition-colors"
+          >
             Admin
           </Link>
         </div>

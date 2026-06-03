@@ -5,20 +5,21 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 const navItems = [
-  { to: '/admin/dashboard',      label: 'Dashboard',     icon: '📊' },
-  { to: '/admin/leads',          label: 'Leads',          icon: '📬' },
-  { to: '/admin/about',          label: 'About Page',     icon: '👤' },
-  { to: '/admin/services',       label: 'Services',       icon: '🎯' },
-  { to: '/admin/packages',       label: 'Packages',       icon: '📋' },
-  { to: '/admin/platforms',      label: 'Platforms',      icon: '🌐' },
-  { to: '/admin/gigs',           label: 'Gigs',           icon: '📦' },
-  { to: '/admin/case-studies',   label: 'Case Studies',   icon: '📁' },
-  { to: '/admin/articles',       label: 'Articles',       icon: '✍️' },
-  { to: '/admin/author',         label: 'Author Profile', icon: '🪪' },
-  { to: '/admin/certifications', label: 'Certifications', icon: '🏆' },
-  { to: '/admin/media',          label: 'File Manager',   icon: '📂' },
-  { to: '/admin/seo',            label: 'SEO Center',     icon: '🔍' },
-  { to: '/admin/settings',       label: 'Settings',       icon: '⚙️' },
+  { to: '/admin/dashboard',      label: 'Dashboard',        icon: '📊' },
+  { to: '/admin/homepage',       label: 'Homepage Manager', icon: '🏠' },
+  { to: '/admin/leads',          label: 'Leads',            icon: '📬' },
+  { to: '/admin/about',          label: 'About Page',       icon: '👤' },
+  { to: '/admin/services',       label: 'Services',         icon: '🎯' },
+  { to: '/admin/packages',       label: 'Packages',         icon: '📋' },
+  { to: '/admin/platforms',      label: 'Platforms',        icon: '🌐' },
+  { to: '/admin/gigs',           label: 'Gigs',             icon: '📦' },
+  { to: '/admin/case-studies',   label: 'Case Studies',     icon: '📁' },
+  { to: '/admin/articles',       label: 'Articles',         icon: '✍️' },
+  { to: '/admin/author',         label: 'Author Profile',   icon: '🪪' },
+  { to: '/admin/certifications', label: 'Certifications',   icon: '🏆' },
+  { to: '/admin/media',          label: 'File Manager',     icon: '📂' },
+  { to: '/admin/seo',            label: 'SEO Center',       icon: '🔍' },
+  { to: '/admin/settings',       label: 'Settings',         icon: '⚙️' },
 ]
 
 export default function AdminLayout({ children }) {
