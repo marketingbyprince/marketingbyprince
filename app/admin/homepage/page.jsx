@@ -42,6 +42,7 @@ function SlidesManager() {
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
   const [preview,  setPreview]  = useState(false)
+  const [saveError,setSaveError]= useState('')
   const [form,     setForm]     = useState({ image_url: '', alt_text: '', display_order: 1, is_active: true, start_date: '', end_date: '' })
   const [editing,  setEditing]  = useState(null)
   const [uploading,setUploading]= useState(false)
@@ -49,7 +50,8 @@ function SlidesManager() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase.from('hero_slides').select('*').order('display_order')
+    const { data, error } = await supabase.from('hero_slides').select('*').order('display_order')
+    if (error) console.error('hero_slides load error:', error)
     setSlides(data ?? [])
     setLoading(false)
   }, [])
@@ -76,29 +78,37 @@ function SlidesManager() {
   }
 
   async function save() {
+    if (!form.image_url) { setSaveError('Image URL is required. Upload a file or paste a URL.'); return }
     setSaving(true)
+    setSaveError('')
     const payload = {
       image_url:     form.image_url,
       alt_text:      form.alt_text,
       display_order: Number(form.display_order),
       is_active:     form.is_active,
-      start_date:    form.start_date || new Date().toISOString(),
-      end_date:      form.end_date || null,
+      start_date:    form.start_date ? new Date(form.start_date).toISOString() : new Date().toISOString(),
+      end_date:      form.end_date   ? new Date(form.end_date).toISOString()   : null,
     }
+    let error
     if (editing === 'new') {
-      await supabase.from('hero_slides').insert([payload])
+      ;({ error } = await supabase.from('hero_slides').insert([payload]))
     } else {
-      await supabase.from('hero_slides').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing)
+      ;({ error } = await supabase.from('hero_slides').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing))
     }
     setSaving(false)
+    if (error) {
+      setSaveError(`Save failed: ${error.message} — Run the RLS fix SQL shown below.`)
+      return
+    }
     closeForm()
     load()
   }
 
   async function remove(id) {
     if (!confirm('Delete this slide?')) return
-    await supabase.from('hero_slides').delete().eq('id', id)
-    load()
+    const { error } = await supabase.from('hero_slides').delete().eq('id', id)
+    if (error) alert('Delete failed: ' + error.message)
+    else load()
   }
 
   async function toggleActive(slide) {
@@ -211,7 +221,12 @@ function SlidesManager() {
             </Field>
           </div>
 
-          <div className="flex gap-3 mt-2">
+          {saveError && (
+            <div className="mt-3 p-3 rounded-lg bg-red-900/30 border border-red-700">
+              <p className="text-red-300 text-xs">{saveError}</p>
+            </div>
+          )}
+          <div className="flex gap-3 mt-3">
             <SaveBtn saving={saving} onClick={save} />
             <button onClick={closeForm} className="btn-ghost btn-sm">Cancel</button>
           </div>
@@ -254,9 +269,10 @@ function SlidesManager() {
 
       {/* DB migration notice */}
       <div className="mt-8 p-4 rounded-xl border border-yellow-700 bg-yellow-900/20">
-        <p className="text-yellow-300 text-xs font-semibold mb-2">Database Setup Required</p>
-        <p className="text-yellow-200/70 text-xs mb-2">If you see errors, run this SQL in your Supabase dashboard → SQL Editor:</p>
-        <pre className="text-yellow-100/60 text-xs bg-black/30 rounded p-3 overflow-x-auto whitespace-pre-wrap">{`CREATE TABLE IF NOT EXISTS hero_slides (
+        <p className="text-yellow-300 text-xs font-semibold mb-2">⚠️ Run this SQL in Supabase Dashboard → SQL Editor (fixes save errors)</p>
+        <p className="text-yellow-200/70 text-xs mb-2">This creates the tables AND disables RLS so the admin panel can write data:</p>
+        <pre className="text-yellow-100/60 text-xs bg-black/30 rounded p-3 overflow-x-auto whitespace-pre-wrap">{`-- 1. Create hero_slides table
+CREATE TABLE IF NOT EXISTS hero_slides (
   id            BIGSERIAL PRIMARY KEY,
   image_url     TEXT NOT NULL,
   alt_text      TEXT DEFAULT '',
@@ -268,7 +284,14 @@ function SlidesManager() {
   updated_at    TIMESTAMPTZ DEFAULT now()
 );
 
--- Also add homepage visibility to services:
+-- 2. Disable RLS so admin can read/write (table is admin-only)
+ALTER TABLE hero_slides DISABLE ROW LEVEL SECURITY;
+
+-- 3. Create site_settings table
+CREATE TABLE IF NOT EXISTS site_settings (key TEXT PRIMARY KEY, value TEXT);
+ALTER TABLE site_settings DISABLE ROW LEVEL SECURITY;
+
+-- 4. Add homepage columns to services
 ALTER TABLE services ADD COLUMN IF NOT EXISTS show_on_homepage BOOLEAN DEFAULT false;
 ALTER TABLE services ADD COLUMN IF NOT EXISTS homepage_order   INTEGER DEFAULT 99;
 ALTER TABLE services ADD COLUMN IF NOT EXISTS cta_link         TEXT DEFAULT '/contact';`}</pre>
