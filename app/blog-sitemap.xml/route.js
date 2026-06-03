@@ -11,16 +11,20 @@ export async function GET(request) {
       .from('articles').select('slug, updated_at')
       .eq('is_published', true).not('slug', 'is', null)
 
-    const pages = (posts || []).map(p => ({
-      url: `${baseUrl}/blog/${p.slug}`,
-      lastmod: p.updated_at ? p.updated_at.slice(0, 10) : today,
-      freq: 'weekly', priority: '0.7',
-    }))
+    const pages = [
+      { url: `${baseUrl}/blog`, lastmod: today, freq: 'weekly', priority: '0.8' },
+      ...(posts || []).map(p => ({
+        url: `${baseUrl}/blog/${p.slug}`,
+        lastmod: p.updated_at ? p.updated_at.slice(0, 10) : today,
+        freq: 'weekly', priority: '0.7',
+      }))
+    ]
 
     if (isBrowser) return htmlResponse(buildHtmlUrlset(pages, '✍️ Blog Sitemap', `${baseUrl}/sitemap.xml`))
     return xmlResponse(buildUrlset(pages))
   } catch {
-    if (isBrowser) return htmlResponse(buildHtmlUrlset([], '✍️ Blog Sitemap', `${baseUrl}/sitemap.xml`))
-    return xmlResponse(buildUrlset([]))
+    const fallback = [{ url: `${baseUrl}/blog`, lastmod: today, freq: 'weekly', priority: '0.8' }]
+    if (isBrowser) return htmlResponse(buildHtmlUrlset(fallback, '✍️ Blog Sitemap', `${baseUrl}/sitemap.xml`))
+    return xmlResponse(buildUrlset(fallback))
   }
 }
