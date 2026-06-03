@@ -177,22 +177,17 @@ export default function HomeClient() {
   const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
-    const CACHE_KEY = 'hero_slides_cache'
-    const CACHE_TTL = 5 * 60 * 1000
-
     async function fetchSlides() {
       try {
-        const cached = sessionStorage.getItem(CACHE_KEY)
-        if (cached) {
-          const { data, ts } = JSON.parse(cached)
-          if (Date.now() - ts < CACHE_TTL) { setHeroSlides(data); return }
-        }
-        const res = await fetch('/api/hero-slides')
-        if (res.ok) {
-          const data = await res.json()
-          setHeroSlides(data)
-          sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }))
-        }
+        const now = new Date().toISOString()
+        const { data } = await supabase
+          .from('hero_slides')
+          .select('id,image_url,alt_text,display_order')
+          .eq('is_active', true)
+          .lte('start_date', now)
+          .or('end_date.is.null,end_date.gte.' + now)
+          .order('display_order', { ascending: true })
+        if (data?.length) setHeroSlides(data)
       } catch {}
     }
 
