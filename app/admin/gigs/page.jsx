@@ -375,7 +375,10 @@ export default function ManageGigs() {
 
         {/* Add-Ons with inline edit */}
         <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--admin-border)' }}>
-          <SectionLabel hint="Users can optionally select these with a quantity multiplier when inquiring.">Add-Ons {!isAdd && `(${addons.length})`}</SectionLabel>
+          <SectionLabel hint="These add-ons are exclusive to this gig only — not shared with other gigs. Users can select them with a quantity multiplier (e.g. 3× Fast Delivery = price × 3).">
+            Add-Ons for <span className="text-white normal-case">{form.title || 'this Gig'}</span>
+            {!isAdd && ` (${addons.length})`}
+          </SectionLabel>
           {isAdd ? (
             <p className="text-gray-500 text-sm bg-white/5 rounded-xl px-5 py-4">💡 Save the gig first, then add your add-on services here.</p>
           ) : (
@@ -465,7 +468,10 @@ export default function ManageGigs() {
                     <input type="number" value={addonDraft.max_quantity} min="1" max="30" onChange={e => setAddonDraft(p => ({ ...p, max_quantity: e.target.value }))} placeholder="1" className="admin-input" />
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mb-4">Max Qty &gt; 1 lets users pick e.g. "3 extra days delivery" — price × qty.</p>
+                <p className="text-xs text-gray-600 mb-4">
+                  Max Qty &gt; 1 = quantity stepper on gig page (e.g. 3× Fast Delivery = ${addonDraft.price ? `$${Number(addonDraft.price) * (Number(addonDraft.max_quantity) || 1)} max` : 'price × qty'}).
+                  These add-ons only appear on <strong className="text-gray-400">{form.title || 'this gig'}</strong>.
+                </p>
                 <button type="submit" disabled={savingAddon || !addonDraft.name} className="btn-admin btn-sm disabled:opacity-60">
                   {savingAddon ? 'Adding…' : '+ Add Add-On'}
                 </button>
