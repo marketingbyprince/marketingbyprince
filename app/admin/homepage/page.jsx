@@ -267,35 +267,6 @@ function SlidesManager() {
         </div>
       )}
 
-      {/* DB migration notice */}
-      <div className="mt-8 p-4 rounded-xl border border-yellow-700 bg-yellow-900/20">
-        <p className="text-yellow-300 text-xs font-semibold mb-2">⚠️ Run this SQL in Supabase Dashboard → SQL Editor (fixes save errors)</p>
-        <p className="text-yellow-200/70 text-xs mb-2">This creates the tables AND disables RLS so the admin panel can write data:</p>
-        <pre className="text-yellow-100/60 text-xs bg-black/30 rounded p-3 overflow-x-auto whitespace-pre-wrap">{`-- 1. Create hero_slides table
-CREATE TABLE IF NOT EXISTS hero_slides (
-  id            BIGSERIAL PRIMARY KEY,
-  image_url     TEXT NOT NULL,
-  alt_text      TEXT DEFAULT '',
-  display_order INTEGER DEFAULT 1,
-  is_active     BOOLEAN DEFAULT true,
-  start_date    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  end_date      TIMESTAMPTZ,
-  created_at    TIMESTAMPTZ DEFAULT now(),
-  updated_at    TIMESTAMPTZ DEFAULT now()
-);
-
--- 2. Disable RLS so admin can read/write (table is admin-only)
-ALTER TABLE hero_slides DISABLE ROW LEVEL SECURITY;
-
--- 3. Create site_settings table
-CREATE TABLE IF NOT EXISTS site_settings (key TEXT PRIMARY KEY, value TEXT);
-ALTER TABLE site_settings DISABLE ROW LEVEL SECURITY;
-
--- 4. Add homepage columns to services
-ALTER TABLE services ADD COLUMN IF NOT EXISTS show_on_homepage BOOLEAN DEFAULT false;
-ALTER TABLE services ADD COLUMN IF NOT EXISTS homepage_order   INTEGER DEFAULT 99;
-ALTER TABLE services ADD COLUMN IF NOT EXISTS cta_link         TEXT DEFAULT '/contact';`}</pre>
-      </div>
     </div>
   )
 }
