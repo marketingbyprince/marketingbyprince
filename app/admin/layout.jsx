@@ -17,7 +17,7 @@ const navItems = [
   { to: '/admin/articles',       label: 'Articles',       icon: '✍️' },
   { to: '/admin/author',         label: 'Author Profile', icon: '🪪' },
   { to: '/admin/certifications', label: 'Certifications', icon: '🏆' },
-  { to: '/admin/media',          label: 'Media',          icon: '🖼️' },
+  { to: '/admin/media',          label: 'File Manager',   icon: '📂' },
   { to: '/admin/seo',            label: 'SEO Center',     icon: '🔍' },
   { to: '/admin/settings',       label: 'Settings',       icon: '⚙️' },
 ]
