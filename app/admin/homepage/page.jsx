@@ -68,9 +68,9 @@ function SlidesManager() {
     setUploading(true)
     const ext  = file.name.split('.').pop()
     const path = `hero-slides/${Date.now()}.${ext}`
-    const { data, error } = await supabase.storage.from('media').upload(path, file, { upsert: false })
+    const { data, error } = await supabase.storage.from('website-assets').upload(path, file, { upsert: false })
     if (error) { alert('Upload failed: ' + error.message); setUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('website-assets').getPublicUrl(path)
     setForm(f => ({ ...f, image_url: publicUrl }))
     setUploading(false)
   }
