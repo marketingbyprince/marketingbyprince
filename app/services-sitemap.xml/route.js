@@ -6,8 +6,8 @@ export async function GET(request) {
   const isBrowser = isBrowserRequest(request)
 
   try {
-    const { supabase } = await import('@/lib/supabase')
-    const { data: services } = await supabase
+    const { supabaseAdmin } = await import('@/lib/supabase')
+    const { data: services } = await supabaseAdmin
       .from('services').select('slug, updated_at')
       .eq('is_active', true).not('slug', 'is', null)
 

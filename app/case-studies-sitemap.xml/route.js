@@ -6,8 +6,8 @@ export async function GET(request) {
   const isBrowser = isBrowserRequest(request)
 
   try {
-    const { supabase } = await import('@/lib/supabase')
-    const { data: cases } = await supabase
+    const { supabaseAdmin } = await import('@/lib/supabase')
+    const { data: cases } = await supabaseAdmin
       .from('case_studies').select('id, updated_at')
       .eq('is_published', true)
 
