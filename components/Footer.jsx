@@ -1,13 +1,12 @@
 import Link from 'next/link'
 
 const pageLinks = [
-  { to: '/',        label: 'Home' },
-  { to: '/about',   label: 'About' },
-  { to: '/services',label: 'Services' },
-  { to: '/#process',label: 'Process' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/blog',    label: 'Insights' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/',         label: 'Home' },
+  { to: '/about',    label: 'About' },
+  { to: '/services', label: 'Services' },
+  { to: '/pricing',  label: 'Pricing' },
+  { to: '/blog',     label: 'Insights' },
+  { to: '/contact',  label: 'Contact' },
 ]
 
 const workLinks = [

@@ -104,7 +104,7 @@ export default function GigDetailClient({ params }) {
     <div className="min-h-screen flex items-center justify-center bg-soft">
       <div className="text-center">
         <p className="text-body text-gray-500 mb-4">Gig not found.</p>
-        <Link href="/gigs" className="btn-primary btn-md">← Back to Gigs</Link>
+        <Link href="/pricing" className="btn-primary btn-md">← Back to Pricing</Link>
       </div>
     </div>
   )
@@ -114,7 +114,7 @@ export default function GigDetailClient({ params }) {
   return (
     <div className="min-h-screen pt-24 pb-24 bg-soft">
       <div className="section-narrow">
-        <Link href="/gigs" className="text-body-sm font-semibold text-gray-400 hover:text-accent flex items-center gap-1 mb-8 transition-colors">← Back to Gigs</Link>
+        <Link href="/pricing" className="text-body-sm font-semibold text-gray-400 hover:text-accent flex items-center gap-1 mb-8 transition-colors">← Back to Pricing</Link>
 
         {/* Header */}
         <div className="mb-10">

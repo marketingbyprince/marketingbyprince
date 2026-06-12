@@ -9,9 +9,8 @@ const workLinks = [
 ]
 
 const aboutLinks = [
-  { to: '/certifications', label: 'Certifications' },
   { to: '/about',          label: 'About Prince Pandey' },
-  { to: '/about#agency',   label: 'About Marketing By Prince' },
+  { to: '/certifications', label: 'Certifications' },
 ]
 
 const topLinks = [

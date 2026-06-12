@@ -12,8 +12,8 @@ export default function GigsClient() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [loading,        setLoading]        = useState(true)
   const { currency, setCurrency, format }   = useCurrency()
-  const [hero,           setHero]           = useState({
-    eyebrow:  'Freelance Gigs',
+  const [hero, setHero] = useState({
+    eyebrow:  'Pricing & Packages',
     title:    'Packaged Services',
     subtitle: 'Fixed-scope deliverables with transparent pricing. Pick a package and let\'s get started.',
     intro:    '',
@@ -87,11 +87,11 @@ export default function GigsClient() {
           <div className="text-center py-20 text-gray-400">
             <p className="text-4xl mb-4">🚧</p>
             <p className="text-body">
-              Gigs coming soon.{' '}
+              Packages coming soon.{' '}
               <Link href="/contact" className="font-bold hover:underline" style={{ color: 'var(--accent)' }}>
                 Contact me
               </Link>{' '}
-              for custom work.
+              for custom pricing.
             </p>
           </div>
         ) : (
@@ -129,7 +129,7 @@ export default function GigsClient() {
                       </p>
                     )}
                     <Link
-                      href={`/gigs/${gig.slug || gig.id}`}
+                      href={`/pricing/${gig.slug || gig.id}`}
                       className="mt-5 block w-full text-center btn btn-md border-2 border-accent text-accent hover:bg-accent hover:text-white transition-all"
                     >
                       View Package
