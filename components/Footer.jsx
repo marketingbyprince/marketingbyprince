@@ -110,19 +110,12 @@ export default function Footer() {
         </div>
 
         <div
-          className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6"
+          className="flex justify-center pt-6"
           style={{ borderTop: '1px solid #1F2937' }}
         >
           <p style={{ color: '#6B7280', fontSize: '12px' }}>
             &copy;2026 Prince Pandey. All rights reserved.
           </p>
-          <Link
-            href="/admin/login"
-            style={{ color: '#374151', fontSize: '11px' }}
-            className="hover:text-gray-500 transition-colors"
-          >
-            Admin
-          </Link>
         </div>
       </div>
     </footer>
