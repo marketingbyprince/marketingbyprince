@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { isBrowserRequest } from '@/lib/sitemap-helpers'
 
 const BASE_URL = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
 
@@ -11,7 +10,7 @@ async function getActiveSitemaps(baseUrl) {
   const active = [{ key: 'pages', lastmod: today }]
 
   try {
-    const { supabase } = await import('@/lib/supabase')
+    const { supabaseAdmin: supabase } = await import('@/lib/supabase')
     const [
       { count: gigCount },
       { count: serviceCount },
@@ -122,23 +121,13 @@ function buildHtmlIndex(baseUrl, sitemaps) {
 </html>`
 }
 
-export async function GET(request) {
+export async function GET() {
   const baseUrl = BASE_URL()
-  const isBrowser = isBrowserRequest(request)
   const sitemaps = await getActiveSitemaps(baseUrl)
 
-  if (!isBrowser) {
-    return new NextResponse(buildXmlIndex(sitemaps), {
-      headers: {
-        'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    })
-  }
-
-  return new NextResponse(buildHtmlIndex(baseUrl, sitemaps), {
+  return new NextResponse(buildXmlIndex(sitemaps), {
     headers: {
-      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600',
     },
   })
