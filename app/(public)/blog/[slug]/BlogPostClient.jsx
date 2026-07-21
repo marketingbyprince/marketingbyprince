@@ -72,7 +72,7 @@ export default function BlogPostClient({ params }) {
       setArticle(art)
       setAuthor(auth)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [slug])
 
   if (loading) return (

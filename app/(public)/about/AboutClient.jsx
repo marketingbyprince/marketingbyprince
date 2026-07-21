@@ -33,7 +33,7 @@ export default function AboutClient() {
       setSkills(s.data || [])
       setEducation(ed.data || [])
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   const handleDownloadResume = async () => {

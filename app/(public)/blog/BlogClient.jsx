@@ -16,6 +16,7 @@ export default function BlogClient() {
       .select('id, title, slug, excerpt, cover_image_url, category, read_time_minutes, published_at')
       .eq('is_published', true).order('published_at', { ascending: false })
       .then(({ data }) => { setArticles(data || []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   const categories = ['All', ...new Set(articles.map(a => a.category).filter(Boolean))]

@@ -18,6 +18,7 @@ export default function CertificationsClient() {
     supabase.from('certifications').select('*').eq('is_active', true)
       .order('issue_date', { ascending: false })
       .then(({ data }) => { setCerts(data?.length ? data : fallback); setLoading(false) })
+      .catch(() => { setCerts(fallback); setLoading(false) })
   }, [])
 
   return (
