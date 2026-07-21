@@ -23,6 +23,7 @@ export default function ServicesClient() {
         setServices(data || [])
         setLoading(false)
       })
+      .catch(() => setLoading(false))
   }, [])
 
   const pillars = useMemo(() => {

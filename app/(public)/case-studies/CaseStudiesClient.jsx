@@ -13,6 +13,7 @@ export default function CaseStudiesClient() {
     supabase.from('case_studies').select('*').eq('is_published', true)
       .order('created_at', { ascending: false })
       .then(({ data }) => { setCases(data || []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   const industries = ['All', ...new Set(cases.map(c => c.industry).filter(Boolean))]

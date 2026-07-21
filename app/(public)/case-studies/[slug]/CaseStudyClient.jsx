@@ -20,6 +20,7 @@ export default function CaseStudyClient({ params }) {
   useEffect(() => {
     supabase.from('case_studies').select('*').eq('id', id).single()
       .then(({ data }) => { setCs(data); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [id])
 
   if (loading) return (

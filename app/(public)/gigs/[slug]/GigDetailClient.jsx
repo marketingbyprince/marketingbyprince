@@ -54,7 +54,7 @@ export default function GigDetailClient({ params }) {
       setPlatforms(filteredPlats)
       setLoading(false)
     }
-    load()
+    load().catch(() => setLoading(false))
   }, [id])
 
   const selPkgObj       = useMemo(() => packages.find(p => p.id === selPkgId) ?? null, [packages, selPkgId])

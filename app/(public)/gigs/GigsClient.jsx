@@ -39,7 +39,7 @@ export default function GigsClient() {
         }))
       }
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   const categories    = ['All', ...new Set(gigs.map(g => g.category).filter(Boolean))]
