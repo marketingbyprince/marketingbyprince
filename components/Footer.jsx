@@ -13,6 +13,7 @@ const workLinks = [
   { to: '/portfolio',    label: 'Portfolio' },
   { to: '/case-studies', label: 'Case Studies' },
   { to: '/certifications', label: 'Certifications' },
+  { to: '/expertise',    label: 'Expertise' },
 ]
 
 export default function Footer() {

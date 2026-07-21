@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { generateResume } from '@/lib/resumeUtils'
 import SectionHeader from '@/components/ui/SectionHeader'
@@ -182,6 +183,13 @@ export default function AboutClient() {
                 </div>
               ))}
             </div>
+            <Link
+              href="/expertise"
+              className="inline-block mt-4 text-body-sm font-semibold"
+              style={{ color: 'var(--accent)' }}
+            >
+              See the full breakdown of my expertise →
+            </Link>
           </div>
         )}
 
