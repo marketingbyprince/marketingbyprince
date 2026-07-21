@@ -11,6 +11,7 @@ const workLinks = [
 const aboutLinks = [
   { to: '/about',          label: 'About Prince Pandey' },
   { to: '/certifications', label: 'Certifications' },
+  { to: '/expertise',      label: 'Expertise' },
 ]
 
 const topLinks = [
