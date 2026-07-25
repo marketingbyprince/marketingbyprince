@@ -2,15 +2,17 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import SectionHeader from '@/components/ui/SectionHeader'
 import ServiceCard   from '@/components/ServiceCard'
 
 
 export default function ServicesClient() {
+  const searchParams = useSearchParams()
   const [services,     setServices]     = useState([])
   const [loading,      setLoading]      = useState(true)
-  const [activePillar, setActivePillar] = useState('All')
+  const [activePillar, setActivePillar] = useState(() => searchParams.get('pillar') || 'All')
   const [search,       setSearch]       = useState('')
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import ServicesClient from './ServicesClient'
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 }
 
 export default function Page() {
-  return <ServicesClient />
+  return (
+    <Suspense>
+      <ServicesClient />
+    </Suspense>
+  )
 }

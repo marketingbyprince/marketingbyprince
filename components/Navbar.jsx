@@ -2,31 +2,27 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { SERVICE_PILLARS } from '@/lib/servicePillars'
 
-const workLinks = [
-  { to: '/portfolio',    label: 'Portfolio' },
-  { to: '/case-studies', label: 'Case Studies' },
-]
-
-const aboutLinks = [
-  { to: '/about',          label: 'About Prince Pandey' },
-  { to: '/certifications', label: 'Certifications' },
-  { to: '/expertise',      label: 'Expertise' },
+const servicesDropdown = [
+  ...SERVICE_PILLARS.map(pillar => ({ to: `/services?pillar=${encodeURIComponent(pillar)}`, label: pillar })),
+  { to: '/services', label: 'All Services' },
 ]
 
 const topLinks = [
-  { label: 'Work',     dropdown: workLinks },
-  { label: 'Services', to: '/services' },
-  { label: 'Process',  to: '/#process' },
-  { label: 'Pricing',  to: '/pricing' },
-  { label: 'About',    dropdown: aboutLinks },
-  { label: 'Insights', to: '/blog' },
+  { label: 'Home',         to: '/' },
+  { label: 'Services',     dropdown: servicesDropdown },
+  { label: 'Case Studies', to: '/case-studies' },
+  { label: 'Portfolio',    to: '/portfolio' },
+  { label: 'Insights',     to: '/blog' },
+  { label: 'About',        to: '/about' },
+  { label: 'Contact',      to: '/contact' },
 ]
 
 function DropdownMenu({ items, isOpen }) {
   return (
     <div
-      className={`absolute top-full left-0 mt-1 min-w-[200px] bg-white border border-gray-100 rounded-lg shadow-lg py-1 transition-all duration-150 z-50 ${
+      className={`absolute top-full left-0 mt-1 min-w-[220px] bg-white border border-gray-100 rounded-lg shadow-lg py-1 transition-all duration-150 z-50 ${
         isOpen ? 'opacity-100 pointer-events-auto translate-y-0' : 'opacity-0 pointer-events-none -translate-y-1'
       }`}
     >
@@ -126,7 +122,7 @@ export default function Navbar() {
             className="ml-3 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-all hover:-translate-y-px hover:shadow-lg min-h-[44px] flex items-center"
             style={{ backgroundColor: '#FF6933' }}
           >
-            Contact
+            Book Strategy Call
           </Link>
         </div>
 
@@ -193,7 +189,7 @@ export default function Navbar() {
               className="block w-full text-center text-white text-sm font-bold px-5 py-3 rounded-lg mt-3 min-h-[44px] flex items-center justify-center"
               style={{ backgroundColor: '#FF6933' }}
             >
-              Contact
+              Book Strategy Call
             </Link>
           </div>
         </div>
