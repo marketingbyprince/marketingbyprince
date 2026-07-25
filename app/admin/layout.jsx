@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 const navItems = [
   { to: '/admin/dashboard',      label: 'Dashboard',        icon: '📊' },
   { to: '/admin/homepage',       label: 'Homepage Manager', icon: '🏠' },
+  { to: '/admin/pages',          label: 'Pages',            icon: '📄' },
   { to: '/admin/leads',          label: 'Leads',            icon: '📬' },
   { to: '/admin/about',          label: 'About Page',       icon: '👤' },
   { to: '/admin/services',       label: 'Services',         icon: '🎯' },
