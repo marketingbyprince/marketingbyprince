@@ -1,11 +1,17 @@
 import HomeClient from './HomeClient'
 import PageRenderer from '@/components/sections/PageRenderer'
 import { getPageWithSections } from '@/lib/pages'
+import { getSeoMeta } from '@/lib/seo'
 
-export const metadata = {
-  title: 'Performance Marketing Consultant India | Prince Pandey',
-  description: 'Results-driven PPC, Meta Ads, SEO & CRO services. 40+ clients, 3-5x ROAS. Based in Panchkula, serving pan-India.',
-  alternates: { canonical: 'https://marketingbyprince.com' },
+export async function generateMetadata() {
+  return getSeoMeta({
+    contentType: 'homepage',
+    fallback: {
+      title: 'Performance Marketing Consultant India | Prince Pandey',
+      description: 'Results-driven PPC, Meta Ads, SEO & CRO services. 40+ clients, 3-5x ROAS. Based in Panchkula, serving pan-India.',
+      path: '/',
+    },
+  })
 }
 
 export default async function Page() {
