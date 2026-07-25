@@ -226,6 +226,20 @@ export default function HomeClient() {
           style={{ flex: '0 0 55%' }}
         >
           <div className="max-w-lg">
+            <span
+              style={{
+                display: 'inline-block',
+                color: '#FF6933',
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: '14px',
+              }}
+            >
+              Full-Funnel Digital Growth Partner
+            </span>
+
             <h1
               style={{
                 fontSize: 'clamp(28px, 4vw, 38px)',
@@ -247,7 +261,7 @@ export default function HomeClient() {
                 marginBottom: '32px',
               }}
             >
-              I manage $12K+/mo in ad spend across Meta, Google, and TikTok — delivering up to 10x ROAS for 40+ clients.
+              I manage $12K+/mo in ad spend across Meta, Google, and TikTok — delivering up to 10x ROAS for 40+ clients, backed by SEO, marketplace growth, and automation that make every channel compound.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
@@ -351,7 +365,10 @@ export default function HomeClient() {
       <section style={{ backgroundColor: '#fff', padding: 'clamp(48px, 8vw, 120px) 0' }}>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="mb-12">
-            <SectionHeadline>Services Built for Growth</SectionHeadline>
+            <SectionHeadline>Performance Marketing, Backed by a Full Growth Stack</SectionHeadline>
+            <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.7, marginTop: '12px', maxWidth: '640px' }}>
+              Performance marketing drives the results — SEO &amp; AEO, marketplace growth, development, and automation make sure they compound.
+            </p>
           </div>
 
           <div

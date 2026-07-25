@@ -65,8 +65,8 @@ export default function ServicesClient() {
 
         <SectionHeader
           eyebrow="Services"
-          title="What I Offer"
-          subtitle="Performance-driven marketing services for brands that want to scale."
+          title="Performance Marketing, Backed by a Full Growth Stack"
+          subtitle="Performance marketing drives the results — SEO & AEO, marketplace growth, development, and automation make sure they compound."
         />
 
         {loading ? (

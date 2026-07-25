@@ -6,8 +6,8 @@ export async function generateMetadata() {
   return getSeoMeta({
     contentType: 'services',
     fallback: {
-      title: 'Digital Marketing Services | PPC, Meta Ads, SEO | Prince Pandey',
-      description: 'Performance marketing services: Google Ads, Meta Ads, SEO, CRO & LinkedIn Ads. Transparent pricing, proven results.',
+      title: 'Performance Marketing & Digital Growth Services | Prince Pandey',
+      description: 'Performance marketing at the core — backed by SEO, marketplace growth, website & app development, and automation. Transparent pricing, proven results.',
       path: '/services',
     },
   })
