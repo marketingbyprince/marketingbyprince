@@ -86,7 +86,7 @@ export default function GigDetailClient({ params }) {
     const { error } = await supabase.from('leads').insert([{
       name: form.name, email: form.email,
       phone: form.phone || null, company: form.company || null, message: form.message || null,
-      source_page: `/gigs/${id}`, selected_gig_id: gig.id, selected_gig_package_id: selPkgId || null,
+      source_page: `/pricing/${id}`, selected_gig_id: gig.id, selected_gig_package_id: selPkgId || null,
       selected_addons: selAddonEntries.length
         ? selAddonEntries.map(({ addon, qty }) => ({ id: addon.id, name: addon.name, price: addon.price, qty }))
         : null,

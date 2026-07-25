@@ -9,7 +9,7 @@ export async function GET() {
     { url: `${baseUrl}/about`,          freq: 'monthly', priority: '0.9', lastmod: today },
     { url: `${baseUrl}/services`,       freq: 'weekly',  priority: '0.9', lastmod: today },
     { url: `${baseUrl}/blog`,           freq: 'daily',   priority: '0.8', lastmod: today },
-    { url: `${baseUrl}/gigs`,           freq: 'weekly',  priority: '0.8', lastmod: today },
+    { url: `${baseUrl}/pricing`,        freq: 'weekly',  priority: '0.8', lastmod: today },
     { url: `${baseUrl}/portfolio`,      freq: 'monthly', priority: '0.7', lastmod: today },
     { url: `${baseUrl}/case-studies`,   freq: 'monthly', priority: '0.7', lastmod: today },
     { url: `${baseUrl}/certifications`, freq: 'monthly', priority: '0.6', lastmod: today },

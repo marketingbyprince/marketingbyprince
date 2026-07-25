@@ -23,13 +23,13 @@ async function getActiveSitemaps(baseUrl) {
       supabase.from('case_studies').select('id', { count: 'exact', head: true }).eq('is_published', true),
     ])
 
-    if (gigCount > 0)     active.push({ key: 'gigs',         lastmod: today })
+    if (gigCount > 0)     active.push({ key: 'pricing',      lastmod: today })
     if (serviceCount > 0) active.push({ key: 'services',     lastmod: today })
     if (blogCount > 0)    active.push({ key: 'blog',         lastmod: today })
     if (caseCount > 0)    active.push({ key: 'case-studies', lastmod: today })
   } catch {
     // On DB error fall back to including all sitemaps
-    ;['gigs', 'services', 'blog', 'case-studies'].forEach(key =>
+    ;['pricing', 'services', 'blog', 'case-studies'].forEach(key =>
       active.push({ key, lastmod: today })
     )
   }
@@ -50,8 +50,8 @@ ${entries}
 }
 
 function buildHtmlIndex(baseUrl, sitemaps) {
-  const ICONS = { pages: '📄', gigs: '💼', services: '🛠️', blog: '✍️', 'case-studies': '📊' }
-  const LABELS = { pages: 'Pages', gigs: 'Gigs', services: 'Services', blog: 'Blog', 'case-studies': 'Case Studies' }
+  const ICONS = { pages: '📄', pricing: '💼', services: '🛠️', blog: '✍️', 'case-studies': '📊' }
+  const LABELS = { pages: 'Pages', pricing: 'Pricing', services: 'Services', blog: 'Blog', 'case-studies': 'Case Studies' }
 
   const cards = sitemaps.map(s => `
     <a class="card" href="${s.url}">

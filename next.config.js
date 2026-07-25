@@ -10,7 +10,10 @@ const nextConfig = {
     ],
   },
   async redirects() {
-    return []
+    return [
+      { source: '/gigs', destination: '/pricing', permanent: true },
+      { source: '/gigs/:slug', destination: '/pricing/:slug', permanent: true },
+    ]
   },
 }
 
