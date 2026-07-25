@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { resolveSectionData } from '@/lib/pages'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PageRenderer from '@/components/sections/PageRenderer'
@@ -9,13 +10,13 @@ import PageRenderer from '@/components/sections/PageRenderer'
 // PageRenderer would on the public site. Gated by AdminLayout's auth check
 // and readable via the authenticated RLS policies on pages/page_sections/faqs.
 export default function PreviewPage({ params }) {
-  const [state, setState] = useState({ loading: true, page: null, sections: [], faqsBySection: {} })
+  const [state, setState] = useState({ loading: true, page: null, sections: [], faqsBySection: {}, dataBySection: {} })
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       const { data: page } = await supabase.from('pages').select('*').eq('slug', params.slug).single()
-      if (!page) { if (!cancelled) setState({ loading: false, page: null, sections: [], faqsBySection: {} }); return }
+      if (!page) { if (!cancelled) setState({ loading: false, page: null, sections: [], faqsBySection: {}, dataBySection: {} }); return }
 
       const [{ data: sections }, { data: faqs }] = await Promise.all([
         supabase.from('page_sections').select('*').eq('page_id', page.id).eq('is_visible', true).order('sort_order'),
@@ -24,8 +25,9 @@ export default function PreviewPage({ params }) {
 
       const faqSection = (sections || []).find(s => s.section_type === 'faq_accordion')
       const faqsBySection = faqSection && faqs?.length ? { [faqSection.id]: faqs } : {}
+      const dataBySection = await resolveSectionData(sections || [])
 
-      if (!cancelled) setState({ loading: false, page, sections: sections || [], faqsBySection })
+      if (!cancelled) setState({ loading: false, page, sections: sections || [], faqsBySection, dataBySection })
     }
     load()
     return () => { cancelled = true }
@@ -53,7 +55,7 @@ export default function PreviewPage({ params }) {
         Admin Preview — {state.page.status === 'published' ? 'Published' : 'Draft'} — /{state.page.slug}
       </div>
       <Navbar />
-      <PageRenderer sections={state.sections} faqsBySection={state.faqsBySection} />
+      <PageRenderer sections={state.sections} faqsBySection={state.faqsBySection} dataBySection={state.dataBySection} />
       <Footer />
     </div>
   )

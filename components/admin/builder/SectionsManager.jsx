@@ -35,7 +35,12 @@ export default function SectionsManager({ pageId }) {
 
   const openEdit = (section) => {
     const { html: h, ...rest } = section.content || {}
-    setForm({ adminTitle: section.title || '', ...rest })
+    const meta = SECTION_TYPE_META[section.section_type]
+    const stringified = { ...rest }
+    ;(meta?.jsonFields || []).forEach((key) => {
+      if (rest[key] !== undefined) stringified[key] = JSON.stringify(rest[key], null, 2)
+    })
+    setForm({ adminTitle: section.title || '', ...stringified })
     setHtml(h || '')
     setModal({ mode: 'edit', type: section.section_type, section })
   }
@@ -44,9 +49,20 @@ export default function SectionsManager({ pageId }) {
 
   const save = async (e) => {
     e.preventDefault()
-    setSaving(true)
     const { adminTitle, ...content } = form
     const meta = SECTION_TYPE_META[modal.type]
+
+    for (const key of meta.jsonFields || []) {
+      if (!content[key]) { delete content[key]; continue }
+      try {
+        content[key] = JSON.parse(content[key])
+      } catch {
+        alert(`"${key}" isn't valid JSON — fix it before saving.`)
+        return
+      }
+    }
+
+    setSaving(true)
     if (meta.hasHtmlField) content.html = html
 
     if (modal.mode === 'add') {
@@ -182,6 +198,11 @@ export default function SectionsManager({ pageId }) {
           size="lg"
           title={`${modal.mode === 'add' ? 'Add' : 'Edit'} ${activeMeta.label} Section`}
         >
+          {activeMeta.note && (
+            <p className="text-xs rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--admin-bg)', color: 'var(--admin-muted)' }}>
+              ℹ️ {activeMeta.note}
+            </p>
+          )}
           <FieldGroup
             fields={[{ name: 'adminTitle', label: 'Admin Label (internal, optional)', hint: 'Helps you tell sections apart in this list' }]}
             form={form}

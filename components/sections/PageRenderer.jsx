@@ -2,7 +2,7 @@ import { SECTION_REGISTRY } from './index'
 
 // Renders a page's sections in order. Unknown section_types are skipped
 // (logged in dev) rather than crashing the page.
-export default function PageRenderer({ sections = [], faqsBySection = {} }) {
+export default function PageRenderer({ sections = [], faqsBySection = {}, dataBySection = {} }) {
   return (
     <>
       {sections.map((section) => {
@@ -18,6 +18,7 @@ export default function PageRenderer({ sections = [], faqsBySection = {} }) {
             key={section.id}
             content={section.content || {}}
             faqs={faqsBySection[section.id]}
+            data={dataBySection[section.id]}
           />
         )
       })}

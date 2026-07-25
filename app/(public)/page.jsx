@@ -21,5 +21,5 @@ export default async function Page() {
   // isn't present yet (e.g. migration not run in this environment).
   if (!page || page.sections.length === 0) return <HomeClient />
 
-  return <PageRenderer sections={page.sections} faqsBySection={page.faqsBySection} />
+  return <PageRenderer sections={page.sections} faqsBySection={page.faqsBySection} dataBySection={page.dataBySection} />
 }
