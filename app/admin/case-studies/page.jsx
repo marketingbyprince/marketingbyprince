@@ -6,7 +6,7 @@ import RichTextEditor from '@/components/admin/RichTextEditor'
 const empty = {
   title: '', client_name: '', industry: '', challenge: '', strategy: '',
   execution: '', results: '', key_metrics: {}, cover_image_url: '',
-  is_featured: false, is_published: false,
+  portfolio_url: '', is_featured: false, is_published: false,
 }
 
 export default function ManageCaseStudies() {
@@ -78,6 +78,7 @@ export default function ManageCaseStudies() {
             { name: 'client_name',     label: 'Client Name' },
             { name: 'industry',        label: 'Industry' },
             { name: 'cover_image_url', label: 'Cover Image URL' },
+            { name: 'portfolio_url',   label: 'Live Portfolio URL', hint: 'Optional — shown as "View Live" on the Portfolio page' },
           ].map(f => (
             <div key={f.name}>
               <label className="admin-label">{f.label}</label>
@@ -85,6 +86,7 @@ export default function ManageCaseStudies() {
                      value={form[f.name] || ''}
                      onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))}
                      className="admin-input" />
+              {f.hint && <p className="text-xs mt-1 text-gray-500">{f.hint}</p>}
             </div>
           ))}
           {[
@@ -119,7 +121,7 @@ export default function ManageCaseStudies() {
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.is_featured}
                      onChange={e => setForm(p => ({ ...p, is_featured: e.target.checked }))} />
-              <span className="text-sm text-gray-300 font-medium">Featured on Home</span>
+              <span className="text-sm text-gray-300 font-medium">Featured (shown on /portfolio)</span>
             </label>
           </div>
           <div className="flex gap-3">
