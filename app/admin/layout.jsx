@@ -12,6 +12,7 @@ const navItems = [
   { to: '/admin/about',          label: 'About Page',       icon: '👤' },
   { to: '/admin/services',       label: 'Services',         icon: '🎯' },
   { to: '/admin/packages',       label: 'Packages',         icon: '📋' },
+  { to: '/admin/addons',         label: 'Add-ons',          icon: '🧩' },
   { to: '/admin/platforms',      label: 'Platforms',        icon: '🌐' },
   { to: '/admin/gigs',           label: 'Gigs',             icon: '📦' },
   { to: '/admin/case-studies',   label: 'Case Studies',     icon: '📁' },

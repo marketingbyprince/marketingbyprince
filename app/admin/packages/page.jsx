@@ -1,16 +1,19 @@
 'use client'
+import { useEffect, useState } from 'react'
 import AdminPageShell from '@/components/admin/AdminPageShell'
 import CrudModal      from '@/components/admin/CrudModal'
 import FieldGroup     from '@/components/admin/FieldGroup'
 import RecordRow      from '@/components/admin/RecordRow'
 import { useCrud }    from '@/hooks/useCrud'
+import { supabase }   from '@/lib/supabase'
 
 // ─── Schema ─────────────────────────────────────────────────────────────────
 // Table: service_packages
-// Columns: id, name, tier, price, delivery_days, description, features (text[]),
-//          is_featured, is_active, created_at
+// Columns: id, service_id (fk -> services), name, tier, price, delivery_days,
+//          description, features (jsonb array), is_featured, is_active, created_at
 
 const DEFAULT_FORM = {
+  service_id:    '',
   name:          '',
   tier:          'standard',
   price:         '',
@@ -35,26 +38,6 @@ const TIER_COLOR = {
   premium:  'bg-accent/10 text-accent',
   custom:   'bg-yellow-500/10 text-yellow-400',
 }
-
-const FIELDS = [
-  { name: 'name', label: 'Package Name', required: true },
-  { name: 'tier', label: 'Tier', type: 'select', options: TIER_OPTIONS, required: true },
-  [
-    { name: 'price',         label: 'Price (₹)',     type: 'number', min: 0, placeholder: '0' },
-    { name: 'delivery_days', label: 'Delivery (days)', type: 'number', min: 1, placeholder: '7' },
-  ],
-  { name: 'description', label: 'Short Description', type: 'textarea', rows: 2 },
-  {
-    name:        'features',
-    label:       'Features',
-    type:        'textarea',
-    rows:        5,
-    placeholder: 'One feature per line…',
-    hint:        'Each line becomes a separate feature bullet.',
-  },
-  { name: 'is_featured', label: 'Featured (highlight this package)', type: 'checkbox' },
-  { name: 'is_active',   label: 'Active',                            type: 'checkbox' },
-]
 
 // Convert DB array → newline string for the textarea
 function transformForEdit(record) {
@@ -86,6 +69,36 @@ export default function ManagePackages() {
     orderBy:     'tier',
     orderAsc:    true,
   })
+  const [services, setServices] = useState([])
+
+  useEffect(() => {
+    supabase.from('services').select('id, title').order('title')
+      .then(({ data }) => setServices(data || []))
+  }, [])
+
+  const serviceOptions = services.map(s => ({ value: s.id, label: s.title }))
+  const serviceName = (id) => services.find(s => s.id === id)?.title
+
+  const FIELDS = [
+    { name: 'service_id', label: 'Service', type: 'select', required: true, options: serviceOptions },
+    { name: 'name', label: 'Package Name', required: true },
+    { name: 'tier', label: 'Tier', type: 'select', options: TIER_OPTIONS, required: true },
+    [
+      { name: 'price',         label: 'Price (₹)',     type: 'number', min: 0, placeholder: '0' },
+      { name: 'delivery_days', label: 'Delivery (days)', type: 'number', min: 1, placeholder: '7' },
+    ],
+    { name: 'description', label: 'Short Description', type: 'textarea', rows: 2 },
+    {
+      name:        'features',
+      label:       'Features',
+      type:        'textarea',
+      rows:        5,
+      placeholder: 'One feature per line…',
+      hint:        'Each line becomes a separate feature bullet.',
+    },
+    { name: 'is_featured', label: 'Featured (highlight this package)', type: 'checkbox' },
+    { name: 'is_active',   label: 'Active',                            type: 'checkbox' },
+  ]
 
   const { records: packages, loading, saving, modal, error } = crud
   const isAdd = modal === 'add'
@@ -111,7 +124,7 @@ export default function ManagePackages() {
               <RecordRow
                 key={p.id}
                 title={p.name}
-                subtitle={p.description}
+                subtitle={serviceName(p.service_id) || 'No service assigned'}
                 meta={
                   <>
                     <span

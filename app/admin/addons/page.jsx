@@ -1,45 +1,64 @@
 'use client'
+import { useEffect, useState } from 'react'
 import AdminPageShell from '@/components/admin/AdminPageShell'
 import CrudModal      from '@/components/admin/CrudModal'
 import FieldGroup     from '@/components/admin/FieldGroup'
 import RecordRow      from '@/components/admin/RecordRow'
 import { useCrud }    from '@/hooks/useCrud'
+import { supabase }   from '@/lib/supabase'
 
 // ─── Schema ─────────────────────────────────────────────────────────────────
-// Table: addons
-// Columns: id, title, description, price, icon, category, is_active, created_at
+// Table: add_on_services
+// Columns: id, service_id (fk -> services), name, description, price, icon,
+//          category, is_active, sort_order, created_at
 
 const DEFAULT_FORM = {
-  title:       '',
+  service_id:  '',
+  name:        '',
   description: '',
   price:       '',
   icon:        '',
   category:    '',
+  sort_order:  0,
   is_active:   true,
 }
-
-const FIELDS = [
-  { name: 'title',    label: 'Title',    required: true },
-  { name: 'category', label: 'Category', placeholder: 'e.g. Content, Design, Analytics' },
-  { name: 'icon',     label: 'Icon',     placeholder: '🧩' },
-  { name: 'price',    label: 'Price (₹)', type: 'number', min: 0, placeholder: '0' },
-  { name: 'description', label: 'Description', type: 'textarea', rows: 2 },
-  { name: 'is_active',   label: 'Active',      type: 'checkbox' },
-]
 
 function transformForSave(form) {
   return {
     ...form,
-    price: form.price !== '' ? Number(form.price) : null,
+    price:      form.price !== '' ? Number(form.price) : null,
+    sort_order: form.sort_order !== '' ? Number(form.sort_order) : 0,
   }
 }
 
 export default function ManageAddons() {
-  const crud = useCrud('addons', {
+  const crud = useCrud('add_on_services', {
     defaultForm: DEFAULT_FORM,
-    orderBy:     'category',
+    orderBy:     'sort_order',
     orderAsc:    true,
   })
+  const [services, setServices] = useState([])
+
+  useEffect(() => {
+    supabase.from('services').select('id, title').order('title')
+      .then(({ data }) => setServices(data || []))
+  }, [])
+
+  const serviceOptions = services.map(s => ({ value: s.id, label: s.title }))
+  const serviceName = (id) => services.find(s => s.id === id)?.title
+
+  const FIELDS = [
+    { name: 'service_id', label: 'Service', type: 'select', required: true, options: serviceOptions },
+    { name: 'name',     label: 'Add-on Name',    required: true },
+    { name: 'category', label: 'Category', placeholder: 'e.g. Content, Design, Analytics' },
+    [
+      { name: 'icon', label: 'Icon', placeholder: '🧩' },
+      { name: 'sort_order', label: 'Sort Order', type: 'number', min: 0, placeholder: '0' },
+    ],
+    { name: 'price',    label: 'Price (₹)', type: 'number', min: 0, placeholder: '0' },
+    { name: 'description', label: 'Description', type: 'textarea', rows: 2 },
+    { name: 'is_active',   label: 'Active',      type: 'checkbox' },
+  ]
 
   const { records: addons, loading, saving, modal, error } = crud
   const isAdd = modal === 'add'
@@ -65,8 +84,8 @@ export default function ManageAddons() {
               <RecordRow
                 key={a.id}
                 icon={a.icon || '🧩'}
-                title={a.title}
-                subtitle={a.category}
+                title={a.name}
+                subtitle={[serviceName(a.service_id), a.category].filter(Boolean).join(' · ')}
                 meta={
                   a.price != null ? (
                     <span className="text-sm font-bold text-white">

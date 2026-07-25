@@ -39,34 +39,30 @@ export default function ServiceDetailClient({ params }) {
     let cancelled = false
     setLoading(true)
 
-    Promise.all([
-      supabase.from('services').select('*').eq('slug', slug).eq('is_active', true).single(),
-      supabase.from('service_packages').select('*').eq('is_active', true),
-      supabase.from('addons').select('*').eq('is_active', true).order('category'),
-      supabase.from('platforms').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
-    ]).then(async ([{ data: svc }, { data: pkgs }, { data: ads }, { data: plats }]) => {
-      if (cancelled) return
+    supabase.from('services').select('*').eq('slug', slug).eq('is_active', true).single()
+      .then(async ({ data: svc }) => {
+        if (cancelled) return
+        setService(svc)
 
-      setService(svc)
-      setPackages(
-        (pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier))
-      )
-      setAddons(ads || [])
-      setPlatforms(plats || [])
+        if (!svc) { setLoading(false); return }
 
-      if (svc?.pillar) {
-        const { data: rel } = await supabase
-          .from('services')
-          .select('id, title, description, icon, pillar, slug')
-          .eq('pillar', svc.pillar)
-          .eq('is_active', true)
-          .neq('id', svc.id)
-          .limit(3)
-        if (!cancelled) setRelated(rel || [])
-      }
+        const [{ data: pkgs }, { data: ads }, { data: plats }, { data: rel }] = await Promise.all([
+          supabase.from('service_packages').select('*').eq('service_id', svc.id).eq('is_active', true),
+          supabase.from('add_on_services').select('*').eq('service_id', svc.id).eq('is_active', true).order('sort_order'),
+          supabase.from('platforms').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
+          svc.pillar
+            ? supabase.from('services').select('id, title, description, icon, pillar, slug')
+                .eq('pillar', svc.pillar).eq('is_active', true).neq('id', svc.id).limit(3)
+            : Promise.resolve({ data: [] }),
+        ])
+        if (cancelled) return
 
-      if (!cancelled) setLoading(false)
-    })
+        setPackages((pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)))
+        setAddons(ads || [])
+        setPlatforms(plats || [])
+        setRelated(rel || [])
+        setLoading(false)
+      })
 
     return () => { cancelled = true }
   }, [slug])
@@ -98,7 +94,7 @@ export default function ServiceDetailClient({ params }) {
     if (selPlatformObjs.length)
       parts.push(`Platforms: ${selPlatformObjs.map(p => p.name).join(', ')}`)
     if (selAddonObjs.length)
-      parts.push(`Add-ons: ${selAddonObjs.map(a => a.title).join(', ')}`)
+      parts.push(`Add-ons: ${selAddonObjs.map(a => a.name).join(', ')}`)
     return `/contact?subject=${encodeURIComponent(parts.join(' | '))}`
   }, [service, selPkgObj, selPlatformObjs, selAddonObjs])
 
@@ -306,7 +302,7 @@ export default function ServiceDetailClient({ params }) {
                       <div className="flex items-center gap-2.5 flex-1 min-w-0">
                         <span className="text-xl leading-none shrink-0">{addon.icon || '🧩'}</span>
                         <span className="font-bold text-sm text-deep leading-snug truncate">
-                          {addon.title}
+                          {addon.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -431,7 +427,7 @@ export default function ServiceDetailClient({ params }) {
                 {selAddonObjs.map(a => (
                   <QuoteRow
                     key={a.id}
-                    label={`Add-on: ${a.title}`}
+                    label={`Add-on: ${a.name}`}
                     value={a.price ? `+${format(a.price)}` : null}
                     onRemove={() => toggleAddon(a.id)}
                   />
