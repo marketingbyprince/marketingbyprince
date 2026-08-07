@@ -4,19 +4,27 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+const LIGHT_FIELDS = 'id, slug, title, client_name, industry, channel, summary, cover_image_url, key_metrics, is_featured, sort_order, created_at'
+
 export default function CaseStudiesClient() {
   const [cases,    setCases]    = useState([])
   const [industry, setIndustry] = useState('All')
+  const [channel,  setChannel]  = useState('All')
   const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
-    supabase.from('case_studies').select('*').eq('is_published', true)
+    supabase.from('case_studies').select(LIGHT_FIELDS).eq('is_published', true)
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .then(({ data }) => { setCases(data || []); setLoading(false) })
   }, [])
 
   const industries = ['All', ...new Set(cases.map(c => c.industry).filter(Boolean))]
-  const filtered   = industry === 'All' ? cases : cases.filter(c => c.industry === industry)
+  const channels   = ['All', ...new Set(cases.map(c => c.channel).filter(Boolean))]
+  const filtered   = cases.filter(c =>
+    (industry === 'All' || c.industry === industry) &&
+    (channel === 'All' || c.channel === channel)
+  )
 
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Raleway', sans-serif", paddingTop: '80px' }}>
@@ -48,17 +56,34 @@ export default function CaseStudiesClient() {
       <section style={{ backgroundColor: '#F9FAFB', padding: 'clamp(40px, 6vw, 80px) 0' }}>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12">
 
-          {/* Industry filters */}
-          <div className="flex flex-wrap gap-2 mb-10">
-            {industries.map(ind => (
-              <button
-                key={ind}
-                onClick={() => setIndustry(ind)}
-                className={industry === ind ? 'filter-pill-on' : 'filter-pill-off'}
-              >
-                {ind}
-              </button>
-            ))}
+          {/* Filters */}
+          <div className="mb-10 space-y-3">
+            {channels.length > 2 && (
+              <div className="flex flex-wrap gap-2">
+                {channels.map(ch => (
+                  <button
+                    key={ch}
+                    onClick={() => setChannel(ch)}
+                    className={channel === ch ? 'filter-pill-on' : 'filter-pill-off'}
+                  >
+                    {ch}
+                  </button>
+                ))}
+              </div>
+            )}
+            {industries.length > 2 && (
+              <div className="flex flex-wrap gap-2">
+                {industries.map(ind => (
+                  <button
+                    key={ind}
+                    onClick={() => setIndustry(ind)}
+                    className={industry === ind ? 'filter-pill-on' : 'filter-pill-off'}
+                  >
+                    {ind}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -77,7 +102,7 @@ export default function CaseStudiesClient() {
               {filtered.map(c => (
                 <Link
                   key={c.id}
-                  href={`/case-studies/${c.id}`}
+                  href={`/case-studies/${c.slug || c.id}`}
                   className="group block bg-white rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-1"
                   style={{ border: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
                 >
@@ -98,24 +123,26 @@ export default function CaseStudiesClient() {
                   )}
 
                   <div className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      {c.industry && (
-                        <span className="badge-accent">{c.industry}</span>
-                      )}
-                      {c.is_featured && (
-                        <span className="badge-warn">Featured</span>
-                      )}
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                      {c.channel && <span className="badge-accent">{c.channel}</span>}
+                      {c.industry && <span className="badge-accent">{c.industry}</span>}
+                      {c.is_featured && <span className="badge-warn">Featured</span>}
                     </div>
 
                     <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#111827', marginBottom: '6px', lineHeight: 1.3 }}>
                       {c.title}
                     </h3>
                     {c.client_name && (
-                      <p style={{ fontSize: '13px', color: '#6B7280', marginBottom: '16px' }}>{c.client_name}</p>
+                      <p style={{ fontSize: '13px', color: '#6B7280', marginBottom: '12px' }}>{c.client_name}</p>
+                    )}
+                    {c.summary && (
+                      <p style={{ fontSize: '12.5px', color: '#6B7280', lineHeight: 1.6, marginBottom: '16px' }}>
+                        {c.summary}
+                      </p>
                     )}
 
                     {c.key_metrics && Object.keys(c.key_metrics).length > 0 && (
-                      <div className="flex gap-6 mb-4">
+                      <div className="flex gap-6 mb-4 flex-wrap">
                         {Object.entries(c.key_metrics).slice(0, 2).map(([k, v]) => (
                           <div key={k}>
                             <div style={{ fontSize: '20px', fontWeight: 900, color: '#FF6933', lineHeight: 1.2 }}>{v}</div>
@@ -129,7 +156,7 @@ export default function CaseStudiesClient() {
                       className="inline-flex items-center gap-1 group-hover:gap-2 transition-all font-semibold"
                       style={{ color: '#FF6933', fontSize: '13px' }}
                     >
-                      Read case study <span>&rarr;</span>
+                      Read case study &rarr;
                     </span>
                   </div>
                 </Link>

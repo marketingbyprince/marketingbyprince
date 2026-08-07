@@ -22,7 +22,7 @@ export default function CaseStudySliderSection({ content = {}, data = {} }) {
           {cases.map(c => (
             <Link
               key={c.id}
-              href={`/case-studies/${c.id}`}
+              href={`/case-studies/${c.slug || c.id}`}
               className="card-interactive overflow-hidden shrink-0 snap-start"
               style={{ width: 'min(85vw, 340px)' }}
             >

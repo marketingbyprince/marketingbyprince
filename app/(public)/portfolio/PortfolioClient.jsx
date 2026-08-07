@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import SectionHeader from '@/components/ui/SectionHeader'
 
+const LIGHT_FIELDS = 'id, slug, title, client_name, industry, channel, cover_image_url, key_metrics, portfolio_url, sort_order, created_at'
+
 // Portfolio is a curated, visual-first highlight reel (featured case studies
-// only) that funnels into the full narrative on /case-studies/[id]. The
+// only) that funnels into the full narrative on /case-studies/[slug]. The
 // complete, filterable index of every case study lives on /case-studies —
 // this page intentionally shows a smaller, hand-picked set.
 export default function PortfolioClient() {
@@ -16,7 +18,7 @@ export default function PortfolioClient() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { data: featured } = await supabase.from('case_studies').select('*')
+      const { data: featured } = await supabase.from('case_studies').select(LIGHT_FIELDS)
         .eq('is_published', true).eq('is_featured', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
@@ -30,7 +32,7 @@ export default function PortfolioClient() {
         return
       }
 
-      const { data: all } = await supabase.from('case_studies').select('*')
+      const { data: all } = await supabase.from('case_studies').select(LIGHT_FIELDS)
         .eq('is_published', true)
         .order('created_at', { ascending: false })
       if (!cancelled) { setCases(all || []); setLoading(false) }
@@ -61,7 +63,7 @@ export default function PortfolioClient() {
             {cases.map(c => (
               <Link
                 key={c.id}
-                href={`/case-studies/${c.id}`}
+                href={`/case-studies/${c.slug || c.id}`}
                 className="card-interactive overflow-hidden group block relative"
               >
                 {c.cover_image_url ? (
@@ -85,11 +87,14 @@ export default function PortfolioClient() {
                   </a>
                 )}
                 <div className="p-6">
-                  <span className="badge-accent mb-3 inline-block">{c.industry}</span>
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
+                    {c.channel && <span className="badge-accent">{c.channel}</span>}
+                    {c.industry && <span className="badge-accent">{c.industry}</span>}
+                  </div>
                   <h3 className="heading-section mb-1.5">{c.title}</h3>
                   <p className="text-body-sm text-gray-500 mb-4">{c.client_name}</p>
                   {c.key_metrics && Object.keys(c.key_metrics).length > 0 && (
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 flex-wrap">
                       {Object.entries(c.key_metrics).slice(0, 2).map(([k, v]) => (
                         <div key={k}>
                           <div className="font-black text-lg" style={{ color: 'var(--accent)' }}>{v}</div>

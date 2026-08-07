@@ -3,8 +3,11 @@ import SchemaScript from '@/components/SchemaScript'
 import { supabase } from '@/lib/supabase'
 import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
 
-async function getCaseStudy(id) {
-  const { data } = await supabase.from('case_studies').select('id, title, challenge').eq('id', id).single()
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function getCaseStudy(slugOrId) {
+  const column = UUID_RE.test(slugOrId) ? 'id' : 'slug'
+  const { data } = await supabase.from('case_studies').select('id, title, summary').eq(column, slugOrId).single()
   return data
 }
 
@@ -15,7 +18,7 @@ export async function generateMetadata({ params }) {
     contentId: cs?.id ?? null,
     fallback: {
       title: `${cs?.title || 'Case Study'} | Marketing By Prince`,
-      description: cs?.challenge?.slice(0, 160),
+      description: cs?.summary,
       path: `/case-studies/${params.slug}`,
     },
   })
