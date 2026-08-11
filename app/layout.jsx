@@ -1,8 +1,12 @@
 import './globals.css'
 import { cache } from 'react'
 import { Raleway } from 'next/font/google'
+import Script from 'next/script'
 import { supabase } from '@/lib/supabase'
 import SchemaScript from '@/components/SchemaScript'
+
+const GTM_ID = 'GTM-PCCX7QD2'
+const GA_MEASUREMENT_ID = 'G-761G1ESBQT'
 
 const getGlobalSeoSettings = cache(async () => {
   const { data } = await supabase.from('seo_global_settings').select('*').limit(1).single()
@@ -103,8 +107,36 @@ export default async function RootLayout({ children }) {
     <html lang="en" className={raleway.variable}>
       <head>
         <SchemaScript schemas={orgSchema} />
+
+        {/* Google Tag Manager */}
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','${GTM_ID}');`}
+        </Script>
+
+        {/* Google tag (gtag.js) */}
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_MEASUREMENT_ID}');`}
+        </Script>
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+        {children}
     </html>
   )
 }
