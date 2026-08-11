@@ -18,6 +18,7 @@ const servicesLinks = [
   { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[3])}`, label: 'Development' },
   { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[5])}`, label: 'Automation' },
   { to: '/pricing', label: 'Pricing' },
+  { to: '/gigs',    label: 'Gigs' },
 ]
 
 const resourceLinks = [
