@@ -79,7 +79,14 @@ export default function Navbar() {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12 h-full flex items-center justify-between" ref={dropRef}>
 
         {/* Logo */}
-        <Link href="/" className="shrink-0">
+        <Link href="/" className="shrink-0 flex items-center gap-2.5">
+          <img
+            src="/Media/Logo/marketing-by-prince-icon.png"
+            alt="Marketing By Prince"
+            width={36}
+            height={36}
+            className="w-9 h-9 rounded-lg object-cover"
+          />
           <span
             className="text-[#111827] tracking-tight leading-none"
             style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 800, fontSize: '18px' }}

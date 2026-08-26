@@ -67,7 +67,14 @@ export default function Footer() {
 
           {/* Brand col */}
           <div className="sm:col-span-2 md:col-span-1">
-            <Link href="/" className="block mb-4">
+            <Link href="/" className="flex items-center gap-2.5 mb-4">
+              <img
+                src="/Media/Logo/marketing-by-prince-icon.png"
+                alt="Marketing By Prince"
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-lg object-cover"
+              />
               <span
                 className="text-white"
                 style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 800, fontSize: '18px' }}

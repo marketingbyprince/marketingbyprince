@@ -61,10 +61,13 @@ export default function AdminLayout({ children }) {
 
         <div className="p-4 border-b" style={{ borderColor: 'var(--admin-border)' }}>
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                 style={{ backgroundColor: 'var(--accent)' }}>
-              <span className="text-white font-extrabold text-xs">PP</span>
-            </div>
+            <img
+              src="/Media/Logo/marketing-by-prince-icon.png"
+              alt="Marketing By Prince"
+              width={28}
+              height={28}
+              className="w-7 h-7 rounded-lg object-cover shrink-0"
+            />
             <span className="text-white font-bold text-sm tracking-tight">Marketing By Prince</span>
           </Link>
         </div>
