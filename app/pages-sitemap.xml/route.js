@@ -11,7 +11,6 @@ export async function GET() {
     { url: `${baseUrl}/services`,       freq: 'weekly',  priority: '0.9', lastmod: today },
     { url: `${baseUrl}/blog`,           freq: 'daily',   priority: '0.8', lastmod: today },
     { url: `${baseUrl}/pricing`,        freq: 'weekly',  priority: '0.8', lastmod: today },
-    { url: `${baseUrl}/portfolio`,      freq: 'monthly', priority: '0.7', lastmod: today },
     { url: `${baseUrl}/case-studies`,   freq: 'monthly', priority: '0.7', lastmod: today },
     { url: `${baseUrl}/certifications`, freq: 'monthly', priority: '0.6', lastmod: today },
     { url: `${baseUrl}/expertise`,      freq: 'monthly', priority: '0.6', lastmod: today },

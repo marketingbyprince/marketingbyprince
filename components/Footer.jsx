@@ -3,7 +3,6 @@ import { SERVICE_PILLARS } from '@/lib/servicePillars'
 
 const companyLinks = [
   { to: '/about',          label: 'About' },
-  { to: '/portfolio',      label: 'Portfolio' },
   { to: '/case-studies',   label: 'Case Studies' },
   { to: '/contact',        label: 'Contact' },
   { to: '/certifications', label: 'Certifications' },

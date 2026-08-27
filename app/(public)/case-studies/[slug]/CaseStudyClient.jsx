@@ -61,8 +61,8 @@ export default function CaseStudyClient({ params }) {
     <div className="min-h-screen flex items-center justify-center bg-soft">
       <div className="text-center">
         <p className="text-body text-gray-500 mb-4">Case study not found.</p>
-        <Link href="/portfolio" className="text-body-sm font-bold" style={{ color: 'var(--accent)' }}>
-          &larr; Back to Portfolio
+        <Link href="/case-studies" className="text-body-sm font-bold" style={{ color: 'var(--accent)' }}>
+          &larr; Back to Case Studies
         </Link>
       </div>
     </div>

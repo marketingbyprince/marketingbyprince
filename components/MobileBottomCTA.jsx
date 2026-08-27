@@ -5,7 +5,6 @@ const routeLabels = {
   '/':          "Let's Talk",
   '/services':  'Get Quote',
   '/pricing':   'Order Now',
-  '/portfolio': 'Book a Call',
   '/blog':      'Subscribe',
   '/contact':   'Send Message',
 }

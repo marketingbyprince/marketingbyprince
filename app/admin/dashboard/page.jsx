@@ -53,7 +53,7 @@ export default function Dashboard() {
 
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-white tracking-tight">Dashboard</h1>
-        <p className="text-gray-400 text-sm mt-1">Overview of your portfolio content</p>
+        <p className="text-gray-400 text-sm mt-1">Overview of your site content</p>
       </div>
 
       {/* Stat cards */}
@@ -90,7 +90,7 @@ export default function Dashboard() {
         <div>
           <p className="text-white font-semibold text-sm">View live site</p>
           <Link href="/" className="text-accent text-xs hover:underline font-medium">
-            Open portfolio &rarr;
+            Open live site &rarr;
           </Link>
         </div>
       </div>

@@ -16,7 +16,6 @@ const navItems = [
   { to: '/admin/platforms',      label: 'Platforms',        icon: '🌐' },
   { to: '/admin/gigs',           label: 'Gigs',             icon: '📦' },
   { to: '/admin/case-studies',   label: 'Case Studies',     icon: '📁' },
-  { to: '/admin/portfolio',      label: 'Portfolio',        icon: '🖼️' },
   { to: '/admin/articles',       label: 'Articles',         icon: '✍️' },
   { to: '/admin/author',         label: 'Author Profile',   icon: '🪪' },
   { to: '/admin/certifications', label: 'Certifications',   icon: '🏆' },

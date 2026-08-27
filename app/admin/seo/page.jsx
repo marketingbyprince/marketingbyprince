@@ -9,7 +9,6 @@ const SINGLETON_SECTIONS = [
   { type: 'homepage',     label: 'Homepage',     icon: '🏠', href: '/admin/seo/homepage' },
   { type: 'services',     label: 'Services',     icon: '🎯', href: '/admin/seo/services' },
   { type: 'gigs',         label: 'Gigs',         icon: '📦', href: '/admin/seo/gigs' },
-  { type: 'portfolio',    label: 'Portfolio',    icon: '🖼️', href: '/admin/seo/portfolio' },
   { type: 'case_studies', label: 'Case Studies', icon: '📁', href: '/admin/seo/case-studies' },
   { type: 'blogs',        label: 'Blogs',        icon: '✍️', href: '/admin/seo/blogs' },
   { type: 'about',        label: 'About Us',     icon: '👤', href: '/admin/seo/about' },
@@ -25,14 +24,13 @@ const EXPANDABLE = {
 }
 
 const PAGE_LABELS = {
-  homepage: 'Homepage', services: 'Services', gigs: 'Gigs', portfolio: 'Portfolio',
+  homepage: 'Homepage', services: 'Services', gigs: 'Gigs',
   case_studies: 'Case Studies', blogs: 'Blogs', about: 'About Us',
 }
 const PAGE_HREFS = {
   homepage:     '/admin/seo/homepage',
   services:     '/admin/seo/services',
   gigs:         '/admin/seo/gigs',
-  portfolio:    '/admin/seo/portfolio',
   case_studies: '/admin/seo/case-studies',
   blogs:        '/admin/seo/blogs',
   about:        '/admin/seo/about',

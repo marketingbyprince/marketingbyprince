@@ -504,7 +504,7 @@ export default function HomepageManagerPage() {
               { key: 'headline',    label: 'Section Headline', placeholder: 'Real Results, Not Just Reports' },
               { key: 'stat',        label: 'Big Stat', placeholder: '10x Peak ROAS' },
               { key: 'description', label: 'Description', type: 'textarea', placeholder: 'For a D2C brand in India…' },
-              { key: 'cta_link',    label: 'Portfolio Link', placeholder: '/portfolio' },
+              { key: 'cta_link',    label: 'Case Studies Link', placeholder: '/case-studies' },
             ]}
           />
         )}

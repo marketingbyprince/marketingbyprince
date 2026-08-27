@@ -14,7 +14,6 @@ const topLinks = [
   { label: 'Services',     dropdown: servicesDropdown },
   { label: 'Gigs',         to: '/pricing' },
   { label: 'Case Studies', to: '/case-studies' },
-  { label: 'Portfolio',    to: '/portfolio' },
   { label: 'Insights',     to: '/blog' },
   { label: 'About',        to: '/about' },
   { label: 'Contact',      to: '/contact' },

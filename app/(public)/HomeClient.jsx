@@ -454,11 +454,11 @@ export default function HomeClient() {
                 Every engagement is built around one goal: measurable growth. From tracking architecture to creative strategy, everything is tied to outcomes that move the needle.
               </p>
               <Link
-                href="/portfolio"
+                href="/case-studies"
                 style={{ color: '#FF6933', fontSize: '14px', fontWeight: 600 }}
                 className="hover:underline underline-offset-2"
               >
-                View Full Portfolio &rarr;
+                View Case Studies &rarr;
               </Link>
             </div>
 
