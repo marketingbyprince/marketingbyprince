@@ -1,9 +1,9 @@
 import Link from 'next/link'
 
-// content: { title, subtitle, ctaLabel, ctaHref, secondaryLabel?, secondaryHref? }
+// content: { eyebrow?, title, subtitle, ctaLabel, ctaHref, secondaryLabel?, secondaryHref? }
 export default function CTASection({ content = {} }) {
   const {
-    title, subtitle,
+    eyebrow, title, subtitle,
     ctaLabel = 'Book Strategy Call', ctaHref = '/contact',
     secondaryLabel, secondaryHref,
   } = content
@@ -12,6 +12,9 @@ export default function CTASection({ content = {} }) {
   return (
     <section className="py-20" style={{ backgroundColor: '#111827' }}>
       <div className="section-wrap text-center">
+        {eyebrow && (
+          <span className="eyebrow mb-3 inline-block" style={{ color: 'var(--accent)' }}>{eyebrow}</span>
+        )}
         <h2 className="heading-display mb-4 text-white">{title}</h2>
         {subtitle && <p className="text-body text-gray-300 max-w-xl mx-auto mb-8">{subtitle}</p>}
         <div className="flex flex-wrap items-center justify-center gap-4">

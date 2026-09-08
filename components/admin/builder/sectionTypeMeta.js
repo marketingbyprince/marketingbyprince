@@ -39,6 +39,7 @@ export const SECTION_TYPE_META = {
     label: 'Call To Action',
     icon: '📣',
     fields: [
+      { name: 'eyebrow', label: 'Eyebrow (optional)' },
       { name: 'title', label: 'Title', required: true },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea', rows: 2 },
       [

@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 const routeLabels = {
   '/':          "Let's Talk",
   '/services':  'Get Quote',
-  '/pricing':   'Order Now',
+  '/pricing':   'Book a Call',
   '/blog':      'Subscribe',
   '/contact':   'Send Message',
 }

@@ -5,8 +5,8 @@ export async function generateMetadata() {
   return getSeoMeta({
     contentType: 'gigs',
     fallback: {
-      title: 'Pricing & Packages | Performance Marketing Services | Prince Pandey',
-      description: 'Transparent pricing packages for performance marketing, SEO, tracking setup and more. Fixed-scope deliverables with expert execution.',
+      title: 'Performance Marketing Services | Google, Meta & TikTok Ads | Marketing by Prince',
+      description: 'Performance marketing services across Google, Meta and TikTok, backed by tracking, attribution, conversion optimization and continuous campaign management.',
       path: '/pricing',
     },
   })
