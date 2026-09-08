@@ -239,6 +239,14 @@
            hover:border-accent/40 hover:text-deep;
   }
 
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
 
   /* ── Spinners ───────────────────────────────────────────────── */
 

@@ -59,12 +59,12 @@ export default function CaseStudiesClient() {
           {/* Filters */}
           <div className="mb-10 space-y-3">
             {channels.length > 2 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1 -mx-1 px-1 no-scrollbar">
                 {channels.map(ch => (
                   <button
                     key={ch}
                     onClick={() => setChannel(ch)}
-                    className={channel === ch ? 'filter-pill-on' : 'filter-pill-off'}
+                    className={`whitespace-nowrap shrink-0 ${channel === ch ? 'filter-pill-on' : 'filter-pill-off'}`}
                   >
                     {ch}
                   </button>
@@ -72,12 +72,12 @@ export default function CaseStudiesClient() {
               </div>
             )}
             {industries.length > 2 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1 -mx-1 px-1 no-scrollbar">
                 {industries.map(ind => (
                   <button
                     key={ind}
                     onClick={() => setIndustry(ind)}
-                    className={industry === ind ? 'filter-pill-on' : 'filter-pill-off'}
+                    className={`whitespace-nowrap shrink-0 ${industry === ind ? 'filter-pill-on' : 'filter-pill-off'}`}
                   >
                     {ind}
                   </button>
