@@ -11,7 +11,7 @@ const companyLinks = [
 ]
 
 const servicesLinks = [
-  { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[0])}`, label: 'Performance Marketing' },
+  { to: '/services/performance-marketing', label: 'Performance Marketing' },
   { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[1])}`, label: 'SEO' },
   { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[2])}`, label: 'Marketplace' },
   { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[3])}`, label: 'Development' },

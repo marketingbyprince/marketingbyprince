@@ -45,6 +45,10 @@ export const SECTION_TYPE_META = {
         { name: 'ctaLabel', label: 'Button Label', placeholder: 'Book Strategy Call' },
         { name: 'ctaHref', label: 'Button Link', placeholder: '/contact' },
       ],
+      [
+        { name: 'secondaryLabel', label: 'Secondary Button Label (optional)' },
+        { name: 'secondaryHref', label: 'Secondary Button Link' },
+      ],
     ],
   },
   faq_accordion: {

@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation'
 import { SERVICE_PILLARS } from '@/lib/servicePillars'
 
 const servicesDropdown = [
-  ...SERVICE_PILLARS.map(pillar => ({ to: `/services?pillar=${encodeURIComponent(pillar)}`, label: pillar })),
+  { to: '/services/performance-marketing', label: SERVICE_PILLARS[0] },
+  ...SERVICE_PILLARS.slice(1).map(pillar => ({ to: `/services?pillar=${encodeURIComponent(pillar)}`, label: pillar })),
   { to: '/services', label: 'All Services' },
 ]
 
