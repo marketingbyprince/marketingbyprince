@@ -1,13 +1,11 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import ServiceCard from '@/components/ServiceCard'
 import { useCurrency } from '@/hooks/useCurrency'
 import CurrencySelector from '@/components/CurrencySelector'
 
-const TIER_ORDER  = ['starter', 'standard', 'premium', 'custom']
 const TIER_LABEL  = { starter: 'Starter', standard: 'Standard', premium: 'Premium', custom: 'Custom / Enterprise' }
 const FEATURED    = 'premium'
 
@@ -20,52 +18,17 @@ function platformRec(count) {
 }
 
 
-export default function ServiceDetailClient({ params }) {
-  const slug = params.slug
-
-  const [service,   setService]   = useState(null)
-  const [packages,  setPackages]  = useState([])
-  const [addons,    setAddons]    = useState([])
-  const [platforms, setPlatforms] = useState([])
-  const [related,   setRelated]   = useState([])
-  const [loading,   setLoading]   = useState(true)
+export default function ServiceDetailClient({ initial }) {
+  const service   = initial?.service ?? null
+  const packages  = initial?.packages ?? []
+  const addons    = initial?.addons ?? []
+  const platforms = initial?.platforms ?? []
+  const related   = initial?.related ?? []
 
   const [selPkgId,      setSelPkgId]      = useState(null)
   const [selAddonIds,   setSelAddonIds]   = useState(() => new Set())
   const [selPlatformIds,setSelPlatformIds]= useState(() => new Set())
   const [addonFilter,   setAddonFilter]   = useState('All')
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-
-    supabase.from('services').select('*').eq('slug', slug).eq('is_active', true).single()
-      .then(async ({ data: svc }) => {
-        if (cancelled) return
-        setService(svc)
-
-        if (!svc) { setLoading(false); return }
-
-        const [{ data: pkgs }, { data: ads }, { data: plats }, { data: rel }] = await Promise.all([
-          supabase.from('service_packages').select('*').eq('service_id', svc.id).eq('is_active', true),
-          supabase.from('add_on_services').select('*').eq('service_id', svc.id).eq('is_active', true).order('sort_order'),
-          supabase.from('platforms').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
-          svc.pillar
-            ? supabase.from('services').select('id, title, description, icon, pillar, slug')
-                .eq('pillar', svc.pillar).eq('is_active', true).neq('id', svc.id).limit(3)
-            : Promise.resolve({ data: [] }),
-        ])
-        if (cancelled) return
-
-        setPackages((pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)))
-        setAddons(ads || [])
-        setPlatforms(plats || [])
-        setRelated(rel || [])
-        setLoading(false)
-      })
-
-    return () => { cancelled = true }
-  }, [slug])
 
   const selPkgObj       = useMemo(() => packages.find(p => p.id === selPkgId) ?? null, [packages, selPkgId])
   const selAddonObjs    = useMemo(() => addons.filter(a => selAddonIds.has(a.id)),      [addons, selAddonIds])
@@ -109,8 +72,6 @@ export default function ServiceDetailClient({ params }) {
     setSelAddonIds(new Set())
     setSelPlatformIds(new Set())
   }, [])
-
-  if (loading) return <LoadingSkeleton />
 
   if (!service) return (
     <div className="min-h-screen flex items-center justify-center bg-soft px-4">
@@ -518,36 +479,5 @@ function QuoteRow({ label, value, onRemove }) {
         </button>
       </div>
     </div>
-  )
-}
-
-function LoadingSkeleton() {
-  return (
-    <main className="min-h-screen pt-24 pb-24 bg-soft">
-      <div className="section-narrow animate-pulse">
-        <div className="flex items-center gap-2 mb-8">
-          {[48, 8, 80, 8, 120].map((w, i) => (
-            <div key={i} className="h-3 rounded bg-gray-200" style={{ width: w }} />
-          ))}
-        </div>
-        <div className="card p-8 mb-12">
-          <div className="flex flex-col sm:flex-row gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-gray-200 shrink-0" />
-            <div className="flex-1 space-y-3">
-              <div className="h-3 w-20 bg-gray-200 rounded" />
-              <div className="h-8 w-2/3 bg-gray-200 rounded" />
-              <div className="space-y-2">
-                <div className="h-3 bg-gray-100 rounded" />
-                <div className="h-3 bg-gray-100 rounded w-5/6" />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <div className="h-10 w-28 bg-gray-200 rounded-xl" />
-                <div className="h-10 w-28 bg-gray-100 rounded-xl" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
   )
 }

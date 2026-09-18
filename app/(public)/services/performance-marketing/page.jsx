@@ -3,6 +3,8 @@ import SchemaScript from '@/components/SchemaScript'
 import { supabase } from '@/lib/supabase'
 import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
 
+export const dynamic = 'force-dynamic'
+
 const RESULT_SLUGS = [
   'tech-trade-group-google-ads',
   'zebra-effect-meta-ads',

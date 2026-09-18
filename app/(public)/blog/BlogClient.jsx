@@ -1,22 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import SectionHeader from '@/components/ui/SectionHeader'
 
 
-export default function BlogClient() {
-  const [articles,        setArticles]        = useState([])
+export default function BlogClient({ initialArticles }) {
+  const articles = initialArticles ?? []
   const [activeCategory,  setActiveCategory]  = useState('All')
-  const [loading,         setLoading]         = useState(true)
-
-  useEffect(() => {
-    supabase.from('articles')
-      .select('id, title, slug, excerpt, cover_image_url, category, read_time_minutes, published_at')
-      .eq('is_published', true).order('published_at', { ascending: false })
-      .then(({ data }) => { setArticles(data || []); setLoading(false) })
-  }, [])
 
   const categories = ['All', ...new Set(articles.map(a => a.category).filter(Boolean))]
   const filtered   = activeCategory === 'All' ? articles : articles.filter(a => a.category === activeCategory)
@@ -43,9 +34,7 @@ export default function BlogClient() {
           ))}
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-20"><div className="spinner" /></div>
-        ) : filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
             <p className="text-4xl mb-4">✍️</p>
             <p className="text-body">Articles coming soon. Stay tuned!</p>

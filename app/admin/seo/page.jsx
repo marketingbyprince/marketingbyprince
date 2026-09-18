@@ -6,13 +6,16 @@ import { scoreColor, scoreLabel } from '@/lib/seo-scoring'
 import SeoScoreCard from '@/components/admin/seo/SeoScoreCard'
 
 const SINGLETON_SECTIONS = [
-  { type: 'homepage',     label: 'Homepage',     icon: '🏠', href: '/admin/seo/homepage' },
-  { type: 'services',     label: 'Services',     icon: '🎯', href: '/admin/seo/services' },
-  { type: 'gigs',         label: 'Gigs',         icon: '📦', href: '/admin/seo/gigs' },
-  { type: 'case_studies', label: 'Case Studies', icon: '📁', href: '/admin/seo/case-studies' },
-  { type: 'blogs',        label: 'Blogs',        icon: '✍️', href: '/admin/seo/blogs' },
-  { type: 'about',        label: 'About Us',     icon: '👤', href: '/admin/seo/about' },
-  { type: null,           label: 'Global Settings', icon: '⚙️', href: '/admin/seo/global' },
+  { type: 'homepage',       label: 'Homepage',       icon: '🏠', href: '/admin/seo/homepage' },
+  { type: 'services',       label: 'Services',       icon: '🎯', href: '/admin/seo/services' },
+  { type: 'gigs',           label: 'Gigs',           icon: '📦', href: '/admin/seo/gigs' },
+  { type: 'case_studies',   label: 'Case Studies',   icon: '📁', href: '/admin/seo/case-studies' },
+  { type: 'blogs',          label: 'Blogs',          icon: '✍️', href: '/admin/seo/blogs' },
+  { type: 'about',          label: 'About Us',       icon: '👤', href: '/admin/seo/about' },
+  { type: 'expertise',      label: 'Expertise',      icon: '🧠', href: '/admin/seo/expertise' },
+  { type: 'certifications', label: 'Certifications', icon: '🏆', href: '/admin/seo/certifications' },
+  { type: 'contact',        label: 'Contact',        icon: '✉️', href: '/admin/seo/contact' },
+  { type: null,             label: 'Global Settings', icon: '⚙️', href: '/admin/seo/global' },
 ]
 
 // Which singleton rows have expandable sub-records
@@ -26,14 +29,18 @@ const EXPANDABLE = {
 const PAGE_LABELS = {
   homepage: 'Homepage', services: 'Services', gigs: 'Gigs',
   case_studies: 'Case Studies', blogs: 'Blogs', about: 'About Us',
+  expertise: 'Expertise', certifications: 'Certifications', contact: 'Contact',
 }
 const PAGE_HREFS = {
-  homepage:     '/admin/seo/homepage',
-  services:     '/admin/seo/services',
-  gigs:         '/admin/seo/gigs',
-  case_studies: '/admin/seo/case-studies',
-  blogs:        '/admin/seo/blogs',
-  about:        '/admin/seo/about',
+  homepage:       '/admin/seo/homepage',
+  services:       '/admin/seo/services',
+  gigs:           '/admin/seo/gigs',
+  case_studies:   '/admin/seo/case-studies',
+  blogs:          '/admin/seo/blogs',
+  about:          '/admin/seo/about',
+  expertise:      '/admin/seo/expertise',
+  certifications: '/admin/seo/certifications',
+  contact:        '/admin/seo/contact',
 }
 
 function Check({ ok }) {

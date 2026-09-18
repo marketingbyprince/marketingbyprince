@@ -4,15 +4,24 @@ import { supabase } from '@/lib/supabase'
 import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const LIGHT_FIELDS = 'id, slug, title, client_name, industry, channel, cover_image_url, key_metrics, sort_order, created_at'
 
-async function getCaseStudy(slugOrId) {
+async function getCaseStudyDetail(slugOrId) {
   const column = UUID_RE.test(slugOrId) ? 'id' : 'slug'
-  const { data } = await supabase.from('case_studies').select('id, title, summary').eq(column, slugOrId).single()
-  return data
+  const { data: cs } = await supabase.from('case_studies').select('*').eq(column, slugOrId).single()
+  if (!cs) return { cs: null, ordered: [], others: [] }
+
+  const { data: all } = await supabase.from('case_studies').select(LIGHT_FIELDS)
+    .eq('is_published', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false })
+
+  const ordered = all || []
+  return { cs, ordered, others: ordered.filter(o => o.id !== cs.id) }
 }
 
 export async function generateMetadata({ params }) {
-  const cs = await getCaseStudy(params.slug)
+  const { cs } = await getCaseStudyDetail(params.slug)
   return getSeoMeta({
     contentType: 'case_study',
     contentId: cs?.id ?? null,
@@ -25,19 +34,19 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const cs = await getCaseStudy(params.slug)
-  const schemas = cs ? await getSeoSchemas({ contentType: 'case_study', contentId: cs.id }) : []
+  const detail = await getCaseStudyDetail(params.slug)
+  const schemas = detail.cs ? await getSeoSchemas({ contentType: 'case_study', contentId: detail.cs.id }) : []
 
   const breadcrumb = buildBreadcrumbSchema([
     { name: 'Home', url: 'https://marketingbyprince.com' },
     { name: 'Case Studies', url: 'https://marketingbyprince.com/case-studies' },
-    { name: cs?.title || 'Case Study', url: `https://marketingbyprince.com/case-studies/${params.slug}` },
+    { name: detail.cs?.title || 'Case Study', url: `https://marketingbyprince.com/case-studies/${params.slug}` },
   ])
 
   return (
     <>
       <SchemaScript schemas={[breadcrumb, ...schemas]} />
-      <CaseStudyClient params={params} />
+      <CaseStudyClient initial={detail} />
     </>
   )
 }

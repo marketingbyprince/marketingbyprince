@@ -1,31 +1,17 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 import SectionHeader from '@/components/ui/SectionHeader'
 import ServiceCard   from '@/components/ServiceCard'
 
 
-export default function ServicesClient() {
+export default function ServicesClient({ initialServices }) {
   const searchParams = useSearchParams()
-  const [services,     setServices]     = useState([])
-  const [loading,      setLoading]      = useState(true)
+  const services      = initialServices ?? []
   const [activePillar, setActivePillar] = useState(() => searchParams.get('pillar') || 'All')
   const [search,       setSearch]       = useState('')
-
-  useEffect(() => {
-    supabase
-      .from('services')
-      .select('id, title, description, pillar, icon, slug, is_active')
-      .eq('is_active', true)
-      .order('pillar')
-      .then(({ data }) => {
-        setServices(data || [])
-        setLoading(false)
-      })
-  }, [])
 
   const pillars = useMemo(() => {
     const seen = new Map()
@@ -69,9 +55,7 @@ export default function ServicesClient() {
           subtitle="Performance marketing drives the results — SEO & AEO, marketplace growth, development, and automation make sure they compound."
         />
 
-        {loading ? (
-          <PillarSkeleton />
-        ) : pillars.length > 0 ? (
+        {pillars.length > 0 ? (
           <div className="flex flex-wrap gap-2 mb-10">
             <button
               onClick={() => setActivePillar('All')}
@@ -117,9 +101,7 @@ export default function ServicesClient() {
           )}
         </div>
 
-        {loading ? (
-          <CardSkeleton />
-        ) : !hasResults ? (
+        {!hasResults ? (
           <EmptyState hasSearch={!!search.trim()} onClear={handleReset} isFiltered={isFiltered} />
         ) : (
           <div className="space-y-14">
@@ -147,64 +129,21 @@ export default function ServicesClient() {
           </div>
         )}
 
-        {!loading && (
-          <div
-            className="mt-20 rounded-2xl p-10 text-center"
-            style={{
-              backgroundColor: 'var(--accent-muted)',
-              border: '1px solid var(--accent-border)',
-            }}
-          >
-            <h3 className="heading-section mb-2">Don&rsquo;t see what you need?</h3>
-            <p className="text-body text-gray-500 mb-6 max-w-md mx-auto">
-              Let&rsquo;s discuss a custom solution tailored to your exact goals and budget.
-            </p>
-            <Link href="/contact" className="btn-primary btn-lg">Talk to Me</Link>
-          </div>
-        )}
+        <div
+          className="mt-20 rounded-2xl p-10 text-center"
+          style={{
+            backgroundColor: 'var(--accent-muted)',
+            border: '1px solid var(--accent-border)',
+          }}
+        >
+          <h3 className="heading-section mb-2">Don&rsquo;t see what you need?</h3>
+          <p className="text-body text-gray-500 mb-6 max-w-md mx-auto">
+            Let&rsquo;s discuss a custom solution tailored to your exact goals and budget.
+          </p>
+          <Link href="/contact" className="btn-primary btn-lg">Talk to Me</Link>
+        </div>
 
       </div>
-    </div>
-  )
-}
-
-function PillarSkeleton() {
-  return (
-    <div className="flex flex-wrap gap-2 mb-10">
-      {[96, 128, 112, 144, 104, 120].map((w, i) => (
-        <div key={i} className="h-9 rounded-full bg-gray-200 animate-pulse" style={{ width: w }} />
-      ))}
-    </div>
-  )
-}
-
-function CardSkeleton() {
-  return (
-    <div className="space-y-14">
-      {[6, 3].map((count, gi) => (
-        <div key={gi}>
-          <div className="flex items-center gap-2.5 mb-6">
-            <div className="w-6 h-6 rounded-lg bg-gray-200 animate-pulse" />
-            <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {Array.from({ length: count }, (_, i) => (
-              <div key={i} className="card p-6 animate-pulse">
-                <div className="w-12 h-12 rounded-xl bg-gray-200 mb-5" />
-                <div className="h-4 bg-gray-200 rounded mb-3 w-3/4" />
-                <div className="space-y-2 mb-6">
-                  <div className="h-3 bg-gray-100 rounded" />
-                  <div className="h-3 bg-gray-100 rounded w-5/6" />
-                  <div className="h-3 bg-gray-100 rounded w-4/6" />
-                </div>
-                <div className="border-t border-gray-100 pt-4">
-                  <div className="h-8 w-24 bg-gray-200 rounded-lg" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   )
 }

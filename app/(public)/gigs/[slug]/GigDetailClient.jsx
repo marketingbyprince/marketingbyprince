@@ -1,21 +1,19 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+import { useMemo, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCurrency } from '@/hooks/useCurrency'
 import CurrencySelector from '@/components/CurrencySelector'
 
-const TIER_ORDER = ['starter', 'standard', 'premium']
-
-export default function GigDetailClient({ params }) {
+export default function GigDetailClient({ params, initial }) {
   const id = params.slug
 
-  const [gig,             setGig]             = useState(null)
-  const [packages,        setPackages]        = useState([])
-  const [addons,          setAddons]          = useState([])
-  const [platforms,       setPlatforms]       = useState([])
-  const [loading,         setLoading]         = useState(true)
+  const gig       = initial?.gig ?? null
+  const packages  = initial?.packages ?? []
+  const addons    = initial?.addons ?? []
+  const platforms = initial?.platforms ?? []
+
   const [selPkgId,        setSelPkgId]        = useState(null)
   // Map of addonId -> quantity (0 means not selected)
   const [addonQty,        setAddonQty]        = useState({})
@@ -26,36 +24,6 @@ export default function GigDetailClient({ params }) {
 
   const packagesRef    = useRef(null)
   const exploreMoreRef = useRef(null)
-
-  useEffect(() => {
-    async function load() {
-      let { data: g } = await supabase.from('gigs').select('*').eq('slug', id).single()
-      if (!g) {
-        const { data: byId } = await supabase.from('gigs').select('*').eq('id', id).single()
-        g = byId
-      }
-      if (!g) { setLoading(false); return }
-
-      const gigId = g.id
-      const [{ data: pkgs }, { data: ads }, { data: plats }] = await Promise.all([
-        supabase.from('gig_packages').select('*').eq('gig_id', gigId).eq('is_active', true),
-        supabase.from('gig_addons').select('*').eq('gig_id', gigId).eq('is_active', true).order('sort_order'),
-        supabase.from('platforms').select('*').eq('is_active', true).order('sort_order'),
-      ])
-      setGig(g)
-      setPackages((pkgs || []).sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)))
-      setAddons(ads || [])
-
-      // Filter platforms to only ones allowed for this gig (if set)
-      const allowedIds = g.allowed_platform_ids
-      const filteredPlats = (allowedIds && allowedIds.length > 0)
-        ? (plats || []).filter(p => allowedIds.includes(p.id))
-        : (plats || [])
-      setPlatforms(filteredPlats)
-      setLoading(false)
-    }
-    load()
-  }, [id])
 
   const selPkgObj       = useMemo(() => packages.find(p => p.id === selPkgId) ?? null, [packages, selPkgId])
   const selPlatformObjs = useMemo(() => platforms.filter(p => selPlatformIds.has(p.id)), [platforms, selPlatformIds])
@@ -99,7 +67,6 @@ export default function GigDetailClient({ params }) {
   const scrollToPackages   = () => packagesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   const scrollToExplore    = () => exploreMoreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-soft"><div className="spinner" /></div>
   if (!gig)    return (
     <div className="min-h-screen flex items-center justify-center bg-soft">
       <div className="text-center">

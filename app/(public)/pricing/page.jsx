@@ -1,6 +1,8 @@
 import GigsClient from '../gigs/GigsClient'
 import { getSeoMeta } from '@/lib/seo'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata() {
   return getSeoMeta({
     contentType: 'gigs',

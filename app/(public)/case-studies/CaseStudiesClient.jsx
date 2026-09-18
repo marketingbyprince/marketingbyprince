@@ -2,9 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
-
-const LIGHT_FIELDS = 'id, slug, title, client_name, industry, channel, summary, cover_image_url, key_metrics, is_featured, sort_order, created_at'
 
 function ChevronIcon({ open }) {
   return (
@@ -85,19 +82,11 @@ function FilterDropdown({ label, value, options, onChange }) {
   )
 }
 
-export default function CaseStudiesClient() {
-  const [cases,    setCases]    = useState([])
+export default function CaseStudiesClient({ initialCases }) {
+  const cases = initialCases ?? []
   const [industry, setIndustry] = useState('All')
   const [channel,  setChannel]  = useState('All')
   const [search,   setSearch]   = useState('')
-  const [loading,  setLoading]  = useState(true)
-
-  useEffect(() => {
-    supabase.from('case_studies').select(LIGHT_FIELDS).eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false })
-      .then(({ data }) => { setCases(data || []); setLoading(false) })
-  }, [])
 
   const industries = useMemo(() => ['All', ...new Set(cases.map(c => c.industry).filter(Boolean))], [cases])
   const channels   = useMemo(() => ['All', ...new Set(cases.map(c => c.channel).filter(Boolean))], [cases])
@@ -180,15 +169,11 @@ export default function CaseStudiesClient() {
             </div>
           </div>
 
-          {!loading && (
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-6">
-              {filtered.length} {filtered.length === 1 ? 'case study' : 'case studies'}
-            </p>
-          )}
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-6">
+            {filtered.length} {filtered.length === 1 ? 'case study' : 'case studies'}
+          </p>
 
-          {loading ? (
-            <div className="flex justify-center py-20"><div className="spinner" /></div>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="text-center py-20">
               {hasActiveFilters ? (
                 <>

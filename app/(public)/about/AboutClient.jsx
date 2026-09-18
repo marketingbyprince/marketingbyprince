@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import { generateResume } from '@/lib/resumeUtils'
 import SectionHeader from '@/components/ui/SectionHeader'
 
@@ -14,28 +13,12 @@ function fmtDate(d) {
   return `${MONTHS[dt.getUTCMonth()]} ${dt.getUTCFullYear()}`
 }
 
-export default function AboutClient() {
-  const [about,      setAbout]      = useState(null)
-  const [experience, setExperience] = useState([])
-  const [skills,     setSkills]     = useState([])
-  const [education,  setEducation]  = useState([])
-  const [loading,    setLoading]    = useState(true)
+export default function AboutClient({ initial }) {
+  const about      = initial?.about ?? null
+  const experience = initial?.experience ?? []
+  const skills     = initial?.skills ?? []
+  const education  = initial?.education ?? []
   const [generating, setGenerating] = useState(false)
-
-  useEffect(() => {
-    Promise.all([
-      supabase.from('about_content').select('*').single(),
-      supabase.from('work_experience').select('*').order('sort_order'),
-      supabase.from('skills').select('*').order('category').order('sort_order'),
-      supabase.from('education').select('*').order('sort_order'),
-    ]).then(([a, e, s, ed]) => {
-      setAbout(a.data)
-      setExperience(e.data || [])
-      setSkills(s.data || [])
-      setEducation(ed.data || [])
-      setLoading(false)
-    })
-  }, [])
 
   const handleDownloadResume = async () => {
     setGenerating(true)
@@ -49,14 +32,6 @@ export default function AboutClient() {
     acc[cat].push(s)
     return acc
   }, {})
-
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-24 pb-20 bg-soft flex items-center justify-center">
-        <div className="spinner" />
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-soft">

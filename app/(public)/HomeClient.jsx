@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 
 /* ── Static fallback data ──────────────────────────────────────── */
 
@@ -171,43 +170,9 @@ function HeroSlider({ slides }) {
 }
 
 /* ── Main page ─────────────────────────────────────────────────── */
-export default function HomeClient() {
-  const [services,    setServices]    = useState([])
-  const [heroSlides,  setHeroSlides]  = useState([])
-  const [loading,     setLoading]     = useState(true)
-
-  useEffect(() => {
-    async function fetchSlides() {
-      try {
-        const now = new Date().toISOString()
-        const { data } = await supabase
-          .from('hero_slides')
-          .select('id,image_url,alt_text,display_order')
-          .eq('is_active', true)
-          .lte('start_date', now)
-          .or('end_date.is.null,end_date.gte.' + now)
-          .order('display_order', { ascending: true })
-        if (data?.length) setHeroSlides(data)
-      } catch {}
-    }
-
-    async function fetchServices() {
-      try {
-        const { data } = await supabase
-          .from('services')
-          .select('id,title,description,cta_link')
-          .eq('is_active', true)
-          .eq('show_on_homepage', true)
-          .order('homepage_order', { ascending: true })
-          .limit(10)
-        if (data?.length) setServices(data)
-      } catch {}
-    }
-
-    Promise.all([fetchSlides(), fetchServices()]).finally(() => setLoading(false))
-  }, [])
-
-  const displayServices = services.length ? services : DEFAULT_SERVICES
+export default function HomeClient({ initial }) {
+  const heroSlides = initial?.heroSlides ?? []
+  const displayServices = initial?.services?.length ? initial.services : DEFAULT_SERVICES
 
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Raleway', sans-serif" }}>

@@ -1,15 +1,9 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import MetricsTable from '@/components/case-studies/MetricsTable'
 import ScreenshotGallery from '@/components/case-studies/ScreenshotGallery'
 import PdfViewer from '@/components/case-studies/PdfViewer'
 import RelatedProjects from '@/components/case-studies/RelatedProjects'
 import PrevNextNav from '@/components/case-studies/PrevNextNav'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const sectionDefs = [
   { label: 'The Challenge', icon: '🎯', key: 'challenge' },
@@ -19,43 +13,10 @@ const sectionDefs = [
   { label: 'Results',       icon: '📈', key: 'results'   },
 ]
 
-const LIGHT_FIELDS = 'id, slug, title, client_name, industry, channel, cover_image_url, key_metrics, sort_order, created_at'
-
-export default function CaseStudyClient({ params }) {
-  const slugOrId = params.slug
-  const [cs,      setCs]      = useState(null)
-  const [others,  setOthers]  = useState([])
-  const [ordered, setOrdered] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      const column = UUID_RE.test(slugOrId) ? 'id' : 'slug'
-      const { data } = await supabase.from('case_studies').select('*').eq(column, slugOrId).single()
-      if (cancelled) return
-      setCs(data)
-      setLoading(false)
-
-      if (data) {
-        const { data: all } = await supabase.from('case_studies').select(LIGHT_FIELDS)
-          .eq('is_published', true)
-          .order('sort_order', { ascending: true })
-          .order('created_at', { ascending: false })
-        if (cancelled) return
-        setOrdered(all || [])
-        setOthers((all || []).filter(o => o.id !== data.id))
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [slugOrId])
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-soft">
-      <div className="spinner" />
-    </div>
-  )
+export default function CaseStudyClient({ initial }) {
+  const cs      = initial?.cs ?? null
+  const others  = initial?.others ?? []
+  const ordered = initial?.ordered ?? []
 
   if (!cs) return (
     <div className="min-h-screen flex items-center justify-center bg-soft">

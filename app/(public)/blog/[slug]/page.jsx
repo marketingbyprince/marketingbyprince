@@ -3,15 +3,16 @@ import SchemaScript from '@/components/SchemaScript'
 import { supabase } from '@/lib/supabase'
 import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
 
-async function getArticle(slug) {
-  const { data } = await supabase.from('articles')
-    .select('title, excerpt, slug, cover_image_url, published_at, created_at, author')
-    .eq('slug', slug).single()
-  return data
+async function getArticleDetail(slug) {
+  const [{ data: article }, { data: authorProfile }] = await Promise.all([
+    supabase.from('articles').select('*').eq('slug', slug).eq('is_published', true).single(),
+    supabase.from('author_profile').select('*').eq('id', 1).single(),
+  ])
+  return { article: article || null, author: authorProfile || null }
 }
 
 export async function generateMetadata({ params }) {
-  const post = await getArticle(params.slug)
+  const { article: post } = await getArticleDetail(params.slug)
   return getSeoMeta({
     contentType: 'blog_post',
     contentId: params.slug,
@@ -24,8 +25,11 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const post = await getArticle(params.slug)
-  const schemas = await getSeoSchemas({ contentType: 'blog_post', contentId: params.slug })
+  const [detail, schemas] = await Promise.all([
+    getArticleDetail(params.slug),
+    getSeoSchemas({ contentType: 'blog_post', contentId: params.slug }),
+  ])
+  const post = detail.article
 
   const breadcrumb = buildBreadcrumbSchema([
     { name: 'Home', url: 'https://marketingbyprince.com' },
@@ -46,7 +50,7 @@ export default async function Page({ params }) {
   return (
     <>
       <SchemaScript schemas={[breadcrumb, articleSchema, ...schemas]} />
-      <BlogPostClient params={params} />
+      <BlogPostClient initial={detail} />
     </>
   )
 }

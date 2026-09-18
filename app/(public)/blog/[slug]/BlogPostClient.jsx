@@ -1,8 +1,4 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 
 function AuthorCard({ author }) {
   if (!author) return null
@@ -58,28 +54,9 @@ function AuthorCard({ author }) {
 }
 
 
-export default function BlogPostClient({ params }) {
-  const slug = params.slug
-  const [article, setArticle] = useState(null)
-  const [author, setAuthor] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    Promise.all([
-      supabase.from('articles').select('*').eq('slug', slug).eq('is_published', true).single(),
-      supabase.from('author_profile').select('*').eq('id', 1).single(),
-    ]).then(([{ data: art }, { data: auth }]) => {
-      setArticle(art)
-      setAuthor(auth)
-      setLoading(false)
-    })
-  }, [slug])
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-soft">
-      <div className="spinner" />
-    </div>
-  )
+export default function BlogPostClient({ initial }) {
+  const article = initial?.article ?? null
+  const author  = initial?.author ?? null
 
   if (!article) return (
     <div className="min-h-screen flex items-center justify-center bg-soft">
