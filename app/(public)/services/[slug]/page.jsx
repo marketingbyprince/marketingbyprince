@@ -43,17 +43,17 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const detail = await getServiceDetail(params.slug)
-  const schemas = detail.service ? await getSeoSchemas({ contentType: 'service', contentId: detail.service.id }) : []
 
   const breadcrumb = buildBreadcrumbSchema([
     { name: 'Home', url: 'https://marketingbyprince.com' },
     { name: 'Services', url: 'https://marketingbyprince.com/services' },
     { name: detail.service?.title || 'Service', url: `https://marketingbyprince.com/services/${params.slug}` },
   ])
+  const graph = await getSeoSchemas({ contentType: 'service', contentId: detail.service?.id ?? null, extraNodes: [breadcrumb] })
 
   return (
     <>
-      <SchemaScript schemas={[breadcrumb, ...schemas]} />
+      <SchemaScript schemas={graph} />
       <ServiceDetailClient initial={detail} />
     </>
   )

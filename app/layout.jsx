@@ -20,32 +20,6 @@ const DEFAULT_TITLE = 'Performance Marketing Consultant in India | Prince Pandey
 const DEFAULT_DESCRIPTION = 'Performance marketing first — backed by SEO, marketplace growth, web & app development, and automation. A complete digital growth partner for brands ready to scale. 3+ years, 40+ clients, consistent 3-5x ROAS.'
 const DEFAULT_OG_IMAGE = '/og-image.jpg'
 
-const defaultPersonSchema = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      '@id': 'https://marketingbyprince.com/#person',
-      name: 'Prince Pandey',
-      jobTitle: 'Performance Marketing Consultant',
-      url: 'https://marketingbyprince.com',
-      email: 'marketingbyprince@gmail.com',
-      telephone: '+919465992412',
-      address: { '@type': 'PostalAddress', addressLocality: 'Panchkula', addressRegion: 'Haryana', addressCountry: 'IN' },
-      sameAs: ['https://linkedin.com/in/prince-pandey', 'https://github.com/prince-pandey'],
-      knowsAbout: ['PPC', 'Meta Ads', 'Google Ads', 'SEO', 'Performance Marketing', 'CRO'],
-    },
-    {
-      '@type': 'Organization',
-      '@id': 'https://marketingbyprince.com/#organization',
-      name: 'Marketing By Prince',
-      url: 'https://marketingbyprince.com',
-      founder: { '@id': 'https://marketingbyprince.com/#person' },
-      description: 'Full-service digital growth partner led by performance marketing — backed by SEO, marketplace growth, website & app development, creative, and marketing automation.',
-    },
-  ],
-}
-
 export async function generateMetadata() {
   const settings = await getGlobalSeoSettings()
 
@@ -95,9 +69,13 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   const settings = await getGlobalSeoSettings()
+  // Site-wide schema is opt-in via the SEO Center's Global Settings org_schema
+  // field. Pages that need their own Person/Organization/BreadcrumbList graph
+  // (e.g. /about) build and render it themselves, so this stays empty by
+  // default rather than emitting a schema that duplicates or conflicts with it.
   const orgSchema = settings?.org_schema && Object.keys(settings.org_schema).length
     ? settings.org_schema
-    : defaultPersonSchema
+    : null
 
   return (
     <html lang="en" className={raleway.variable}>

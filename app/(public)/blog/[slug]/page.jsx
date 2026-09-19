@@ -25,10 +25,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const [detail, schemas] = await Promise.all([
-    getArticleDetail(params.slug),
-    getSeoSchemas({ contentType: 'blog_post', contentId: params.slug }),
-  ])
+  const detail = await getArticleDetail(params.slug)
   const post = detail.article
 
   const breadcrumb = buildBreadcrumbSchema([
@@ -38,7 +35,6 @@ export default async function Page({ params }) {
   ])
 
   const articleSchema = post ? {
-    '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
     description: post.excerpt,
@@ -47,9 +43,11 @@ export default async function Page({ params }) {
     author: { '@type': 'Person', name: post.author || 'Prince Pandey' },
   } : null
 
+  const graph = await getSeoSchemas({ contentType: 'blog_post', contentId: params.slug, extraNodes: [breadcrumb, articleSchema] })
+
   return (
     <>
-      <SchemaScript schemas={[breadcrumb, articleSchema, ...schemas]} />
+      <SchemaScript schemas={graph} />
       <BlogPostClient initial={detail} />
     </>
   )

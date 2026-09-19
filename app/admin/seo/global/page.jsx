@@ -11,12 +11,22 @@ function Field({ label, children, hint }) {
     </div>
   )
 }
-function Input({ value, onChange, placeholder }) {
+function Input({ value, onChange, placeholder, onBlur }) {
   return (
-    <input value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+    <input value={value || ''} onChange={e => onChange(e.target.value)} onBlur={onBlur} placeholder={placeholder}
            className="w-full rounded-lg px-3 py-2.5 text-sm"
            style={{ backgroundColor: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }} />
   )
+}
+
+// Search-engine verification fields only want the bare token, but people
+// naturally paste the whole <meta name="..." content="..."> tag Google/Bing
+// hand them. Pull the content value out of a pasted tag; leave a bare token
+// alone.
+function sanitizeVerificationToken(raw) {
+  if (!raw) return raw
+  const match = raw.match(/content=["']([^"']+)["']/i)
+  return (match ? match[1] : raw).trim()
 }
 function Textarea({ value, onChange, placeholder, rows = 4 }) {
   return (
@@ -41,10 +51,15 @@ export default function GlobalSeoPage() {
 
   const save = async () => {
     setSaving(true)
+    const payload = {
+      ...settings,
+      google_verification: sanitizeVerificationToken(settings.google_verification),
+      bing_verification: sanitizeVerificationToken(settings.bing_verification),
+    }
     if (settings.id) {
-      await supabase.from('seo_global_settings').update(settings).eq('id', settings.id)
+      await supabase.from('seo_global_settings').update(payload).eq('id', settings.id)
     } else {
-      const { data } = await supabase.from('seo_global_settings').insert(settings).select().single()
+      const { data } = await supabase.from('seo_global_settings').insert(payload).select().single()
       if (data) setSettings(data)
     }
     setSaving(false)
@@ -106,11 +121,21 @@ export default function GlobalSeoPage() {
            style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
         <h2 className="text-white font-bold">Search Engine Verifications</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Field label="Google Search Console Verification">
-            <Input value={settings.google_verification} onChange={set('google_verification')} placeholder="google-site-verification=..." />
+          <Field label="Google Search Console Verification" hint="Paste the full <meta> tag or just the token, either works">
+            <Input
+              value={settings.google_verification}
+              onChange={set('google_verification')}
+              onBlur={() => set('google_verification')(sanitizeVerificationToken(settings.google_verification))}
+              placeholder="NJZokP9rDeTSDRqrzxB75RqeAHzoMoGcTVKhpBtcBPY"
+            />
           </Field>
-          <Field label="Bing Webmaster Verification">
-            <Input value={settings.bing_verification} onChange={set('bing_verification')} placeholder="msvalidate.01=..." />
+          <Field label="Bing Webmaster Verification" hint="Paste the full <meta> tag or just the token, either works">
+            <Input
+              value={settings.bing_verification}
+              onChange={set('bing_verification')}
+              onBlur={() => set('bing_verification')(sanitizeVerificationToken(settings.bing_verification))}
+              placeholder="msvalidate.01=..."
+            />
           </Field>
         </div>
       </div>

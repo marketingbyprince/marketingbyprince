@@ -1,9 +1,11 @@
 import AboutClient from './AboutClient'
 import SchemaScript from '@/components/SchemaScript'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, buildProfilePageSchema } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
+
+const ABOUT_URL = 'https://marketingbyprince.com/about'
 
 async function getAboutData() {
   const [{ data: about }, { data: experience }, { data: skills }, { data: education }] = await Promise.all([
@@ -27,13 +29,24 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const [schemas, initial] = await Promise.all([
-    getSeoSchemas({ contentType: 'about' }),
+  const [graph, initial] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'about',
+      extraNodes: [
+        buildProfilePageSchema({
+          id: `${ABOUT_URL}#profilepage`,
+          url: ABOUT_URL,
+          name: 'About Prince Pandey',
+          personId: `${ABOUT_URL}#person`,
+          breadcrumbId: `${ABOUT_URL}#breadcrumb`,
+        }),
+      ],
+    }),
     getAboutData(),
   ])
   return (
     <>
-      <SchemaScript schemas={schemas} />
+      <SchemaScript schemas={graph} />
       <AboutClient initial={initial} />
     </>
   )

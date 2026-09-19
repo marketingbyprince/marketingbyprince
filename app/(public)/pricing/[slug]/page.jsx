@@ -44,17 +44,17 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const detail = await getGigDetail(params.slug)
-  const schemas = detail.gig ? await getSeoSchemas({ contentType: 'gig', contentId: detail.gig.id }) : []
 
   const breadcrumb = buildBreadcrumbSchema([
     { name: 'Home', url: 'https://marketingbyprince.com' },
     { name: 'Pricing', url: 'https://marketingbyprince.com/pricing' },
     { name: detail.gig?.title || 'Pricing', url: `https://marketingbyprince.com/pricing/${params.slug}` },
   ])
+  const graph = await getSeoSchemas({ contentType: 'gig', contentId: detail.gig?.id ?? null, extraNodes: [breadcrumb] })
 
   return (
     <>
-      <SchemaScript schemas={[breadcrumb, ...schemas]} />
+      <SchemaScript schemas={graph} />
       <GigDetailClient params={params} initial={detail} />
     </>
   )

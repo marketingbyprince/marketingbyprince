@@ -33,20 +33,20 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const [caseStudies, schemas] = await Promise.all([
-    getResultCaseStudies(),
-    getSeoSchemas({ contentType: 'performance-marketing-service' }),
-  ])
-
   const breadcrumb = buildBreadcrumbSchema([
     { name: 'Home', url: 'https://marketingbyprince.com' },
     { name: 'Services', url: 'https://marketingbyprince.com/services' },
     { name: 'Performance Marketing', url: 'https://marketingbyprince.com/services/performance-marketing' },
   ])
 
+  const [caseStudies, graph] = await Promise.all([
+    getResultCaseStudies(),
+    getSeoSchemas({ contentType: 'performance-marketing-service', extraNodes: [breadcrumb] }),
+  ])
+
   return (
     <>
-      <SchemaScript schemas={[breadcrumb, ...schemas]} />
+      <SchemaScript schemas={graph} />
       <PerformanceMarketingContent caseStudies={caseStudies} />
     </>
   )

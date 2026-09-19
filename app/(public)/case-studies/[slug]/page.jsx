@@ -35,17 +35,17 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const detail = await getCaseStudyDetail(params.slug)
-  const schemas = detail.cs ? await getSeoSchemas({ contentType: 'case_study', contentId: detail.cs.id }) : []
 
   const breadcrumb = buildBreadcrumbSchema([
     { name: 'Home', url: 'https://marketingbyprince.com' },
     { name: 'Case Studies', url: 'https://marketingbyprince.com/case-studies' },
     { name: detail.cs?.title || 'Case Study', url: `https://marketingbyprince.com/case-studies/${params.slug}` },
   ])
+  const graph = await getSeoSchemas({ contentType: 'case_study', contentId: detail.cs?.id ?? null, extraNodes: [breadcrumb] })
 
   return (
     <>
-      <SchemaScript schemas={[breadcrumb, ...schemas]} />
+      <SchemaScript schemas={graph} />
       <CaseStudyClient initial={detail} />
     </>
   )
