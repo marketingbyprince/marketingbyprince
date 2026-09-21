@@ -1,7 +1,8 @@
 import AboutClient from './AboutClient'
 import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas, buildProfilePageSchema } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildProfilePageSchema } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const [graph, initial] = await Promise.all([
+  const [graph, initial, faqs] = await Promise.all([
     getSeoSchemas({
       contentType: 'about',
       extraNodes: [
@@ -68,11 +69,13 @@ export default async function Page() {
       ],
     }),
     getAboutData(),
+    getPageFaqs('about'),
   ])
   return (
     <>
       <SchemaScript schemas={graph} />
       <AboutClient initial={initial} />
+      <FaqSection faqs={faqs} />
     </>
   )
 }
