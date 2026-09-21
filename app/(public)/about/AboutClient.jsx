@@ -85,7 +85,7 @@ export default function AboutClient({ initial }) {
               <p className="text-body text-gray-600 leading-relaxed">{about.description}</p>
             )}
 
-            {about?.is_location_visible && about?.location && (
+            {about?.location && (
               <div className="flex items-center gap-2 text-body-sm text-gray-500 font-medium mt-6">
                 <span>📍</span> {about.location}
               </div>
@@ -100,8 +100,8 @@ export default function AboutClient({ initial }) {
             <div className="relative">
               <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200" />
               <div className="space-y-8">
-                {experience.map((job) => (
-                  <div key={job.id} className="relative pl-12">
+                {experience.map((job, i) => (
+                  <div key={i} className="relative pl-12">
                     <div
                       className={`absolute left-0 top-1 w-8 h-8 rounded-full flex items-center justify-center border-2 ${job.is_current ? 'border-accent' : 'bg-white border-gray-200'}`}
                       style={job.is_current ? { backgroundColor: 'var(--accent)' } : {}}
@@ -148,8 +148,8 @@ export default function AboutClient({ initial }) {
                 <div key={cat}>
                   <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{cat}</p>
                   <div className="flex flex-wrap gap-2">
-                    {catSkills.map(s => (
-                      <span key={s.id} className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-full text-body-sm font-semibold text-gray-600 hover:border-accent/40 hover:text-deep transition-all">
+                    {catSkills.map((s, i) => (
+                      <span key={i} className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-full text-body-sm font-semibold text-gray-600 hover:border-accent/40 hover:text-deep transition-all">
                         {s.name}
                       </span>
                     ))}
@@ -172,8 +172,8 @@ export default function AboutClient({ initial }) {
           <div>
             <SectionHeader eyebrow="Education" title="Academic Background" />
             <div className="space-y-4">
-              {education.map(edu => (
-                <div key={edu.id} className="card p-6 inline-flex flex-col gap-1 w-full">
+              {education.map((edu, i) => (
+                <div key={i} className="card p-6 inline-flex flex-col gap-1 w-full">
                   <h3 className="heading-section">{edu.degree}{edu.field_of_study ? ` in ${edu.field_of_study}` : ''}</h3>
                   <p className="text-body-sm font-semibold mt-1" style={{ color: 'var(--accent)' }}>
                     {edu.institution} &middot; {edu.start_year}{edu.end_year || edu.is_current ? ` – ${edu.is_current ? 'Ongoing' : edu.end_year}` : ''}
