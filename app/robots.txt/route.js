@@ -1,11 +1,12 @@
 import { supabase } from '@/lib/supabase'
+import { SITE_URL } from '@/lib/site'
 
 function defaultRobotsTxt(baseUrl) {
   return `User-agent: *\nAllow: /\nDisallow: /admin/\nSitemap: ${baseUrl}/sitemap.xml\n`
 }
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
+  const baseUrl = SITE_URL
   const { data } = await supabase.from('seo_global_settings').select('robots_txt').limit(1).single()
 
   const body = data?.robots_txt?.trim() ? data.robots_txt : defaultRobotsTxt(baseUrl)

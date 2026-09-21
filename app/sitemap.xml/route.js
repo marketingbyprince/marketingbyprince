@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/site'
 
-const BASE_URL = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
+const BASE_URL = () => SITE_URL
 
 // Fetch which dynamic sitemaps have content so we only include non-empty ones
 async function getActiveSitemaps(baseUrl) {

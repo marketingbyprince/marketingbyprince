@@ -1,8 +1,9 @@
 import { xmlResponse, buildUrlset } from '@/lib/sitemap-helpers'
 import { supabase } from '@/lib/supabase'
+import { SITE_URL } from '@/lib/site'
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
+  const baseUrl = SITE_URL
   const today = new Date().toISOString().slice(0, 10)
 
   const pages = [

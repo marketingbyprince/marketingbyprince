@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/site'
 
 async function fetchUrls(xmlUrl) {
   try {
@@ -17,7 +18,7 @@ async function fetchUrls(xmlUrl) {
 }
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://marketingbyprince.vercel.app'
+  const baseUrl = SITE_URL
 
   // Fetch sitemap index and extract sub-sitemap URLs
   let sitemapSections = []

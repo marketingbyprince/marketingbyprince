@@ -2,6 +2,7 @@ import './globals.css'
 import { cache } from 'react'
 import { Raleway } from 'next/font/google'
 import { supabase } from '@/lib/supabase'
+import { SITE_URL } from '@/lib/site'
 import SchemaScript from '@/components/SchemaScript'
 
 const getGlobalSeoSettings = cache(async () => {
@@ -30,19 +31,19 @@ export async function generateMetadata() {
   const twitterHandle = settings?.twitter_handle
 
   return {
-    metadataBase: new URL('https://marketingbyprince.com'),
+    metadataBase: new URL(SITE_URL),
     title: {
       default: title,
       template: `%s${settings?.default_title_suffix || ' | Marketing By Prince'}`,
     },
     description,
     keywords: ['performance marketing', 'performance marketing consultant', 'PPC consultant India', 'Google Ads consultant', 'Meta Ads expert', 'LinkedIn Ads management', 'TikTok Ads management', 'Prince Pandey'],
-    authors: [{ name: 'Prince Pandey', url: 'https://marketingbyprince.com/about' }],
+    authors: [{ name: 'Prince Pandey', url: `${SITE_URL}/about` }],
     creator: 'Prince Pandey',
     openGraph: {
       type: 'website',
       locale: 'en_IN',
-      url: 'https://marketingbyprince.com',
+      url: SITE_URL,
       siteName,
       title,
       description,
@@ -61,7 +62,7 @@ export async function generateMetadata() {
       googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
     },
     alternates: {
-      canonical: 'https://marketingbyprince.com',
+      canonical: SITE_URL,
     },
     ...(settings?.google_verification ? { verification: { google: settings.google_verification } } : {}),
   }
