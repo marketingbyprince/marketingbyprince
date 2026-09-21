@@ -7,7 +7,14 @@ export async function GET() {
 
   const pages = [
     { url: baseUrl,                     freq: 'weekly',  priority: '1.0', lastmod: today },
-    { url: `${baseUrl}/about`,          freq: 'monthly', priority: '0.9', lastmod: today },
+    {
+      url: `${baseUrl}/about`, freq: 'monthly', priority: '0.9', lastmod: today,
+      images: [{
+        loc: `${baseUrl}/images/prince-pandey-performance-marketer.jpg`,
+        title: 'Prince Pandey, Performance Marketer and PPC Expert',
+        caption: 'Prince Pandey, Performance Marketer',
+      }],
+    },
     { url: `${baseUrl}/services`,       freq: 'weekly',  priority: '0.9', lastmod: today },
     { url: `${baseUrl}/services/performance-marketing`,        freq: 'weekly',  priority: '0.9', lastmod: today },
     { url: `${baseUrl}/services/google-ads-management`,        freq: 'monthly', priority: '0.8', lastmod: today },

@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { generateResume } from '@/lib/resumeUtils'
 import SectionHeader from '@/components/ui/SectionHeader'
+
+const DEFAULT_PROFILE_IMAGE = '/images/prince-pandey-performance-marketer.jpg'
 
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -40,21 +43,17 @@ export default function AboutClient({ initial }) {
         {/* ── Bio ─────────────────────────────────────────────────── */}
         <div className="grid md:grid-cols-3 gap-12 mb-20">
           <div className="md:col-span-1 flex flex-col items-center md:items-start gap-5">
-            {about?.profile_image_url ? (
-              <div className="w-36 h-36 rounded-2xl border-2 overflow-hidden" style={{ borderColor: 'var(--accent-border)' }}>
-                <img
-                  src={about.profile_image_url}
-                  alt={`${about?.name} — professional headshot`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            ) : (
-              <div className="w-36 h-36 rounded-2xl border-2 flex items-center justify-center text-5xl"
-                   style={{ background: 'var(--accent-muted)', borderColor: 'var(--accent-border)' }}>
-                👨‍💼
-              </div>
-            )}
+            <figure className="w-36 h-36 rounded-2xl border-2 overflow-hidden m-0" style={{ borderColor: 'var(--accent-border)' }}>
+              <Image
+                src={about?.profile_image_url || DEFAULT_PROFILE_IMAGE}
+                alt="Prince Pandey, Performance Marketer and PPC Expert"
+                width={877}
+                height={877}
+                priority
+                className="w-full h-full object-cover"
+              />
+              <figcaption className="sr-only">Prince Pandey</figcaption>
+            </figure>
 
             <button
               onClick={handleDownloadResume}

@@ -24,6 +24,9 @@ export async function generateMetadata() {
       title: 'About Prince Pandey | Performance Marketing Expert',
       description: '3+ years managing 40+ client accounts. Key Account Manager specializing in Google, Meta, LinkedIn & TikTok Ads.',
       path: '/about',
+      ogImageWidth: 1200,
+      ogImageHeight: 630,
+      ogImageAlt: 'Prince Pandey, Performance Marketer',
     },
   })
 }
@@ -39,6 +42,7 @@ export default async function Page() {
           name: 'About Prince Pandey',
           personId: `${ABOUT_URL}#person`,
           breadcrumbId: `${ABOUT_URL}#breadcrumb`,
+          primaryImageId: `${ABOUT_URL}#primaryimage`,
         }),
       ],
     }),
