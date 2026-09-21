@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { computeSeoScores } from '@/lib/seo-scoring'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 import { PUBLIC_PATHS } from '@/lib/publicPaths'
+import { checkedWrite } from '@/lib/supabaseWrite'
 import SeoScoreCard from './SeoScoreCard'
 import SchemaBuilder from './SchemaBuilder'
 
@@ -165,15 +166,20 @@ export default function SeoEditPanel({ contentType, contentId = null }) {
       geo_score: scores.geo,
       aeo_score: scores.aeo,
     }
+    let err
     if (meta.id) {
-      await supabase.from('seo_page_meta').update(payload).eq('id', meta.id)
+      ;({ error: err } = await checkedWrite(
+        supabase.from('seo_page_meta').update(payload).eq('id', meta.id),
+        { table: 'seo_page_meta', action: 'Save' }
+      ))
     } else {
-      const { data } = await supabase.from('seo_page_meta').insert(payload).select().single()
+      const { data, error } = await supabase.from('seo_page_meta').insert(payload).select().single()
       if (data) setMeta(data)
+      err = error
     }
-    await revalidatePublicPaths(PUBLIC_PATHS[contentType] || [])
+    if (!err) await revalidatePublicPaths(PUBLIC_PATHS[contentType] || [])
     setSaving(false)
-    setSaved(true)
+    setSaved(!err)
     setTimeout(() => setSaved(false), 3000)
   }
 

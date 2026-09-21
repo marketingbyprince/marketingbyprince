@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { generateResume } from '@/lib/resumeUtils'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 import { PUBLIC_PATHS } from '@/lib/publicPaths'
+import { checkedWrite } from '@/lib/supabaseWrite'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 
@@ -114,14 +115,20 @@ function ProfileSection() {
   const save = async () => {
     setSaving(true); setError(null)
     const { id, ...payload } = form
-    let err
+    let err, savedRows
     if (data?.id) {
-      ;({ error: err } = await supabase.from('about_content').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', data.id))
+      ;({ data: savedRows, error: err } = await checkedWrite(
+        supabase.from('about_content').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', data.id),
+        { table: 'about_content', action: 'Save' }
+      ))
     } else {
       ;({ error: err } = await supabase.from('about_content').insert([payload]))
     }
     if (err) setError(err.message)
-    else await revalidatePublicPaths(PUBLIC_PATHS.about)
+    else {
+      if (savedRows) setData(savedRows[0])
+      await revalidatePublicPaths(PUBLIC_PATHS.about)
+    }
     setSaving(false)
   }
 
@@ -251,7 +258,10 @@ function WorkSection() {
     if (modal === 'add') {
       ;({ error: err } = await supabase.from('work_experience').insert([payload]))
     } else {
-      ;({ error: err } = await supabase.from('work_experience').update(payload).eq('id', modal.id))
+      ;({ error: err } = await checkedWrite(
+        supabase.from('work_experience').update(payload).eq('id', modal.id),
+        { table: 'work_experience', action: 'Save' }
+      ))
     }
     if (err) { setError(err.message); setSaving(false); return }
     await revalidatePublicPaths(PUBLIC_PATHS.about)
@@ -260,7 +270,11 @@ function WorkSection() {
 
   const del = async () => {
     setDeleting(true)
-    await supabase.from('work_experience').delete().eq('id', delTarget.id)
+    const { error: err } = await checkedWrite(
+      supabase.from('work_experience').delete().eq('id', delTarget.id),
+      { table: 'work_experience', action: 'Delete' }
+    )
+    if (err) setError(err.message)
     await revalidatePublicPaths(PUBLIC_PATHS.about)
     setDeleting(false); setDelTarget(null); load()
   }
@@ -369,7 +383,10 @@ function SkillsSection() {
     if (modal === 'add') {
       ;({ error: err } = await supabase.from('skills').insert([payload]))
     } else {
-      ;({ error: err } = await supabase.from('skills').update(payload).eq('id', modal.id))
+      ;({ error: err } = await checkedWrite(
+        supabase.from('skills').update(payload).eq('id', modal.id),
+        { table: 'skills', action: 'Save' }
+      ))
     }
     if (err) { setError(err.message); setSaving(false); return }
     await revalidatePublicPaths(PUBLIC_PATHS.about)
@@ -378,7 +395,11 @@ function SkillsSection() {
 
   const del = async () => {
     setDeleting(true)
-    await supabase.from('skills').delete().eq('id', delTarget.id)
+    const { error: err } = await checkedWrite(
+      supabase.from('skills').delete().eq('id', delTarget.id),
+      { table: 'skills', action: 'Delete' }
+    )
+    if (err) setError(err.message)
     await revalidatePublicPaths(PUBLIC_PATHS.about)
     setDeleting(false); setDelTarget(null); load()
   }
@@ -489,7 +510,10 @@ function EducationSection() {
     if (modal === 'add') {
       ;({ error: err } = await supabase.from('education').insert([payload]))
     } else {
-      ;({ error: err } = await supabase.from('education').update(payload).eq('id', modal.id))
+      ;({ error: err } = await checkedWrite(
+        supabase.from('education').update(payload).eq('id', modal.id),
+        { table: 'education', action: 'Save' }
+      ))
     }
     if (err) { setError(err.message); setSaving(false); return }
     await revalidatePublicPaths(PUBLIC_PATHS.about)
@@ -498,7 +522,11 @@ function EducationSection() {
 
   const del = async () => {
     setDeleting(true)
-    await supabase.from('education').delete().eq('id', delTarget.id)
+    const { error: err } = await checkedWrite(
+      supabase.from('education').delete().eq('id', delTarget.id),
+      { table: 'education', action: 'Delete' }
+    )
+    if (err) setError(err.message)
     await revalidatePublicPaths(PUBLIC_PATHS.about)
     setDeleting(false); setDelTarget(null); load()
   }
@@ -596,7 +624,10 @@ function CaseStudiesSection() {
     if (modal === 'add') {
       ;({ error: err } = await supabase.from('case_studies').insert([{ ...payload, source: 'manual' }]))
     } else {
-      ;({ error: err } = await supabase.from('case_studies').update(payload).eq('id', modal.id))
+      ;({ error: err } = await checkedWrite(
+        supabase.from('case_studies').update(payload).eq('id', modal.id),
+        { table: 'case_studies', action: 'Save' }
+      ))
     }
     if (err) { setError(err.message); setSaving(false); return }
     await revalidatePublicPaths(PUBLIC_PATHS.case_study)
@@ -605,13 +636,21 @@ function CaseStudiesSection() {
 
   const del = async () => {
     setDeleting(true)
-    await supabase.from('case_studies').delete().eq('id', delTarget.id)
+    const { error: err } = await checkedWrite(
+      supabase.from('case_studies').delete().eq('id', delTarget.id),
+      { table: 'case_studies', action: 'Delete' }
+    )
+    if (err) setError(err.message)
     await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     setDeleting(false); setDelTarget(null); load()
   }
 
   const toggleResume = async (row) => {
-    await supabase.from('case_studies').update({ is_visible_on_resume: !row.is_visible_on_resume }).eq('id', row.id)
+    const { error: err } = await checkedWrite(
+      supabase.from('case_studies').update({ is_visible_on_resume: !row.is_visible_on_resume }).eq('id', row.id),
+      { table: 'case_studies', action: 'Update' }
+    )
+    if (err) setError(err.message)
     await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     load()
   }
@@ -741,7 +780,11 @@ function ResumeSection() {
   const saveExtra = async () => {
     if (!aboutId) return
     setSaving(true)
-    await supabase.from('about_content').update({ resume_extra_info: extraInfo }).eq('id', aboutId)
+    const { error: err } = await checkedWrite(
+      supabase.from('about_content').update({ resume_extra_info: extraInfo }).eq('id', aboutId),
+      { table: 'about_content', action: 'Save' }
+    )
+    if (err) setError(err.message)
     setSaving(false)
   }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { checkedWrite } from '@/lib/supabaseWrite'
 
 export function useCrud(table, {
   defaultForm,
@@ -62,10 +63,10 @@ export function useCrud(table, {
       const { error: err } = await supabaseAdmin.from(table).insert([cleanPayload])
       supabaseError = err
     } else {
-      const { error: err } = await supabaseAdmin
-        .from(table)
-        .update(cleanPayload)
-        .eq('id', modal.id)
+      const { error: err } = await checkedWrite(
+        supabaseAdmin.from(table).update(cleanPayload).eq('id', modal.id),
+        { table, action: 'Save' }
+      )
       supabaseError = err
     }
 
@@ -83,7 +84,10 @@ export function useCrud(table, {
 
   const remove = useCallback(async (id) => {
     if (!confirm('Delete this record? This cannot be undone.')) return
-    const { error: err } = await supabaseAdmin.from(table).delete().eq('id', id)
+    const { error: err } = await checkedWrite(
+      supabaseAdmin.from(table).delete().eq('id', id),
+      { table, action: 'Delete' }
+    )
     if (err) { setError(err.message); return }
     await revalidatePublicPaths(revalidatePaths)
     setRecords(prev => prev.filter(r => r.id !== id))
@@ -92,10 +96,10 @@ export function useCrud(table, {
   const toggleField = useCallback(async (id, field, currentValue) => {
     const next = !currentValue
     setRecords(prev => prev.map(r => r.id === id ? { ...r, [field]: next } : r))
-    const { error: err } = await supabaseAdmin
-      .from(table)
-      .update({ [field]: next })
-      .eq('id', id)
+    const { error: err } = await checkedWrite(
+      supabaseAdmin.from(table).update({ [field]: next }).eq('id', id),
+      { table, action: 'Update' }
+    )
     if (err) {
       setRecords(prev => prev.map(r => r.id === id ? { ...r, [field]: currentValue } : r))
       setError(err.message)
