@@ -6,16 +6,15 @@ import Link from 'next/link'
 /* ── Static fallback data ──────────────────────────────────────── */
 
 const DEFAULT_SERVICES = [
-  { id: 1,  title: 'Performance Marketing & Paid Media Management',      description: 'Meta, Google, TikTok, X, Reddit, Pinterest, Telegram, Taboola, Traffic Junky & AI-native ad platforms.' },
-  { id: 2,  title: 'Marketing Automation & CRM Architecture',            description: 'Email, SMS, WhatsApp automation + CRM setup (HubSpot, Salesforce, GoHighLevel, ActiveCampaign).' },
-  { id: 3,  title: 'Tracking, Attribution & Analytics Setup',            description: 'Server-side tracking (CAPI), GA4, GTM, Mixpanel/Amplitude, custom attribution modeling.' },
-  { id: 4,  title: 'SEO & Answer Engine Optimization (AEO)',             description: 'Traditional SEO plus optimization for ChatGPT, Perplexity, Gemini and AI search.' },
-  { id: 5,  title: 'Website & Landing Page Development',                 description: 'CMS setups, WordPress/Webflow/Shopify, custom builds, and conversion rate optimization.' },
-  { id: 6,  title: 'Mobile App Development & App Store Optimization (ASO)', description: 'iOS/Android development + Play Console & App Store listing optimization.' },
-  { id: 7,  title: 'Workflow & AI Automation Consulting',                description: 'AI flowcharts, Zapier/Make/n8n automation, and operational workflow design.' },
-  { id: 8,  title: 'Social Media Marketing & Organic Growth',            description: 'Content strategy, community management, and cross-platform organic growth.' },
-  { id: 9,  title: 'Chrome Extension Development & Store Optimization',  description: 'Custom extensions + Chrome Web Store (CWS) listing and install optimization.' },
-  { id: 10, title: 'White-Label Digital Services for Agencies',          description: 'Campaign management, dev, automation, and tracking delivered under your brand.' },
+  { id: 1, title: 'Performance Marketing & Paid Media Management', description: 'Meta, Google, TikTok, X, Reddit, Pinterest, Telegram, Taboola, Traffic Junky & AI-native ad platforms.' },
+  { id: 2, title: 'Google Ads Management',                         description: 'Search, Performance Max, Shopping and YouTube campaigns built around conversion tracking.',      cta_link: '/services/google-ads-management' },
+  { id: 3, title: 'Meta Ads Management',                           description: 'Facebook and Instagram Ads focused on creative testing, tracking and profitable scaling.',      cta_link: '/services/meta-ads-management' },
+  { id: 4, title: 'LinkedIn Ads Management',                       description: 'B2B LinkedIn Ads built around precise targeting, lead quality and cost per lead.',              cta_link: '/services/linkedin-ads-management' },
+  { id: 5, title: 'TikTok Ads Management',                         description: 'Creative-led TikTok Ads with proper conversion tracking behind them.',                          cta_link: '/services/tiktok-ads-management' },
+  { id: 6, title: 'Tracking, Attribution & Analytics',             description: 'GA4, Google Tag Manager and server-side tracking so ad decisions are based on real data.',       cta_link: '/services/tracking-attribution-analytics' },
+  { id: 7, title: 'Landing Page & CRO',                            description: 'Landing page build and conversion rate optimization for the traffic you already pay for.',      cta_link: '/services/landing-page-cro' },
+  { id: 8, title: 'PPC & Ad Account Audit',                        description: 'An independent audit of your Google, Meta, LinkedIn or TikTok account.',                        cta_link: '/services/ppc-audit' },
+  { id: 9, title: 'White-Label PPC for Agencies',                  description: 'White-label PPC execution across Google, Meta, LinkedIn and TikTok Ads, under your brand.',      cta_link: '/services/white-label-ppc' },
 ]
 
 const PROCESS_STEPS = [
@@ -202,7 +201,7 @@ export default function HomeClient({ initial }) {
                 marginBottom: '14px',
               }}
             >
-              Full-Funnel Digital Growth Partner
+              Performance Marketing Consultant
             </span>
 
             <h1
@@ -226,7 +225,7 @@ export default function HomeClient({ initial }) {
                 marginBottom: '32px',
               }}
             >
-              I manage $12K+/mo in ad spend across Meta, Google, and TikTok — delivering up to 10x ROAS for 40+ clients, backed by SEO, marketplace growth, and automation that make every channel compound.
+              I manage $12K+/mo in ad spend across Meta, Google, LinkedIn and TikTok, delivering up to 10x ROAS for 40+ clients, with tracking and CRO that make every rupee and dollar count.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
@@ -330,9 +329,9 @@ export default function HomeClient({ initial }) {
       <section style={{ backgroundColor: '#fff', padding: 'clamp(48px, 8vw, 120px) 0' }}>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="mb-12">
-            <SectionHeadline>Performance Marketing, Backed by a Full Growth Stack</SectionHeadline>
+            <SectionHeadline>Performance Marketing Services</SectionHeadline>
             <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.7, marginTop: '12px', maxWidth: '640px' }}>
-              Performance marketing drives the results — SEO &amp; AEO, marketplace growth, development, and automation make sure they compound.
+              Paid media, tracking and conversion work focused on one thing: profitable growth.
             </p>
           </div>
 
@@ -447,7 +446,7 @@ export default function HomeClient({ initial }) {
                   10x Peak ROAS
                 </div>
                 <p style={{ fontSize: '14px', color: '#4B5563', lineHeight: 1.7, marginTop: '12px' }}>
-                  For a D2C brand in India — scaled from $2K to $20K/mo in 90 days while improving ROAS.
+                  For a D2C brand in India: scaled from $2K to $20K/mo in 90 days while improving ROAS.
                 </p>
               </div>
             </div>
@@ -479,10 +478,10 @@ export default function HomeClient({ initial }) {
                   marginBottom: '8px',
                 }}
               >
-                Overall Digital Growth
+                Performance Marketing Retainer
               </h3>
               <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '24px' }}>
-                Custom Retainer — Tailored for brands ready to dominate their market
+                Custom Retainer: tailored for brands ready to scale profitably
               </p>
 
               <ul

@@ -15,6 +15,12 @@ const nextConfig = {
       { source: '/gigs/:slug', destination: '/pricing/:slug', permanent: true },
       { source: '/portfolio', destination: '/work', permanent: true },
       { source: '/portfolio/:slug', destination: '/work', permanent: true },
+      {
+        source: '/services',
+        has: [{ type: 'query', key: 'pillar' }],
+        destination: '/services',
+        permanent: true,
+      },
     ]
   },
 }

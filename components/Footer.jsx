@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { SERVICE_PILLARS } from '@/lib/servicePillars'
 
 const companyLinks = [
   { to: '/about',          label: 'About' },
@@ -11,11 +10,11 @@ const companyLinks = [
 ]
 
 const servicesLinks = [
-  { to: '/services/performance-marketing', label: 'Performance Marketing' },
-  { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[1])}`, label: 'SEO' },
-  { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[2])}`, label: 'Marketplace' },
-  { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[3])}`, label: 'Development' },
-  { to: `/services?pillar=${encodeURIComponent(SERVICE_PILLARS[5])}`, label: 'Automation' },
+  { to: '/services/performance-marketing',        label: 'Performance Marketing' },
+  { to: '/services/google-ads-management',        label: 'Google Ads' },
+  { to: '/services/meta-ads-management',          label: 'Meta Ads' },
+  { to: '/services/linkedin-ads-management',      label: 'LinkedIn Ads' },
+  { to: '/services/tracking-attribution-analytics', label: 'Tracking & Analytics' },
   { to: '/pricing', label: 'Pricing' },
 ]
 
@@ -82,8 +81,8 @@ export default function Footer() {
               </span>
             </Link>
             <p style={{ color: '#9CA3AF', fontSize: '13px', lineHeight: '1.7' }} className="max-w-xs mb-6">
-              A complete digital growth partner — performance marketing first, backed by SEO,
-              marketplace growth, development, and automation.
+              Performance marketing consultant helping brands scale profitably with Google, Meta,
+              LinkedIn and TikTok Ads.
             </p>
             <div className="flex gap-5">
               <a

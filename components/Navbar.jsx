@@ -2,11 +2,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SERVICE_PILLARS } from '@/lib/servicePillars'
+import { SERVICES_NAV } from '@/lib/servicesNav'
 
 const servicesDropdown = [
-  { to: '/services/performance-marketing', label: SERVICE_PILLARS[0] },
-  ...SERVICE_PILLARS.slice(1).map(pillar => ({ to: `/services?pillar=${encodeURIComponent(pillar)}`, label: pillar })),
+  ...SERVICES_NAV,
   { to: '/services', label: 'All Services' },
 ]
 

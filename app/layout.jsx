@@ -17,7 +17,7 @@ const raleway = Raleway({
 })
 
 const DEFAULT_TITLE = 'Performance Marketing Consultant in India | Prince Pandey'
-const DEFAULT_DESCRIPTION = 'Performance marketing first — backed by SEO, marketplace growth, web & app development, and automation. A complete digital growth partner for brands ready to scale. 3+ years, 40+ clients, consistent 3-5x ROAS.'
+const DEFAULT_DESCRIPTION = 'Performance marketing consultant managing $12K+/mo in ad spend across Google, Meta, LinkedIn and TikTok. 40+ client accounts, up to 10x ROAS, 3.5 years agency-side PPC.'
 const DEFAULT_OG_IMAGE = '/og-image.jpg'
 
 export async function generateMetadata() {
@@ -36,7 +36,7 @@ export async function generateMetadata() {
       template: `%s${settings?.default_title_suffix || ' | Marketing By Prince'}`,
     },
     description,
-    keywords: ['performance marketing', 'digital growth partner', 'PPC consultant India', 'Meta Ads expert', 'SEO services India', 'marketplace growth', 'marketing automation', 'Google Ads consultant', 'Prince Pandey'],
+    keywords: ['performance marketing', 'performance marketing consultant', 'PPC consultant India', 'Google Ads consultant', 'Meta Ads expert', 'LinkedIn Ads management', 'TikTok Ads management', 'Prince Pandey'],
     authors: [{ name: 'Prince Pandey', url: 'https://marketingbyprince.com/about' }],
     creator: 'Prince Pandey',
     openGraph: {

@@ -8,7 +8,7 @@ export async function generateMetadata() {
     contentType: 'contact',
     fallback: {
       title: 'Contact Prince Pandey | Free Marketing Consultation',
-      description: 'Get a free consultation. Performance marketing, PPC & SEO services. Response within 24 hours.',
+      description: 'Get a free consultation on Google, Meta, LinkedIn or TikTok Ads management. Response within 24 hours.',
       path: '/contact',
     },
   })

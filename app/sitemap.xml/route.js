@@ -18,7 +18,7 @@ async function getActiveSitemaps(baseUrl) {
       { count: caseCount },
     ] = await Promise.all([
       supabase.from('gigs').select('id', { count: 'exact', head: true }).eq('is_active', true).not('slug', 'is', null),
-      supabase.from('services').select('id', { count: 'exact', head: true }).eq('is_active', true).not('slug', 'is', null),
+      supabase.from('services').select('id', { count: 'exact', head: true }).eq('is_active', true).not('slug', 'is', null).neq('slug', 'performance-marketing'),
       supabase.from('articles').select('id', { count: 'exact', head: true }).eq('is_published', true).not('slug', 'is', null),
       supabase.from('case_studies').select('id', { count: 'exact', head: true }).eq('is_published', true),
     ])
@@ -69,7 +69,7 @@ function buildHtmlIndex(baseUrl, sitemaps) {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Sitemap — Marketing By Prince</title>
+  <title>Sitemap: Marketing By Prince</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9fafb;color:#111827}
@@ -100,7 +100,7 @@ function buildHtmlIndex(baseUrl, sitemaps) {
   <header>
     <div class="logo">PP</div>
     <div>
-      <h1>Marketing By Prince — Sitemap</h1>
+      <h1>Marketing By Prince: Sitemap</h1>
       <p>XML Sitemap Index for search engines</p>
     </div>
   </header>

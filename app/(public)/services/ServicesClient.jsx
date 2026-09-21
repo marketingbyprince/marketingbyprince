@@ -1,49 +1,76 @@
-'use client'
-
-import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import SectionHeader from '@/components/ui/SectionHeader'
-import ServiceCard   from '@/components/ServiceCard'
+import ServiceCard from '@/components/ServiceCard'
 
+const PM_FALLBACK = {
+  id: 'performance-marketing',
+  title: 'Performance Marketing & Paid Media Management',
+  description: 'Meta, Google, TikTok, X, Reddit, Pinterest, Telegram, Taboola, Traffic Junky & AI-native ad platforms.',
+  icon: '🚀',
+  slug: 'performance-marketing',
+}
 
-export default function ServicesClient({ initialServices }) {
-  const searchParams = useSearchParams()
-  const services      = initialServices ?? []
-  const [activePillar, setActivePillar] = useState(() => searchParams.get('pillar') || 'All')
-  const [search,       setSearch]       = useState('')
+const NEW_SERVICES = [
+  {
+    id: 'google-ads-management',
+    title: 'Google Ads Management',
+    description: 'Search, Performance Max, Shopping and YouTube campaigns built around conversion tracking and profitable growth.',
+    icon: '🔍',
+    slug: 'google-ads-management',
+  },
+  {
+    id: 'meta-ads-management',
+    title: 'Meta Ads Management',
+    description: 'Facebook and Instagram Ads management focused on creative testing, tracking and profitable scaling.',
+    icon: '📱',
+    slug: 'meta-ads-management',
+  },
+  {
+    id: 'linkedin-ads-management',
+    title: 'LinkedIn Ads Management',
+    description: 'B2B LinkedIn Ads built around precise targeting, lead quality and cost per lead, not just impressions.',
+    icon: '💼',
+    slug: 'linkedin-ads-management',
+  },
+  {
+    id: 'tiktok-ads-management',
+    title: 'TikTok Ads Management',
+    description: 'TikTok Ads management built around creative testing and conversion tracking, turning attention into acquisition.',
+    icon: '🎵',
+    slug: 'tiktok-ads-management',
+  },
+  {
+    id: 'tracking-attribution-analytics',
+    title: 'Tracking, Attribution & Analytics',
+    description: 'GA4, Google Tag Manager and server-side tracking setup, so your ad decisions are based on real data.',
+    icon: '📊',
+    slug: 'tracking-attribution-analytics',
+  },
+  {
+    id: 'landing-page-cro',
+    title: 'Landing Page & CRO',
+    description: 'Landing page build and conversion rate optimization so the traffic you already pay for converts more often.',
+    icon: '🖥️',
+    slug: 'landing-page-cro',
+  },
+  {
+    id: 'ppc-audit',
+    title: 'PPC & Ad Account Audit',
+    description: 'An independent audit of your Google, Meta, LinkedIn or TikTok account, covering tracking, structure and wasted spend.',
+    icon: '🧐',
+    slug: 'ppc-audit',
+  },
+  {
+    id: 'white-label-ppc',
+    title: 'White-Label PPC for Agencies',
+    description: 'White-label PPC execution for agencies across Google, Meta, LinkedIn and TikTok Ads, delivered under your brand.',
+    icon: '🤝',
+    slug: 'white-label-ppc',
+  },
+]
 
-  const pillars = useMemo(() => {
-    const seen = new Map()
-    services.forEach(s => {
-      if (s.pillar && !seen.has(s.pillar)) seen.set(s.pillar, s.icon || '📌')
-    })
-    return [...seen.entries()].map(([label, icon]) => ({ label, icon }))
-  }, [services])
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return services.filter(s => {
-      const matchPillar = activePillar === 'All' || s.pillar === activePillar
-      const matchSearch = !q
-        || s.title.toLowerCase().includes(q)
-        || s.description?.toLowerCase().includes(q)
-        || s.pillar?.toLowerCase().includes(q)
-      return matchPillar && matchSearch
-    })
-  }, [services, activePillar, search])
-
-  const grouped = useMemo(() =>
-    filtered.reduce((acc, s) => {
-      const key = s.pillar || 'General'
-      acc[key] = acc[key] ? [...acc[key], s] : [s]
-      return acc
-    }, {}),
-  [filtered])
-
-  const hasResults   = Object.keys(grouped).length > 0
-  const isFiltered   = activePillar !== 'All' || search.trim() !== ''
-  const handleReset  = () => { setSearch(''); setActivePillar('All') }
+export default function ServicesClient({ performanceMarketingCard }) {
+  const pmCard = performanceMarketingCard || PM_FALLBACK
 
   return (
     <div className="min-h-screen pt-24 pb-24 bg-soft">
@@ -51,86 +78,17 @@ export default function ServicesClient({ initialServices }) {
 
         <SectionHeader
           eyebrow="Services"
-          title="Performance Marketing, Backed by a Full Growth Stack"
-          subtitle="Performance marketing drives the results — SEO & AEO, marketplace growth, development, and automation make sure they compound."
+          title="Performance Marketing Services"
+          subtitle="Paid media, tracking and conversion work focused on one thing: profitable growth."
         />
 
-        {pillars.length > 0 ? (
-          <div className="flex flex-wrap gap-2 mb-10">
-            <button
-              onClick={() => setActivePillar('All')}
-              className={activePillar === 'All' ? 'filter-pill-on' : 'filter-pill-off'}
-            >
-              All Services
-            </button>
-            {pillars.map(({ label, icon }) => (
-              <button
-                key={label}
-                onClick={() => setActivePillar(activePillar === label ? 'All' : label)}
-                className={activePillar === label ? 'filter-pill-on' : 'filter-pill-off'}
-              >
-                <span className="mr-1.5">{icon}</span>{label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="relative mb-10">
-          <svg
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-            fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search services…"
-            className="input-field pl-11 pr-10"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              aria-label="Clear search"
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors text-sm"
-            >
-              ✕
-            </button>
-          )}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-20">
+          <ServiceCard service={pmCard} />
+          {NEW_SERVICES.map(s => <ServiceCard key={s.id} service={s} />)}
         </div>
 
-        {!hasResults ? (
-          <EmptyState hasSearch={!!search.trim()} onClear={handleReset} isFiltered={isFiltered} />
-        ) : (
-          <div className="space-y-14">
-            {Object.entries(grouped).map(([pillar, items]) => {
-              const pillarIcon = pillars.find(p => p.label === pillar)?.icon ?? '📌'
-              return (
-                <section key={pillar}>
-                  <div className="flex items-center gap-2.5 mb-6">
-                    <span className="text-xl leading-none">{pillarIcon}</span>
-                    <h2 className="heading-section text-deep">{pillar}</h2>
-                    <span
-                      className="ml-auto text-xs font-semibold"
-                      style={{ color: 'var(--color-subtle)' }}
-                    >
-                      {items.length} service{items.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {items.map(s => <ServiceCard key={s.id} service={s} />)}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-        )}
-
         <div
-          className="mt-20 rounded-2xl p-10 text-center"
+          className="rounded-2xl p-10 text-center"
           style={{
             backgroundColor: 'var(--accent-muted)',
             border: '1px solid var(--accent-border)',
@@ -144,39 +102,6 @@ export default function ServicesClient({ initialServices }) {
         </div>
 
       </div>
-    </div>
-  )
-}
-
-function EmptyState({ hasSearch, onClear, isFiltered }) {
-  if (hasSearch) {
-    return (
-      <div className="text-center py-20">
-        <div className="text-4xl mb-4">🔍</div>
-        <h3 className="heading-section mb-2 text-gray-500">No results found</h3>
-        <p className="text-body text-gray-400 mb-6 max-w-sm mx-auto">
-          Try a different keyword, or clear the search to browse all services.
-        </p>
-        <button onClick={onClear} className="btn-secondary btn-md">Clear Search</button>
-      </div>
-    )
-  }
-  if (isFiltered) {
-    return (
-      <div className="text-center py-20">
-        <div className="text-4xl mb-4">📂</div>
-        <h3 className="heading-section mb-2 text-gray-500">No services in this category</h3>
-        <p className="text-body text-gray-400 mb-6">Select a different category or view all services.</p>
-        <button onClick={onClear} className="btn-secondary btn-md">View All</button>
-      </div>
-    )
-  }
-  return (
-    <div className="text-center py-20">
-      <div className="text-4xl mb-4">📭</div>
-      <h3 className="heading-section mb-2 text-gray-500">No services yet</h3>
-      <p className="text-body text-gray-400 mb-6">Services will appear here once they&rsquo;re published.</p>
-      <Link href="/contact" className="btn-primary btn-md">Get in Touch</Link>
     </div>
   )
 }

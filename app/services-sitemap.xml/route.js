@@ -11,6 +11,8 @@ export async function GET() {
     const { data: services } = await supabaseAdmin
       .from('services').select('slug, updated_at')
       .eq('is_active', true).not('slug', 'is', null)
+      // performance-marketing is already listed in pages-sitemap.xml
+      .neq('slug', 'performance-marketing')
 
     ;(services || []).forEach(s => pages.push({
       url: `${baseUrl}/services/${s.slug}`,
