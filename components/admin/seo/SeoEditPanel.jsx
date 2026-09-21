@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { computeSeoScores } from '@/lib/seo-scoring'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { PUBLIC_PATHS } from '@/lib/publicPaths'
 import SeoScoreCard from './SeoScoreCard'
 import SchemaBuilder from './SchemaBuilder'
 
@@ -169,6 +171,7 @@ export default function SeoEditPanel({ contentType, contentId = null }) {
       const { data } = await supabase.from('seo_page_meta').insert(payload).select().single()
       if (data) setMeta(data)
     }
+    await revalidatePublicPaths(PUBLIC_PATHS[contentType] || [])
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)

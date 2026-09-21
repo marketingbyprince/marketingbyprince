@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 
 function Field({ label, children, hint }) {
   return (
@@ -62,6 +63,8 @@ export default function GlobalSeoPage() {
       const { data } = await supabase.from('seo_global_settings').insert(payload).select().single()
       if (data) setSettings(data)
     }
+    // Site-wide defaults live in the root layout, which every page inherits.
+    await revalidatePublicPaths([{ path: '/', type: 'layout' }])
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)

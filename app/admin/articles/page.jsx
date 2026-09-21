@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
 import RichTextEditor from '@/components/admin/RichTextEditor'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { PUBLIC_PATHS } from '@/lib/publicPaths'
 
 const empty = {
   title: '', slug: '', excerpt: '', content: '', category: '',
@@ -57,6 +59,7 @@ export default function ManageArticles() {
     } else {
       await supabaseAdmin.from('articles').update(payload).eq('id', editing)
     }
+    await revalidatePublicPaths(PUBLIC_PATHS.blog_post)
     await fetchData()
     setEditing(null)
     setSaving(false)
@@ -65,6 +68,7 @@ export default function ManageArticles() {
   const del = async id => {
     if (!confirm('Delete this article?')) return
     await supabaseAdmin.from('articles').delete().eq('id', id)
+    await revalidatePublicPaths(PUBLIC_PATHS.blog_post)
     setArticles(prev => prev.filter(a => a.id !== id))
   }
 
@@ -72,6 +76,7 @@ export default function ManageArticles() {
     const update = { is_published: !val }
     if (!val) update.published_at = new Date().toISOString()
     await supabaseAdmin.from('articles').update(update).eq('id', id)
+    await revalidatePublicPaths(PUBLIC_PATHS.blog_post)
     setArticles(prev => prev.map(a => a.id === id ? { ...a, ...update } : a))
   }
 

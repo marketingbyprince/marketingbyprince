@@ -4,6 +4,7 @@ import CrudModal      from '@/components/admin/CrudModal'
 import FieldGroup     from '@/components/admin/FieldGroup'
 import RecordRow      from '@/components/admin/RecordRow'
 import { useCrud }    from '@/hooks/useCrud'
+import { PUBLIC_PATHS } from '@/lib/publicPaths'
 
 const DEFAULT_FORM = {
   title:       '',
@@ -39,6 +40,7 @@ export default function ManageServices() {
     defaultForm: DEFAULT_FORM,
     orderBy:     'pillar',
     orderAsc:    true,
+    revalidatePaths: PUBLIC_PATHS.service,
   })
 
   const { records: services, loading, saving, modal, error } = crud

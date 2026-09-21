@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import AdminPageShell from '@/components/admin/AdminPageShell'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { PUBLIC_PATHS } from '@/lib/publicPaths'
 
 /* ── Tab IDs ──────────────────────────────────────────────────── */
 const TABS = [
@@ -100,6 +102,7 @@ function SlidesManager() {
       setSaveError(`Save failed: ${error.message} — Run the RLS fix SQL shown below.`)
       return
     }
+    await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     closeForm()
     load()
   }
@@ -108,11 +111,12 @@ function SlidesManager() {
     if (!confirm('Delete this slide?')) return
     const { error } = await supabase.from('hero_slides').delete().eq('id', id)
     if (error) alert('Delete failed: ' + error.message)
-    else load()
+    else { await revalidatePublicPaths(PUBLIC_PATHS.homepage); load() }
   }
 
   async function toggleActive(slide) {
     await supabase.from('hero_slides').update({ is_active: !slide.is_active }).eq('id', slide.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     load()
   }
 
@@ -121,6 +125,7 @@ function SlidesManager() {
     const a = slides[i], b = slides[i - 1]
     await supabase.from('hero_slides').update({ display_order: b.display_order }).eq('id', a.id)
     await supabase.from('hero_slides').update({ display_order: a.display_order }).eq('id', b.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     load()
   }
 
@@ -297,12 +302,14 @@ function ServicesManager() {
     }
     setSaving(svc.id)
     await supabase.from('services').update({ show_on_homepage: !svc.show_on_homepage }).eq('id', svc.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     setSaving(null)
     load()
   }
 
   async function updateOrder(svc, newOrder) {
     await supabase.from('services').update({ homepage_order: Number(newOrder) }).eq('id', svc.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     load()
   }
 
@@ -377,6 +384,7 @@ function SettingsSection({ sectionKey, fields, title }) {
       value: values[f.key] ?? '',
     }))
     await supabase.from('site_settings').upsert(upserts, { onConflict: 'key' })
+    await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     setSaving(false)
   }
 

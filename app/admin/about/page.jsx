@@ -2,6 +2,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { generateResume } from '@/lib/resumeUtils'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { PUBLIC_PATHS } from '@/lib/publicPaths'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 
@@ -119,6 +121,7 @@ function ProfileSection() {
       ;({ error: err } = await supabase.from('about_content').insert([payload]))
     }
     if (err) setError(err.message)
+    else await revalidatePublicPaths(PUBLIC_PATHS.about)
     setSaving(false)
   }
 
@@ -251,12 +254,14 @@ function WorkSection() {
       ;({ error: err } = await supabase.from('work_experience').update(payload).eq('id', modal.id))
     }
     if (err) { setError(err.message); setSaving(false); return }
+    await revalidatePublicPaths(PUBLIC_PATHS.about)
     await load(); setModal(null); setSaving(false)
   }
 
   const del = async () => {
     setDeleting(true)
     await supabase.from('work_experience').delete().eq('id', delTarget.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.about)
     setDeleting(false); setDelTarget(null); load()
   }
 
@@ -367,12 +372,14 @@ function SkillsSection() {
       ;({ error: err } = await supabase.from('skills').update(payload).eq('id', modal.id))
     }
     if (err) { setError(err.message); setSaving(false); return }
+    await revalidatePublicPaths(PUBLIC_PATHS.about)
     await load(); setModal(null); setSaving(false)
   }
 
   const del = async () => {
     setDeleting(true)
     await supabase.from('skills').delete().eq('id', delTarget.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.about)
     setDeleting(false); setDelTarget(null); load()
   }
 
@@ -485,12 +492,14 @@ function EducationSection() {
       ;({ error: err } = await supabase.from('education').update(payload).eq('id', modal.id))
     }
     if (err) { setError(err.message); setSaving(false); return }
+    await revalidatePublicPaths(PUBLIC_PATHS.about)
     await load(); setModal(null); setSaving(false)
   }
 
   const del = async () => {
     setDeleting(true)
     await supabase.from('education').delete().eq('id', delTarget.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.about)
     setDeleting(false); setDelTarget(null); load()
   }
 
@@ -590,17 +599,20 @@ function CaseStudiesSection() {
       ;({ error: err } = await supabase.from('case_studies').update(payload).eq('id', modal.id))
     }
     if (err) { setError(err.message); setSaving(false); return }
+    await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     await load(); setModal(null); setSaving(false)
   }
 
   const del = async () => {
     setDeleting(true)
     await supabase.from('case_studies').delete().eq('id', delTarget.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     setDeleting(false); setDelTarget(null); load()
   }
 
   const toggleResume = async (row) => {
     await supabase.from('case_studies').update({ is_visible_on_resume: !row.is_visible_on_resume }).eq('id', row.id)
+    await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     load()
   }
 

@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 
 export function useCrud(table, {
   defaultForm,
   orderBy  = 'created_at',
   orderAsc = false,
   select   = '*',
+  revalidatePaths = [],
 } = {}) {
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
@@ -73,17 +75,19 @@ export function useCrud(table, {
       return
     }
 
+    await revalidatePublicPaths(revalidatePaths)
     await refetch()
     setModal(null)
     setSaving(false)
-  }, [form, modal, table, refetch])
+  }, [form, modal, table, refetch, revalidatePaths])
 
   const remove = useCallback(async (id) => {
     if (!confirm('Delete this record? This cannot be undone.')) return
     const { error: err } = await supabaseAdmin.from(table).delete().eq('id', id)
     if (err) { setError(err.message); return }
+    await revalidatePublicPaths(revalidatePaths)
     setRecords(prev => prev.filter(r => r.id !== id))
-  }, [table])
+  }, [table, revalidatePaths])
 
   const toggleField = useCallback(async (id, field, currentValue) => {
     const next = !currentValue
@@ -95,8 +99,10 @@ export function useCrud(table, {
     if (err) {
       setRecords(prev => prev.map(r => r.id === id ? { ...r, [field]: currentValue } : r))
       setError(err.message)
+    } else {
+      await revalidatePublicPaths(revalidatePaths)
     }
-  }, [table])
+  }, [table, revalidatePaths])
 
   return {
     records,

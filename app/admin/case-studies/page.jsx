@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase as supabaseAdmin } from '@/lib/supabase'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import { CASE_STUDY_CHANNELS } from '@/lib/caseStudyChannels'
+import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { PUBLIC_PATHS } from '@/lib/publicPaths'
 
 const slugify = s => (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
@@ -80,6 +82,7 @@ export default function ManageCaseStudies() {
     } else {
       await supabaseAdmin.from('case_studies').update(payload).eq('id', editing)
     }
+    await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     await fetchData()
     setEditing(null)
     setSaving(false)
@@ -88,11 +91,13 @@ export default function ManageCaseStudies() {
   const del = async id => {
     if (!confirm('Delete this case study?')) return
     await supabaseAdmin.from('case_studies').delete().eq('id', id)
+    await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     setCases(prev => prev.filter(c => c.id !== id))
   }
 
   const toggleField = async (id, field, val) => {
     await supabaseAdmin.from('case_studies').update({ [field]: !val }).eq('id', id)
+    await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     setCases(prev => prev.map(c => c.id === id ? { ...c, [field]: !val } : c))
   }
 
