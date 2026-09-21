@@ -8,6 +8,15 @@ import SectionHeader from '@/components/ui/SectionHeader'
 
 const DEFAULT_PROFILE_IMAGE = '/images/prince-pandey-performance-marketer.jpg'
 
+// next/image only optimizes relative paths or hosts listed in
+// images.remotePatterns. An absolute URL on our own domain (e.g. pasted
+// into the SEO admin panel) would otherwise get rejected with a 400, so
+// strip our own origin and treat it as a local asset.
+function toLocalSrc(url) {
+  if (!url) return null
+  return url.replace(/^https?:\/\/(www\.)?marketingbyprince\.com/i, '') || null
+}
+
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 function fmtDate(d) {
@@ -22,6 +31,7 @@ export default function AboutClient({ initial }) {
   const skills     = initial?.skills ?? []
   const education  = initial?.education ?? []
   const [generating, setGenerating] = useState(false)
+  const [imgSrc, setImgSrc] = useState(() => toLocalSrc(about?.profile_image_url) || DEFAULT_PROFILE_IMAGE)
 
   const handleDownloadResume = async () => {
     setGenerating(true)
@@ -45,12 +55,13 @@ export default function AboutClient({ initial }) {
           <div className="md:col-span-1 flex flex-col items-center md:items-start gap-5">
             <figure className="w-36 h-36 rounded-2xl border-2 overflow-hidden m-0" style={{ borderColor: 'var(--accent-border)' }}>
               <Image
-                src={about?.profile_image_url || DEFAULT_PROFILE_IMAGE}
+                src={imgSrc}
                 alt="Prince Pandey, Performance Marketer and PPC Expert"
                 width={877}
                 height={877}
                 priority
                 className="w-full h-full object-cover"
+                onError={() => setImgSrc(DEFAULT_PROFILE_IMAGE)}
               />
               <figcaption className="sr-only">Prince Pandey</figcaption>
             </figure>
