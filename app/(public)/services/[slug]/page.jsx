@@ -1,7 +1,8 @@
 import ServiceDetailClient from './ServiceDetailClient'
 import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema } from '@/lib/seo'
 
 const TIER_ORDER = ['starter', 'standard', 'premium', 'custom']
 
@@ -49,12 +50,16 @@ export default async function Page({ params }) {
     { name: 'Services', url: 'https://marketingbyprince.com/services' },
     { name: detail.service?.title || 'Service', url: `https://marketingbyprince.com/services/${params.slug}` },
   ])
-  const graph = await getSeoSchemas({ contentType: 'service', contentId: detail.service?.id ?? null, extraNodes: [breadcrumb] })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({ contentType: 'service', contentId: detail.service?.id ?? null, extraNodes: [breadcrumb] }),
+    getPageFaqs('service', detail.service?.id ?? null),
+  ])
 
   return (
     <>
       <SchemaScript schemas={graph} />
       <ServiceDetailClient initial={detail} />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

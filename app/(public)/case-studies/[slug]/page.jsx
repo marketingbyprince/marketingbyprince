@@ -1,7 +1,8 @@
 import CaseStudyClient from './CaseStudyClient'
 import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema } from '@/lib/seo'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const LIGHT_FIELDS = 'id, slug, title, client_name, industry, channel, cover_image_url, key_metrics, sort_order, created_at'
@@ -41,12 +42,16 @@ export default async function Page({ params }) {
     { name: 'Case Studies', url: 'https://marketingbyprince.com/case-studies' },
     { name: detail.cs?.title || 'Case Study', url: `https://marketingbyprince.com/case-studies/${params.slug}` },
   ])
-  const graph = await getSeoSchemas({ contentType: 'case_study', contentId: detail.cs?.id ?? null, extraNodes: [breadcrumb] })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({ contentType: 'case_study', contentId: detail.cs?.id ?? null, extraNodes: [breadcrumb] }),
+    getPageFaqs('case_study', detail.cs?.id ?? null),
+  ])
 
   return (
     <>
       <SchemaScript schemas={graph} />
       <CaseStudyClient initial={detail} />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

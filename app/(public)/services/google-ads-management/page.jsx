@@ -1,28 +1,10 @@
 import ServiceLandingPage from '@/components/services/ServiceLandingPage'
 import SchemaScript from '@/components/SchemaScript'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema, buildServiceSchema, buildFaqPageSchema } from '@/lib/seo'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo'
 
 const SERVICE_NAME = 'Google Ads Management'
 const URL = 'https://marketingbyprince.com/services/google-ads-management'
-
-const FAQS = [
-  {
-    q: 'Which Google Ads campaign types do you manage?',
-    a: 'Search, Performance Max, Shopping, Display and YouTube, depending on where your customers actually are and what the account economics support.',
-  },
-  {
-    q: 'Do you work with new accounts or only existing ones?',
-    a: 'Both. A new account gets built from scratch with proper conversion tracking from day one. An existing account gets audited first, then restructured where it makes sense.',
-  },
-  {
-    q: 'How do you decide how much budget to spend?',
-    a: 'Budget follows what the account can profitably absorb, based on your target CPA or ROAS, not a fixed percentage or a guess.',
-  },
-  {
-    q: 'How is Google Ads Management different from a general PPC audit?',
-    a: 'A PPC audit is a one-time review with a report. Google Ads Management is ongoing, hands-on work: building, testing and optimizing the account week over week.',
-  },
-]
 
 export async function generateMetadata() {
   return getSeoMeta({
@@ -49,11 +31,13 @@ export default async function Page() {
     description: 'Google Ads account management across Search, Performance Max, Shopping and YouTube.',
     url: URL,
   })
-  const faqSchema = buildFaqPageSchema(FAQS.map(f => ({ q: f.q, a: f.a })), { id: `${URL}#faq` })
-  const graph = await getSeoSchemas({
-    contentType: 'service-google-ads-management',
-    extraNodes: [breadcrumb, service, faqSchema],
-  })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'service-google-ads-management',
+      extraNodes: [breadcrumb, service],
+    }),
+    getPageFaqs('service-google-ads-management'),
+  ])
 
   return (
     <>
@@ -78,12 +62,12 @@ export default async function Page() {
           'Weekly optimization: bids, budgets, search terms and audience signals.',
           'Monthly reporting tied to CPA, ROAS and revenue, not just clicks.',
         ]}
-        faqs={FAQS}
         related={[
           { label: 'Meta Ads Management', href: '/services/meta-ads-management' },
           { label: 'Tracking & Analytics', href: '/services/tracking-attribution-analytics' },
         ]}
       />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

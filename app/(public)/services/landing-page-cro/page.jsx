@@ -1,28 +1,10 @@
 import ServiceLandingPage from '@/components/services/ServiceLandingPage'
 import SchemaScript from '@/components/SchemaScript'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema, buildServiceSchema, buildFaqPageSchema } from '@/lib/seo'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo'
 
 const SERVICE_NAME = 'Landing Page & Conversion Rate Optimization'
 const URL = 'https://marketingbyprince.com/services/landing-page-cro'
-
-const FAQS = [
-  {
-    q: 'Do you build new landing pages or optimize existing ones?',
-    a: 'Both. A new page can be built around a specific campaign and offer, or an existing page can be reviewed and improved based on where visitors are dropping off.',
-  },
-  {
-    q: 'What tools do you use to find conversion problems?',
-    a: 'Analytics data, session recordings and heatmaps where available, combined with a direct review of the page against the traffic source and offer.',
-  },
-  {
-    q: 'How long does a CRO project take to show results?',
-    a: 'A single landing page rebuild can be live within a couple of weeks. Ongoing CRO work is iterative and improves over multiple testing cycles.',
-  },
-  {
-    q: 'Does this include copywriting and design?',
-    a: 'Structure, messaging direction and conversion logic are part of the work. Final copywriting and visual design can be handled directly or coordinated with your existing designer or writer.',
-  },
-]
 
 export async function generateMetadata() {
   return getSeoMeta({
@@ -49,11 +31,13 @@ export default async function Page() {
     description: 'Landing page build and conversion rate optimization for paid traffic campaigns.',
     url: URL,
   })
-  const faqSchema = buildFaqPageSchema(FAQS.map(f => ({ q: f.q, a: f.a })), { id: `${URL}#faq` })
-  const graph = await getSeoSchemas({
-    contentType: 'service-landing-page-cro',
-    extraNodes: [breadcrumb, service, faqSchema],
-  })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'service-landing-page-cro',
+      extraNodes: [breadcrumb, service],
+    }),
+    getPageFaqs('service-landing-page-cro'),
+  ])
 
   return (
     <>
@@ -78,12 +62,12 @@ export default async function Page() {
           'Test plan for headlines, layout and calls to action.',
           'Reporting on conversion rate changes tied back to campaign performance.',
         ]}
-        faqs={FAQS}
         related={[
           { label: 'Tracking & Analytics', href: '/services/tracking-attribution-analytics' },
           { label: 'Google Ads Management', href: '/services/google-ads-management' },
         ]}
       />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

@@ -2,7 +2,6 @@ import { Fragment } from 'react'
 import Link from 'next/link'
 import FeatureCardsSection from '@/components/sections/FeatureCardsSection'
 import ProcessTimelineSection from '@/components/sections/ProcessTimelineSection'
-import FAQAccordionSection from '@/components/sections/FAQAccordionSection'
 import CTASection from '@/components/sections/CTASection'
 import SectionHeader from '@/components/ui/SectionHeader'
 
@@ -71,41 +70,6 @@ const DONT_SCALE_REASONS = [
   'Creative fatigue is increasing.',
   'Campaign structure makes testing difficult.',
   "The unit economics don't support scaling.",
-]
-
-const FAQ_ITEMS = [
-  {
-    question: 'What is performance marketing?',
-    answer: 'Performance marketing is a measurable form of digital advertising where campaigns are optimized around specific business outcomes such as leads, purchases, revenue, CPA, CAC or ROAS rather than simply impressions or traffic.',
-  },
-  {
-    question: 'Which advertising platforms do you manage?',
-    answer: 'The core paid acquisition platforms are Google, Meta and TikTok. Additional channels can be considered when they make sense for the business, audience and economics.',
-  },
-  {
-    question: 'Do you only manage ad campaigns?',
-    answer: 'No. Performance depends on more than the campaign itself. Tracking, attribution, creative, landing pages and conversion optimization all influence the final result.',
-  },
-  {
-    question: 'How do you measure performance?',
-    answer: 'Measurement depends on the business model, but can include conversions, CPA, CAC, ROAS, revenue, lead quality and downstream customer value.',
-  },
-  {
-    question: 'Do you work with existing ad accounts?',
-    answer: 'Yes. Existing accounts can be audited, restructured and optimized rather than automatically rebuilt from scratch.',
-  },
-  {
-    question: 'Do you work with agencies?',
-    answer: 'Yes. Performance marketing, campaign management, tracking and related execution can be provided for agency and white-label engagements where appropriate.',
-  },
-  {
-    question: 'How does an engagement start?',
-    answer: 'The first step is understanding the current account, tracking setup, business goals and acquisition economics. From there, the appropriate scope can be determined.',
-  },
-  {
-    question: "What makes your approach different?",
-    answer: 'The focus is not simply on generating more clicks. Campaign performance is evaluated together with tracking, conversion behavior, funnel performance and business economics.',
-  },
 ]
 
 function FlowDiagram({ steps }) {
@@ -495,15 +459,6 @@ export default function PerformanceMarketingContent({ caseStudies = [] }) {
           </Link>
         </div>
       </section>
-
-      {/* ── FAQ ───────────────────────────────────────────────────── */}
-      <FAQAccordionSection
-        content={{
-          eyebrow: 'FAQs',
-          title: 'Performance Marketing FAQs',
-          items: FAQ_ITEMS,
-        }}
-      />
 
       {/* ── Final CTA ─────────────────────────────────────────────── */}
       <CTASection

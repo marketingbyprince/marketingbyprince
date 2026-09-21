@@ -1,7 +1,8 @@
 import GigDetailClient from '../../gigs/[slug]/GigDetailClient'
 import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema } from '@/lib/seo'
 
 const TIER_ORDER = ['starter', 'standard', 'premium']
 
@@ -50,12 +51,16 @@ export default async function Page({ params }) {
     { name: 'Pricing', url: 'https://marketingbyprince.com/pricing' },
     { name: detail.gig?.title || 'Pricing', url: `https://marketingbyprince.com/pricing/${params.slug}` },
   ])
-  const graph = await getSeoSchemas({ contentType: 'gig', contentId: detail.gig?.id ?? null, extraNodes: [breadcrumb] })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({ contentType: 'gig', contentId: detail.gig?.id ?? null, extraNodes: [breadcrumb] }),
+    getPageFaqs('gig', detail.gig?.id ?? null),
+  ])
 
   return (
     <>
       <SchemaScript schemas={graph} />
       <GigDetailClient params={params} initial={detail} />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

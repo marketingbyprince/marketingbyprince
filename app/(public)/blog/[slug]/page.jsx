@@ -1,7 +1,8 @@
 import BlogPostClient from './BlogPostClient'
 import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema } from '@/lib/seo'
 
 async function getArticleDetail(slug) {
   const [{ data: article }, { data: authorProfile }] = await Promise.all([
@@ -43,12 +44,16 @@ export default async function Page({ params }) {
     author: { '@type': 'Person', name: post.author || 'Prince Pandey' },
   } : null
 
-  const graph = await getSeoSchemas({ contentType: 'blog_post', contentId: params.slug, extraNodes: [breadcrumb, articleSchema] })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({ contentType: 'blog_post', contentId: params.slug, extraNodes: [breadcrumb, articleSchema] }),
+    getPageFaqs('blog_post', params.slug),
+  ])
 
   return (
     <>
       <SchemaScript schemas={graph} />
       <BlogPostClient initial={detail} />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

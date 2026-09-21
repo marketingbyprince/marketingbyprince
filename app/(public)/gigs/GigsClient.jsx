@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ProcessTimelineSection from '@/components/sections/ProcessTimelineSection'
-import FAQAccordionSection from '@/components/sections/FAQAccordionSection'
 import CTASection from '@/components/sections/CTASection'
 import SectionHeader from '@/components/ui/SectionHeader'
 
@@ -133,37 +132,6 @@ const HOW_STEPS = [
   { number: 1, title: 'Discover', description: 'Understand the business, current campaigns, tracking and goals.' },
   { number: 2, title: 'Diagnose', description: "Identify what's working, what's leaking budget and what needs attention." },
   { number: 3, title: 'Execute', description: 'Manage, optimize and scale based on the appropriate engagement.' },
-]
-
-const FAQ_ITEMS = [
-  {
-    question: 'What is performance marketing?',
-    answer: 'Performance marketing is a measurable approach to digital advertising where campaigns are optimized around business outcomes such as leads, purchases, revenue, CPA, CAC or ROAS.',
-  },
-  {
-    question: 'Which platforms do you manage?',
-    answer: 'Google Ads, Meta Ads and TikTok are the core paid acquisition platforms. Other channels can be considered when they make sense for the business and economics.',
-  },
-  {
-    question: 'Do you work with existing campaigns?',
-    answer: 'Yes. Existing campaigns can be audited, restructured and optimized rather than automatically rebuilt from scratch.',
-  },
-  {
-    question: 'Do you offer ongoing campaign management?',
-    answer: 'Yes. Ongoing performance marketing management includes campaign optimization, budget allocation, testing, monitoring and performance reporting.',
-  },
-  {
-    question: 'Do you provide tracking and attribution?',
-    answer: 'Yes. Tracking and attribution can be included depending on the engagement, including GA4, GTM, conversion tracking and related measurement infrastructure.',
-  },
-  {
-    question: 'What is the difference between an audit and campaign management?',
-    answer: 'An audit is a diagnostic engagement designed to identify problems and opportunities. Campaign management is ongoing execution and optimization.',
-  },
-  {
-    question: 'How much does performance marketing cost?',
-    answer: 'Pricing depends on the scope and level of support required. Current starting points include a $150 audit, $350/month management and $750/month advanced performance growth engagement.',
-  },
 ]
 
 const RESULT_CARDS = [
@@ -496,15 +464,6 @@ export default async function GigsClient() {
           </div>
         </div>
       </section>
-
-      {/* ── FAQ ───────────────────────────────────────────────────── */}
-      <FAQAccordionSection
-        content={{
-          eyebrow: 'FAQs',
-          title: 'Performance Marketing FAQs',
-          items: FAQ_ITEMS,
-        }}
-      />
 
       {/* ── Final CTA ─────────────────────────────────────────────── */}
       <CTASection

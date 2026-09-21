@@ -1,6 +1,8 @@
 import ServicesClient from './ServicesClient'
+import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +28,16 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const performanceMarketingCard = await getPerformanceMarketingCard()
-  return <ServicesClient performanceMarketingCard={performanceMarketingCard} />
+  const [performanceMarketingCard, graph, faqs] = await Promise.all([
+    getPerformanceMarketingCard(),
+    getSeoSchemas({ contentType: 'services' }),
+    getPageFaqs('services'),
+  ])
+  return (
+    <>
+      <SchemaScript schemas={graph} />
+      <ServicesClient performanceMarketingCard={performanceMarketingCard} />
+      <FaqSection faqs={faqs} />
+    </>
+  )
 }

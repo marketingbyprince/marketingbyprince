@@ -1,28 +1,10 @@
 import ServiceLandingPage from '@/components/services/ServiceLandingPage'
 import SchemaScript from '@/components/SchemaScript'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema, buildServiceSchema, buildFaqPageSchema } from '@/lib/seo'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo'
 
 const SERVICE_NAME = 'Tracking, Attribution & Analytics'
 const URL = 'https://marketingbyprince.com/services/tracking-attribution-analytics'
-
-const FAQS = [
-  {
-    q: 'What is server-side tracking and do I need it?',
-    a: 'Server-side tracking sends conversion data from your server instead of only the browser, so it holds up better against ad blockers and browser privacy limits. Most businesses running meaningful ad spend benefit from it.',
-  },
-  {
-    q: 'Do you set up GA4 from scratch?',
-    a: 'Yes. I can build a new GA4 property and Google Tag Manager container, or audit and repair an existing setup that is missing events or double counting conversions.',
-  },
-  {
-    q: 'What is CAPI and which platforms support it?',
-    a: 'Conversions API (CAPI) sends conversion events directly from your server to the ad platform. Meta and TikTok both support it, and it is one of the most reliable ways to improve tracking accuracy.',
-  },
-  {
-    q: 'Can you fix tracking that another agency set up?',
-    a: 'Yes. Auditing and repairing an existing tracking setup is a common starting point, especially when reported numbers do not match what is actually happening in your business.',
-  },
-]
 
 export async function generateMetadata() {
   return getSeoMeta({
@@ -49,11 +31,13 @@ export default async function Page() {
     description: 'GA4, Google Tag Manager and server-side conversion tracking setup for paid media accounts.',
     url: URL,
   })
-  const faqSchema = buildFaqPageSchema(FAQS.map(f => ({ q: f.q, a: f.a })), { id: `${URL}#faq` })
-  const graph = await getSeoSchemas({
-    contentType: 'service-tracking-attribution-analytics',
-    extraNodes: [breadcrumb, service, faqSchema],
-  })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'service-tracking-attribution-analytics',
+      extraNodes: [breadcrumb, service],
+    }),
+    getPageFaqs('service-tracking-attribution-analytics'),
+  ])
 
   return (
     <>
@@ -78,12 +62,12 @@ export default async function Page() {
           'CRM or backend integration for lead quality and revenue tracking where applicable.',
           'Documentation of the final setup so your team knows what was built and why.',
         ]}
-        faqs={FAQS}
         related={[
           { label: 'PPC & Ad Account Audit', href: '/services/ppc-audit' },
           { label: 'Landing Page & CRO', href: '/services/landing-page-cro' },
         ]}
       />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

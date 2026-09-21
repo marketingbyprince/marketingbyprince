@@ -1,7 +1,8 @@
 import PerformanceMarketingContent from './PerformanceMarketingContent'
 import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,15 +40,17 @@ export default async function Page() {
     { name: 'Performance Marketing', url: 'https://marketingbyprince.com/services/performance-marketing' },
   ])
 
-  const [caseStudies, graph] = await Promise.all([
+  const [caseStudies, graph, faqs] = await Promise.all([
     getResultCaseStudies(),
     getSeoSchemas({ contentType: 'performance-marketing-service', extraNodes: [breadcrumb] }),
+    getPageFaqs('performance-marketing-service'),
   ])
 
   return (
     <>
       <SchemaScript schemas={graph} />
       <PerformanceMarketingContent caseStudies={caseStudies} />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

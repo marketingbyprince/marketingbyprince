@@ -1,28 +1,10 @@
 import ServiceLandingPage from '@/components/services/ServiceLandingPage'
 import SchemaScript from '@/components/SchemaScript'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema, buildServiceSchema, buildFaqPageSchema } from '@/lib/seo'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo'
 
 const SERVICE_NAME = 'White-Label PPC for Agencies'
 const URL = 'https://marketingbyprince.com/services/white-label-ppc'
-
-const FAQS = [
-  {
-    q: 'How does white-label PPC work?',
-    a: 'I manage the campaigns behind the scenes under your agency brand. Your client sees your agency name, and you stay the point of contact while I handle the execution.',
-  },
-  {
-    q: 'Which platforms can you manage white-label?',
-    a: 'Google, Meta, LinkedIn and TikTok Ads, based on what your client needs and what your agency has already sold.',
-  },
-  {
-    q: 'Do you join client calls?',
-    a: 'That depends on how your agency wants to structure the relationship. Some agencies prefer to run all client communication themselves, others bring me in for strategy calls.',
-  },
-  {
-    q: 'How is reporting handled?',
-    a: 'Reporting can be delivered to your agency directly, or formatted to match your existing client reporting so it looks consistent with everything else you send.',
-  },
-]
 
 export async function generateMetadata() {
   return getSeoMeta({
@@ -49,11 +31,13 @@ export default async function Page() {
     description: 'White-label PPC campaign management for agencies, delivered under the agency brand across Google, Meta, LinkedIn and TikTok Ads.',
     url: URL,
   })
-  const faqSchema = buildFaqPageSchema(FAQS.map(f => ({ q: f.q, a: f.a })), { id: `${URL}#faq` })
-  const graph = await getSeoSchemas({
-    contentType: 'service-white-label-ppc',
-    extraNodes: [breadcrumb, service, faqSchema],
-  })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'service-white-label-ppc',
+      extraNodes: [breadcrumb, service],
+    }),
+    getPageFaqs('service-white-label-ppc'),
+  ])
 
   return (
     <>
@@ -78,12 +62,12 @@ export default async function Page() {
           'Direct communication with your team, not your clients, unless you prefer otherwise.',
           'Flexible capacity that scales with how many accounts you bring on.',
         ]}
-        faqs={FAQS}
         related={[
           { label: 'PPC & Ad Account Audit', href: '/services/ppc-audit' },
           { label: 'Google Ads Management', href: '/services/google-ads-management' },
         ]}
       />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

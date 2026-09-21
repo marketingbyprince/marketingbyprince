@@ -1,6 +1,8 @@
 import BlogClient from './BlogClient'
+import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,6 +25,16 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const articles = await getArticles()
-  return <BlogClient initialArticles={articles} />
+  const [articles, graph, faqs] = await Promise.all([
+    getArticles(),
+    getSeoSchemas({ contentType: 'blogs' }),
+    getPageFaqs('blogs'),
+  ])
+  return (
+    <>
+      <SchemaScript schemas={graph} />
+      <BlogClient initialArticles={articles} />
+      <FaqSection faqs={faqs} />
+    </>
+  )
 }

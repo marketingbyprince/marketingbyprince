@@ -33,7 +33,6 @@ export default function ServiceLandingPage({
   intro,
   whoFor,
   included,
-  faqs,
   related,
 }) {
   const ctaHref = `/contact?subject=${encodeURIComponent(serviceName)}`
@@ -107,19 +106,6 @@ export default function ServiceLandingPage({
                 </span>
                 <h3 className="font-extrabold text-deep mb-1.5">{step.title}</h3>
                 <p className="text-body-sm text-gray-500">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="mb-14">
-          <h2 className="heading-section text-deep mb-6">FAQs</h2>
-          <div className="space-y-3">
-            {faqs.map(item => (
-              <div key={item.q} className="card p-5">
-                <h3 className="font-extrabold text-deep text-sm mb-2">{item.q}</h3>
-                <p className="text-body-sm text-gray-500">{item.a}</p>
               </div>
             ))}
           </div>

@@ -1,7 +1,9 @@
 import HomeClient from './HomeClient'
 import PageRenderer from '@/components/sections/PageRenderer'
+import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { getPageWithSections } from '@/lib/pages'
-import { getSeoMeta } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs } from '@/lib/seo'
 import { supabase } from '@/lib/supabase'
 
 // Ensures admin edits (SEO Center, hero slides, homepage services) show up
@@ -41,14 +43,30 @@ async function getHomeFallbackData() {
 }
 
 export default async function Page() {
-  const page = await getPageWithSections('home')
+  const [page, graph, faqs] = await Promise.all([
+    getPageWithSections('home'),
+    getSeoSchemas({ contentType: 'homepage' }),
+    getPageFaqs('homepage'),
+  ])
 
   // Falls back to the legacy hardcoded homepage if the page-builder row
   // isn't present yet (e.g. migration not run in this environment).
   if (!page || page.sections.length === 0) {
     const initial = await getHomeFallbackData()
-    return <HomeClient initial={initial} />
+    return (
+      <>
+        <SchemaScript schemas={graph} />
+        <HomeClient initial={initial} />
+        <FaqSection faqs={faqs} />
+      </>
+    )
   }
 
-  return <PageRenderer sections={page.sections} faqsBySection={page.faqsBySection} dataBySection={page.dataBySection} />
+  return (
+    <>
+      <SchemaScript schemas={graph} />
+      <PageRenderer sections={page.sections} faqsBySection={page.faqsBySection} dataBySection={page.dataBySection} />
+      <FaqSection faqs={faqs} />
+    </>
+  )
 }

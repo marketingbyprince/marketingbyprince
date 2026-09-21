@@ -1,6 +1,8 @@
 import CaseStudiesClient from './CaseStudiesClient'
+import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +27,16 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const cases = await getCaseStudies()
-  return <CaseStudiesClient initialCases={cases} />
+  const [cases, graph, faqs] = await Promise.all([
+    getCaseStudies(),
+    getSeoSchemas({ contentType: 'case_studies' }),
+    getPageFaqs('case_studies'),
+  ])
+  return (
+    <>
+      <SchemaScript schemas={graph} />
+      <CaseStudiesClient initialCases={cases} />
+      <FaqSection faqs={faqs} />
+    </>
+  )
 }

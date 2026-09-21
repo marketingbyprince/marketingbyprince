@@ -1,28 +1,10 @@
 import ServiceLandingPage from '@/components/services/ServiceLandingPage'
 import SchemaScript from '@/components/SchemaScript'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema, buildServiceSchema, buildFaqPageSchema } from '@/lib/seo'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo'
 
 const SERVICE_NAME = 'LinkedIn Ads Management'
 const URL = 'https://marketingbyprince.com/services/linkedin-ads-management'
-
-const FAQS = [
-  {
-    q: 'Is LinkedIn Ads worth it compared to Google or Meta?',
-    a: 'For B2B businesses selling to a specific job title, industry or company size, LinkedIn can reach an audience Google and Meta cannot target as precisely. It usually costs more per click, so the offer and targeting need to be tight.',
-  },
-  {
-    q: 'What campaign objectives do you run?',
-    a: 'Lead generation, website conversions and, where it fits the funnel, retargeting through Sponsored Content and Message Ads.',
-  },
-  {
-    q: 'How do you keep cost per lead under control?',
-    a: 'Through tight audience targeting, lead form optimization and ongoing exclusion of audiences and placements that are not converting.',
-  },
-  {
-    q: 'Do you handle lead follow-up too?',
-    a: 'The campaign delivers the lead into your CRM or inbox. Follow-up process and sales handling stay with your team unless discussed separately.',
-  },
-]
 
 export async function generateMetadata() {
   return getSeoMeta({
@@ -49,11 +31,13 @@ export default async function Page() {
     description: 'B2B LinkedIn Ads management covering Sponsored Content, Message Ads and lead generation campaigns.',
     url: URL,
   })
-  const faqSchema = buildFaqPageSchema(FAQS.map(f => ({ q: f.q, a: f.a })), { id: `${URL}#faq` })
-  const graph = await getSeoSchemas({
-    contentType: 'service-linkedin-ads-management',
-    extraNodes: [breadcrumb, service, faqSchema],
-  })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'service-linkedin-ads-management',
+      extraNodes: [breadcrumb, service],
+    }),
+    getPageFaqs('service-linkedin-ads-management'),
+  ])
 
   return (
     <>
@@ -78,12 +62,12 @@ export default async function Page() {
           'Ongoing exclusion of underperforming audiences and placements.',
           'Monthly reporting on cost per lead, lead quality signals and pipeline impact.',
         ]}
-        faqs={FAQS}
         related={[
           { label: 'Google Ads Management', href: '/services/google-ads-management' },
           { label: 'PPC & Ad Account Audit', href: '/services/ppc-audit' },
         ]}
       />
+      <FaqSection faqs={faqs} />
     </>
   )
 }

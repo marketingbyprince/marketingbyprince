@@ -1,6 +1,8 @@
 import CertificationsClient from './CertificationsClient'
+import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
 import { supabase } from '@/lib/supabase'
-import { getSeoMeta } from '@/lib/seo'
+import { getSeoMeta, getSeoSchemas, getPageFaqs } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +29,16 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const certs = await getCertifications()
-  return <CertificationsClient initialCerts={certs} />
+  const [certs, graph, faqs] = await Promise.all([
+    getCertifications(),
+    getSeoSchemas({ contentType: 'certifications' }),
+    getPageFaqs('certifications'),
+  ])
+  return (
+    <>
+      <SchemaScript schemas={graph} />
+      <CertificationsClient initialCerts={certs} />
+      <FaqSection faqs={faqs} />
+    </>
+  )
 }

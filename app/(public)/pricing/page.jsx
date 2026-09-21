@@ -1,5 +1,7 @@
 import GigsClient from '../gigs/GigsClient'
-import { getSeoMeta } from '@/lib/seo'
+import SchemaScript from '@/components/SchemaScript'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +16,16 @@ export async function generateMetadata() {
   })
 }
 
-export default function Page() {
-  return <GigsClient />
+export default async function Page() {
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({ contentType: 'gigs' }),
+    getPageFaqs('gigs'),
+  ])
+  return (
+    <>
+      <SchemaScript schemas={graph} />
+      <GigsClient />
+      <FaqSection faqs={faqs} />
+    </>
+  )
 }

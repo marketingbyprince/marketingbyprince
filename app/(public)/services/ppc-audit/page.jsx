@@ -1,28 +1,10 @@
 import ServiceLandingPage from '@/components/services/ServiceLandingPage'
 import SchemaScript from '@/components/SchemaScript'
-import { getSeoMeta, getSeoSchemas, buildBreadcrumbSchema, buildServiceSchema, buildFaqPageSchema } from '@/lib/seo'
+import FaqSection from '@/components/FaqSection'
+import { getSeoMeta, getSeoSchemas, getPageFaqs, buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo'
 
 const SERVICE_NAME = 'PPC & Ad Account Audit'
 const URL = 'https://marketingbyprince.com/services/ppc-audit'
-
-const FAQS = [
-  {
-    q: 'What platforms can you audit?',
-    a: 'Google Ads, Meta Ads, LinkedIn Ads and TikTok Ads. The audit covers whichever platforms your business is actually running.',
-  },
-  {
-    q: 'What do I get at the end of the audit?',
-    a: 'A clear written report covering account structure, tracking accuracy, wasted spend and a prioritized list of what to fix first.',
-  },
-  {
-    q: 'How long does an audit take?',
-    a: 'Most audits are completed within a few business days once account access is granted, depending on how many platforms and how much account history there is to review.',
-  },
-  {
-    q: 'Will you also implement the fixes?',
-    a: 'The audit itself is a review and report. Implementation can be handled through ongoing management of the relevant platform if you decide to move forward.',
-  },
-]
 
 export async function generateMetadata() {
   return getSeoMeta({
@@ -49,11 +31,13 @@ export default async function Page() {
     description: 'Independent audit of Google, Meta, LinkedIn or TikTok ad accounts, covering tracking, structure and spend efficiency.',
     url: URL,
   })
-  const faqSchema = buildFaqPageSchema(FAQS.map(f => ({ q: f.q, a: f.a })), { id: `${URL}#faq` })
-  const graph = await getSeoSchemas({
-    contentType: 'service-ppc-audit',
-    extraNodes: [breadcrumb, service, faqSchema],
-  })
+  const [graph, faqs] = await Promise.all([
+    getSeoSchemas({
+      contentType: 'service-ppc-audit',
+      extraNodes: [breadcrumb, service],
+    }),
+    getPageFaqs('service-ppc-audit'),
+  ])
 
   return (
     <>
@@ -78,12 +62,12 @@ export default async function Page() {
           'A prioritized action list ranked by expected impact.',
           'A findings call to walk through the report and answer questions.',
         ]}
-        faqs={FAQS}
         related={[
           { label: 'Tracking & Analytics', href: '/services/tracking-attribution-analytics' },
           { label: 'White-Label PPC', href: '/services/white-label-ppc' },
         ]}
       />
+      <FaqSection faqs={faqs} />
     </>
   )
 }
