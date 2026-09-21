@@ -9,15 +9,16 @@ export async function GET() {
 
   try {
     const { supabaseAdmin } = await import('@/lib/supabase')
+    // services has no updated_at column — created_at is the closest it has.
     const { data: services } = await supabaseAdmin
-      .from('services').select('slug, updated_at')
+      .from('services').select('slug, created_at')
       .eq('is_active', true).not('slug', 'is', null)
       // performance-marketing is already listed in pages-sitemap.xml
       .neq('slug', 'performance-marketing')
 
     ;(services || []).forEach(s => pages.push({
       url: `${baseUrl}/services/${s.slug}`,
-      lastmod: s.updated_at ? s.updated_at.slice(0, 10) : today,
+      lastmod: s.created_at ? s.created_at.slice(0, 10) : today,
       freq: 'monthly', priority: '0.8',
     }))
   } catch { /* fallback: just /services */ }
