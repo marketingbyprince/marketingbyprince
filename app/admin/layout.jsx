@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ToastHost from '@/components/admin/ToastHost'
 
 const navItems = [
   { to: '/admin/dashboard',      label: 'Dashboard',        icon: '📊' },
@@ -49,7 +50,7 @@ export default function AdminLayout({ children }) {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--admin-bg)' }}><div className="spinner" /></div>
 
-  if (pathname === '/admin/login') return <>{children}</>
+  if (pathname === '/admin/login') return <>{children}<ToastHost /></>
 
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: 'var(--admin-bg)' }}>
@@ -103,6 +104,7 @@ export default function AdminLayout({ children }) {
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
+      <ToastHost />
     </div>
   )
 }

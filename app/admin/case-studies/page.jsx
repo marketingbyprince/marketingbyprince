@@ -5,6 +5,7 @@ import RichTextEditor from '@/components/admin/RichTextEditor'
 import { CASE_STUDY_CHANNELS } from '@/lib/caseStudyChannels'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 import { PUBLIC_PATHS } from '@/lib/publicPaths'
+import { checkedWrite } from '@/lib/supabaseWrite'
 
 const slugify = s => (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
@@ -77,11 +78,16 @@ export default function ManageCaseStudies() {
 
     setSaving(true)
     const payload = { ...form, slug: slugify(form.slug) || null, key_metrics, metrics_table, screenshots }
+    let err
     if (editing === 'add') {
-      await supabaseAdmin.from('case_studies').insert([payload])
+      ;({ error: err } = await supabaseAdmin.from('case_studies').insert([payload]))
     } else {
-      await supabaseAdmin.from('case_studies').update(payload).eq('id', editing)
+      ;({ error: err } = await checkedWrite(
+        supabaseAdmin.from('case_studies').update(payload).eq('id', editing),
+        { table: 'case_studies', action: 'Save' }
+      ))
     }
+    if (err) { setError(err.message); setSaving(false); return }
     await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     await fetchData()
     setEditing(null)
@@ -90,13 +96,21 @@ export default function ManageCaseStudies() {
 
   const del = async id => {
     if (!confirm('Delete this case study?')) return
-    await supabaseAdmin.from('case_studies').delete().eq('id', id)
+    const { error: err } = await checkedWrite(
+      supabaseAdmin.from('case_studies').delete().eq('id', id),
+      { table: 'case_studies', action: 'Delete' }
+    )
+    if (err) { setError(err.message); return }
     await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     setCases(prev => prev.filter(c => c.id !== id))
   }
 
   const toggleField = async (id, field, val) => {
-    await supabaseAdmin.from('case_studies').update({ [field]: !val }).eq('id', id)
+    const { error: err } = await checkedWrite(
+      supabaseAdmin.from('case_studies').update({ [field]: !val }).eq('id', id),
+      { table: 'case_studies', action: 'Update' }
+    )
+    if (err) { setError(err.message); return }
     await revalidatePublicPaths(PUBLIC_PATHS.case_study)
     setCases(prev => prev.map(c => c.id === id ? { ...c, [field]: !val } : c))
   }

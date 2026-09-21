@@ -4,6 +4,7 @@ import { supabase as supabaseAdmin } from '@/lib/supabase'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 import { PUBLIC_PATHS } from '@/lib/publicPaths'
+import { checkedWrite } from '@/lib/supabaseWrite'
 
 const empty = {
   title: '', slug: '', excerpt: '', content: '', category: '',
@@ -54,11 +55,16 @@ export default function ManageArticles() {
       read_time_minutes: form.read_time_minutes ? Number(form.read_time_minutes) : null,
       published_at: form.is_published && !form.published_at ? new Date().toISOString() : form.published_at,
     }
+    let err
     if (editing === 'add') {
-      await supabaseAdmin.from('articles').insert([payload])
+      ;({ error: err } = await supabaseAdmin.from('articles').insert([payload]))
     } else {
-      await supabaseAdmin.from('articles').update(payload).eq('id', editing)
+      ;({ error: err } = await checkedWrite(
+        supabaseAdmin.from('articles').update(payload).eq('id', editing),
+        { table: 'articles', action: 'Save' }
+      ))
     }
+    if (err) { setSaving(false); return }
     await revalidatePublicPaths(PUBLIC_PATHS.blog_post)
     await fetchData()
     setEditing(null)
@@ -67,7 +73,11 @@ export default function ManageArticles() {
 
   const del = async id => {
     if (!confirm('Delete this article?')) return
-    await supabaseAdmin.from('articles').delete().eq('id', id)
+    const { error: err } = await checkedWrite(
+      supabaseAdmin.from('articles').delete().eq('id', id),
+      { table: 'articles', action: 'Delete' }
+    )
+    if (err) return
     await revalidatePublicPaths(PUBLIC_PATHS.blog_post)
     setArticles(prev => prev.filter(a => a.id !== id))
   }
@@ -75,7 +85,11 @@ export default function ManageArticles() {
   const togglePublish = async (id, val) => {
     const update = { is_published: !val }
     if (!val) update.published_at = new Date().toISOString()
-    await supabaseAdmin.from('articles').update(update).eq('id', id)
+    const { error: err } = await checkedWrite(
+      supabaseAdmin.from('articles').update(update).eq('id', id),
+      { table: 'articles', action: 'Update' }
+    )
+    if (err) return
     await revalidatePublicPaths(PUBLIC_PATHS.blog_post)
     setArticles(prev => prev.map(a => a.id === id ? { ...a, ...update } : a))
   }

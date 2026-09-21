@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import AdminPageShell from '@/components/admin/AdminPageShell'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 import { PUBLIC_PATHS } from '@/lib/publicPaths'
+import { checkedWrite } from '@/lib/supabaseWrite'
 
 /* ── Tab IDs ──────────────────────────────────────────────────── */
 const TABS = [
@@ -95,7 +96,10 @@ function SlidesManager() {
     if (editing === 'new') {
       ;({ error } = await supabase.from('hero_slides').insert([payload]))
     } else {
-      ;({ error } = await supabase.from('hero_slides').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing))
+      ;({ error } = await checkedWrite(
+        supabase.from('hero_slides').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing),
+        { table: 'hero_slides', action: 'Save' }
+      ))
     }
     setSaving(false)
     if (error) {
@@ -109,13 +113,19 @@ function SlidesManager() {
 
   async function remove(id) {
     if (!confirm('Delete this slide?')) return
-    const { error } = await supabase.from('hero_slides').delete().eq('id', id)
+    const { error } = await checkedWrite(
+      supabase.from('hero_slides').delete().eq('id', id),
+      { table: 'hero_slides', action: 'Delete' }
+    )
     if (error) alert('Delete failed: ' + error.message)
     else { await revalidatePublicPaths(PUBLIC_PATHS.homepage); load() }
   }
 
   async function toggleActive(slide) {
-    await supabase.from('hero_slides').update({ is_active: !slide.is_active }).eq('id', slide.id)
+    await checkedWrite(
+      supabase.from('hero_slides').update({ is_active: !slide.is_active }).eq('id', slide.id),
+      { table: 'hero_slides', action: 'Update' }
+    )
     await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     load()
   }
@@ -123,8 +133,14 @@ function SlidesManager() {
   async function moveUp(i) {
     if (i === 0) return
     const a = slides[i], b = slides[i - 1]
-    await supabase.from('hero_slides').update({ display_order: b.display_order }).eq('id', a.id)
-    await supabase.from('hero_slides').update({ display_order: a.display_order }).eq('id', b.id)
+    await checkedWrite(
+      supabase.from('hero_slides').update({ display_order: b.display_order }).eq('id', a.id),
+      { table: 'hero_slides', action: 'Reorder' }
+    )
+    await checkedWrite(
+      supabase.from('hero_slides').update({ display_order: a.display_order }).eq('id', b.id),
+      { table: 'hero_slides', action: 'Reorder' }
+    )
     await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     load()
   }
@@ -301,14 +317,20 @@ function ServicesManager() {
       return
     }
     setSaving(svc.id)
-    await supabase.from('services').update({ show_on_homepage: !svc.show_on_homepage }).eq('id', svc.id)
+    await checkedWrite(
+      supabase.from('services').update({ show_on_homepage: !svc.show_on_homepage }).eq('id', svc.id),
+      { table: 'services', action: 'Update' }
+    )
     await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     setSaving(null)
     load()
   }
 
   async function updateOrder(svc, newOrder) {
-    await supabase.from('services').update({ homepage_order: Number(newOrder) }).eq('id', svc.id)
+    await checkedWrite(
+      supabase.from('services').update({ homepage_order: Number(newOrder) }).eq('id', svc.id),
+      { table: 'services', action: 'Reorder' }
+    )
     await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     load()
   }
@@ -383,7 +405,10 @@ function SettingsSection({ sectionKey, fields, title }) {
       key: `${sectionKey}_${f.key}`,
       value: values[f.key] ?? '',
     }))
-    await supabase.from('site_settings').upsert(upserts, { onConflict: 'key' })
+    await checkedWrite(
+      supabase.from('site_settings').upsert(upserts, { onConflict: 'key' }),
+      { table: 'site_settings', action: 'Save' }
+    )
     await revalidatePublicPaths(PUBLIC_PATHS.homepage)
     setSaving(false)
   }

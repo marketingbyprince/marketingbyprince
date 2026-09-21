@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
+import { checkedWrite } from '@/lib/supabaseWrite'
 
 function Field({ label, children, hint }) {
   return (
@@ -57,16 +58,21 @@ export default function GlobalSeoPage() {
       google_verification: sanitizeVerificationToken(settings.google_verification),
       bing_verification: sanitizeVerificationToken(settings.bing_verification),
     }
+    let err
     if (settings.id) {
-      await supabase.from('seo_global_settings').update(payload).eq('id', settings.id)
+      ;({ error: err } = await checkedWrite(
+        supabase.from('seo_global_settings').update(payload).eq('id', settings.id),
+        { table: 'seo_global_settings', action: 'Save' }
+      ))
     } else {
-      const { data } = await supabase.from('seo_global_settings').insert(payload).select().single()
+      const { data, error } = await supabase.from('seo_global_settings').insert(payload).select().single()
       if (data) setSettings(data)
+      err = error
     }
     // Site-wide defaults live in the root layout, which every page inherits.
-    await revalidatePublicPaths([{ path: '/', type: 'layout' }])
+    if (!err) await revalidatePublicPaths([{ path: '/', type: 'layout' }])
     setSaving(false)
-    setSaved(true)
+    setSaved(!err)
     setTimeout(() => setSaved(false), 3000)
   }
 
