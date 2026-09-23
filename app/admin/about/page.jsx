@@ -2,6 +2,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { generateResume } from '@/lib/resumeUtils'
+import { cleanText, formatMetrics } from '@/lib/resumePdf'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 import { revalidatePublicPaths } from '@/lib/revalidatePublic'
 import { PUBLIC_PATHS } from '@/lib/publicPaths'
 import { checkedWrite } from '@/lib/supabaseWrite'
@@ -591,6 +593,29 @@ function EducationSection() {
 // ─── Case Studies Section ────────────────────────────────────────────────────
 const BLANK_CS = { client_name: '', industry: '', challenge: '', results: '', key_metrics: '', portfolio_url: '', is_visible_on_resume: true, sort_order: 0 }
 
+// key_metrics is a jsonb object ({ "ROAS": "2.4x" }) whose keys are the labels
+// shown on the website cards. It's edited here as one "Label: value" per line.
+function metricsToLines(m) {
+  if (!m) return ''
+  if (typeof m === 'string') {
+    try { m = JSON.parse(m) } catch { return m }
+  }
+  if (typeof m !== 'object') return String(m)
+  return Object.entries(m).map(([k, v]) => `${k}: ${v}`).join('\n')
+}
+
+function linesToMetrics(text) {
+  const out = {}
+  ;(text || '').split('\n').forEach(line => {
+    const i = line.indexOf(':')
+    if (i <= 0) return
+    const label = line.slice(0, i).trim()
+    const value = line.slice(i + 1).trim()
+    if (label && value) out[label] = value
+  })
+  return out
+}
+
 function CaseStudiesSection() {
   const [rows, setRows]         = useState([])
   const [loading, setLoading]   = useState(true)
@@ -614,12 +639,13 @@ function CaseStudiesSection() {
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
   const openAdd  = () => { setForm({ ...BLANK_CS, sort_order: rows.length + 1 }); setError(null); setModal('add') }
-  const openEdit = r  => { setForm({ ...r, key_metrics: typeof r.key_metrics === 'object' && r.key_metrics !== null ? JSON.stringify(r.key_metrics) : (r.key_metrics || '') }); setError(null); setModal(r) }
+  const openEdit = r  => { setForm({ ...r, key_metrics: metricsToLines(r.key_metrics) }); setError(null); setModal(r) }
 
   const save = async () => {
-    if (!form.client_name || !form.results) { setError('Client name and Results are required'); return }
+    if (!form.client_name || !cleanText(form.results)) { setError('Client name and Results are required'); return }
     setSaving(true); setError(null)
-    const { id, created_at, ...payload } = form
+    const { id, created_at, ...rest } = form
+    const payload = { ...rest, key_metrics: linesToMetrics(form.key_metrics) }
     let err
     if (modal === 'add') {
       ;({ error: err } = await supabase.from('case_studies').insert([{ ...payload, source: 'manual' }]))
@@ -718,8 +744,8 @@ function CaseStudiesSection() {
                     {r.industry && <span className="px-2 py-0.5 rounded-full text-xs font-bold text-gray-400 border" style={{ borderColor: 'var(--admin-border)' }}>{r.industry}</span>}
                     {r.source === 'website_scan' && <span className="px-2 py-0.5 rounded-full text-xs font-bold text-blue-400 bg-blue-500/10">AI Scanned</span>}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">{r.results}</p>
-                  {r.key_metrics && <p className="text-xs font-semibold mt-1" style={{ color: 'var(--accent)' }}>{typeof r.key_metrics === 'string' ? r.key_metrics : JSON.stringify(r.key_metrics)}</p>}
+                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">{cleanText(r.results)}</p>
+                  {formatMetrics(r.key_metrics) && <p className="text-xs font-semibold mt-1" style={{ color: 'var(--accent)' }}>{formatMetrics(r.key_metrics)}</p>}
                   {r.portfolio_url && <a href={r.portfolio_url} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline mt-0.5 inline-block truncate max-w-xs">{r.portfolio_url}</a>}
                 </div>
                 <div className="flex flex-col gap-2 shrink-0 items-end">
@@ -738,14 +764,14 @@ function CaseStudiesSection() {
       {/* Modal */}
       {modal && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="admin-card rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="admin-card rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-white font-extrabold mb-5">{modal === 'add' ? 'Add Case Study' : 'Edit Case Study'}</h3>
             <div className="space-y-4">
               <div><Label>Client / Brand Name *</Label><Input value={form.client_name} onChange={e => set('client_name', e.target.value)} placeholder="e.g. Anand Toyota" /></div>
               <div><Label>Industry</Label><Input value={form.industry || ''} onChange={e => set('industry', e.target.value)} placeholder="e.g. Automotive, Healthcare" /></div>
-              <div><Label>Challenge (what problem did they have?)</Label><Textarea rows={2} value={form.challenge || ''} onChange={e => set('challenge', e.target.value)} placeholder="Low online visibility, poor leads…" /></div>
-              <div><Label>Result / What you did *</Label><Textarea rows={3} value={form.results} onChange={e => set('results', e.target.value)} placeholder="Ran Google Ads + local search campaigns achieving 60–70 quality leads/month…" /></div>
-              <div><Label>Key Metrics</Label><Input value={form.key_metrics || ''} onChange={e => set('key_metrics', e.target.value)} placeholder="e.g. 3x ROAS, 40 leads/week, $12K budget" /></div>
+              <div><Label>Challenge (what problem did they have?)</Label><RichTextEditor value={form.challenge || ''} onChange={v => set('challenge', v)} placeholder="Low online visibility, poor leads…" minHeight={120} /></div>
+              <div><Label>Result / What you did *</Label><RichTextEditor value={form.results || ''} onChange={v => set('results', v)} placeholder="Ran Google Ads + local search campaigns achieving 60–70 quality leads/month…" minHeight={180} /></div>
+              <div><Label>Key Metrics (one per line, Label: value)</Label><Textarea rows={4} value={form.key_metrics || ''} onChange={e => set('key_metrics', e.target.value)} placeholder={'Blended ROAS: 2.40x\nConversions: 100'} /></div>
               <div><Label>Portfolio URL (optional)</Label><Input type="url" value={form.portfolio_url || ''} onChange={e => set('portfolio_url', e.target.value)} placeholder="https://…" /></div>
               <Toggle checked={!!form.is_visible_on_resume} onChange={v => set('is_visible_on_resume', v)} label="Include in resume" />
               <div><Label>Sort Order</Label><Input type="number" value={form.sort_order} onChange={e => set('sort_order', Number(e.target.value))} /></div>
